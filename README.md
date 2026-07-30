@@ -1,14 +1,14 @@
-# 🔍 AI Destekli Dedektiflik RPG Oyunu
+# 🔍 Dedektif — Karanlık Kasabanın Sırrı
 
-Yapay zeka destekli, konsol tabanlı bir dedektiflik rol yapma oyunu. Bir kasabadaki şüphelileri sorgulayarak, ipuçları toplayarak ve AI destekli NPC diyaloglarıyla suçluyu bulmaya çalışın.
+Yapay zeka (AI) hikaye tabanlı, **Point & Click (Tıkla & Bul)** tarzı bir web dedektiflik oyunudur. Karanlık bir kasabada işlenen cinayeti çözmek için binaları gezmeli, ipuçlarını toplamalı ve 5 farklı şüpheliyi sorguya çekerek gerçek suçluyu bulmalısınız!
 
 ---
 
 ## 🎮 Oyun Hakkında
 
-Kasabada bir cinayet işlenmiştir. Siz bir dedektif olarak 3 şüpheliyi sorgulamanız, ipuçlarını birleştirmeniz ve gerçek suçluyu ortaya çıkarmanız gerekiyor. Her NPC'nin kendine özgü bir kişiliği, sakladığı sırları ve değişen güven/korku seviyeleri vardır.
+Yağmurlu bir sonbahar gecesi... Kasabanın meydanında bir ceset bulundu. Kurban, herkesin tanıdığı tüccar Osman Bey'di. Siz bir dedektif olarak **5 şüpheliyi** sorgulamalı, gizli kalmış ipuçlarını birleştirmeli ve gerçek suçluyu ortaya çıkarmalısınız. 
 
-**Gemini AI** sayesinde NPC'ler sorularınıza dinamik, bağlama uygun ve duygusal yanıtlar verir. Doğru sorular sorarak güven kazanın, baskı uygulayarak korkularını tetikleyin ve sırlarını ortaya çıkarın!
+Oyun her başladığında suçlu karakter **rastgele** belirlenir. Bu sayede her oynayışınızda farklı bir deneyim yaşarsınız!
 
 ---
 
@@ -16,11 +16,10 @@ Kasabada bir cinayet işlenmiştir. Siz bir dedektif olarak 3 şüpheliyi sorgul
 
 | Teknoloji | Açıklama |
 |-----------|----------|
-| **C# / .NET 10** | Ana programlama dili ve framework |
-| **SQL Server** | Veritabanı yönetim sistemi |
-| **Dapper** | Hafif ve hızlı ORM (Object-Relational Mapping) |
-| **Gemini AI API** | NPC diyalogları için yapay zeka motoru |
-| **System.Text.Json** | JSON serileştirme ve ayrıştırma |
+| **C# / .NET 10** | Arka plan (Backend) ve Minimal API |
+| **SQLite & Dapper** | Hafif ve hızlı veritabanı yönetimi |
+| **Vanilla HTML/CSS/JS** | Tarayıcı tabanlı (Point & Click) kullanıcı arayüzü |
+| **Gemini AI API** | NPC diyaloglarının ve hikaye üretiminin altyapısı |
 
 ---
 
@@ -28,23 +27,18 @@ Kasabada bir cinayet işlenmiştir. Siz bir dedektif olarak 3 şüpheliyi sorgul
 
 ```
 Dedektiflik/
-├── Models/                          # Veri modelleri
-│   ├── NPC.cs                       # Şüpheli karakter modeli
-│   ├── Clue.cs                      # İpucu modeli
-│   ├── DialogLog.cs                 # Diyalog kayıt modeli
-│   └── AIInteractionResponse.cs     # AI yanıt modeli
+├── Models/                          # Veri modelleri (NPC, Clue, vb.)
 ├── Data/                            # Veritabanı katmanı
-│   ├── schema.sql                   # SQL tablo şeması ve seed data
-│   └── DatabaseRepository.cs        # Dapper ile CRUD işlemleri
-├── Services/                        # İş mantığı katmanı
-│   ├── AntigravityAiService.cs      # Gemini AI API entegrasyonu
-│   └── DialogManager.cs             # Diyalog akış yönetimi
-├── UI/                              # Kullanıcı arayüzü
-│   └── ConsoleUI.cs                 # Renkli interaktif konsol arayüzü
-├── Program.cs                       # Ana giriş noktası
-├── appsettings.Example.json         # Konfigürasyon şablonu
-├── DedektiflikRPG.csproj            # Proje dosyası
-└── .gitignore                       # Git hariç tutulan dosyalar
+│   ├── schema.sql                   # SQLite tablo şeması (100 diyalog tohumu)
+│   └── DatabaseRepository.cs        # Dapper ile veritabanı işlemleri
+├── wwwroot/                         # Frontend (Kullanıcı Arayüzü)
+│   ├── index.html                   # Ana oyun ekranı (Harita, Menüler)
+│   ├── css/style.css                # Noir tarzı oyun tasarımları
+│   ├── js/app.js                    # Oyun motoru (UI mantığı, tıkla/bul)
+│   └── images/                      # AI ile üretilmiş oyun görselleri
+├── Program.cs                       # Ana giriş noktası ve API uç noktaları
+├── appsettings.json                 # Konfigürasyon
+└── README.md                        # Bu dosya
 ```
 
 ---
@@ -54,8 +48,7 @@ Dedektiflik/
 ### Gereksinimler
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [SQL Server](https://www.microsoft.com/sql-server) (LocalDB, Express veya üstü)
-- [Gemini API Anahtarı](https://aistudio.google.com/apikey)
+- Modern bir web tarayıcısı (Chrome, Firefox, Edge)
 
 ### 1. Projeyi Klonlayın
 
@@ -64,38 +57,15 @@ git clone https://github.com/solmazgulecren-ux/Dedektif.git
 cd Dedektif
 ```
 
-### 2. Veritabanını Kurun
+### 2. Konfigürasyonu Ayarlayın
 
-SQL Server Management Studio veya `sqlcmd` ile:
-
-```sql
-CREATE DATABASE DedektiflikRPG;
-GO
-```
-
-Ardından `Data/schema.sql` dosyasını çalıştırarak tabloları ve varsayılan verileri oluşturun:
-
-```bash
-sqlcmd -S localhost -d DedektiflikRPG -i Data/schema.sql
-```
-
-### 3. Konfigürasyonu Ayarlayın
-
-`appsettings.Example.json` dosyasını `appsettings.json` olarak kopyalayın ve değerleri doldurun:
+`appsettings.Example.json` dosyasını `appsettings.json` olarak kopyalayın ve gerekli değerleri (API anahtarı vs.) doldurun:
 
 ```bash
 copy appsettings.Example.json appsettings.json
 ```
 
-```json
-{
-  "ConnectionString": "Server=localhost;Database=DedektiflikRPG;Trusted_Connection=true;TrustServerCertificate=true;",
-  "GeminiApiKey": "BURAYA_GEMINI_API_ANAHTARINIZI_GIRIN",
-  "GeminiModel": "gemini-2.0-flash"
-}
-```
-
-### 4. Projeyi Derleyin ve Çalıştırın
+### 3. Projeyi Derleyin ve Çalıştırın
 
 ```bash
 dotnet restore
@@ -103,36 +73,29 @@ dotnet build
 dotnet run
 ```
 
+Konsolda uygulamanın başladığı URL'yi (genellikle `http://localhost:5000`) göreceksiniz. Bu adresi tarayıcınızda açarak oyuna başlayabilirsiniz.
+
 ---
 
-## 🎯 Oyun Komutları
+## 🎯 Oyun Mekanikleri
 
-| Komut | Açıklama |
-|-------|----------|
-| `1`, `2`, `3` | Şüpheliyle sorgulama başlat |
-| `ipucular` | Eldeki tüm ipuçlarını göster |
-| `sorgula` | Bir NPC'nin sorgulama geçmişini görüntüle |
-| `degistir` | Sorgulama sırasında ana menüye dön |
-| `cikis` | Oyundan çık |
+- **Keşif (Harita):** Kasabanın kuşbakışı haritasından binalara tıklayarak içeri girin.
+- **İpucu Arama:** Binaların içinde karanlık köşelere saklanmış kanıtları bularak dedektif çantanıza ekleyin.
+- **Sorgulama:** Her binanın sahibini (NPC) sorgulayın. Her karakter için 5 kademeli derinleşen bir diyalog sistemi mevcuttur.
+- **Bina Kilitleme:** Bir binadan çıktığınızda o bina kilitlenir. Çıkmadan önce tüm ipuçlarını bulduğunuzdan ve yeterince soru sorduğunuzdan emin olun!
+- **Suçlama (BULDUM!):** Tüm ipuçlarını toplayıp şüphelilerle konuştuktan sonra "BULDUM!" butonuna basıp konuşma geçmişlerini (💬 Konuşma Geçmişi butonu ile) inceleyerek gerçek katili seçin.
 
 ---
 
 ## 🎭 Kasabadaki Şüpheliler
 
-| # | İsim | Rol |
-|---|------|-----|
-| 1 | Kasap Hasan | Kasabadaki eski kasap, herkesin tanıdığı bir figür |
-| 2 | Eczacı Selma | Eczane sahibi, ilaç ve zehir konusunda uzman |
-| 3 | Muhtar Kemal | Kasabanın muhtarı, herkesin sırrını bilen bir politikacı |
-
----
-
-## 🧠 AI Sistemi Nasıl Çalışır?
-
-1. **Dinamik Prompt**: Her sorgulama sırasında NPC'nin güven seviyesi, korku seviyesi, suçluluk durumu ve sakladığı sır bilgilerinden otomatik bir system prompt oluşturulur.
-2. **Bağlamsal Yanıtlar**: AI, oyuncunun elindeki ipuçlarını da dikkate alarak tutarlı ve hikâyeye uygun cevaplar üretir.
-3. **Duygu Durumu**: Her yanıtta NPC'nin duygu durumu (sinirli, korkmuş, sakin, samimi, pişman vb.) raporlanır.
-4. **Güven Mekanizması**: Doğru sorular güveni artırır, agresif sorular güveni düşürür. Yüksek güvende NPC sırlarını paylaşabilir.
+| # | İsim | Mekan | Rol |
+|---|------|-------|-----|
+| 1 | Kasap Hasan | Kasap | Kasabadaki eski kasap, herkesin tanıdığı sert bir figür. |
+| 2 | Eczacı Selma | Eczane | Eczane sahibi, ilaç ve zehir konusunda uzman. |
+| 3 | Muhtar Kemal | Muhtarlık | Kasabanın muhtarı, herkesin sırrını bilen bir politikacı. |
+| 4 | Komiser Güneş| Karakol | Kasabanın kadın polis komiseri, olay yerini ilk inceleyen kişi. |
+| 5 | Terzi Yahya | Terzi | Kasabanın yaşlı terzisi, kurbana son kıyafeti diken kişi. |
 
 ---
 
@@ -144,4 +107,4 @@ Bu proje eğitim ve kişisel kullanım amaçlıdır.
 
 ## 👩‍💻 Geliştirici
 
-**Solmaz Gülecren** — [GitHub](https://github.com/solmazgulecren-ux)
+**Ecren Solmazgül** — [GitHub](https://github.com/solmazgulecren-ux)
