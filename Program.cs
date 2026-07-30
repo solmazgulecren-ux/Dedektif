@@ -177,7 +177,7 @@ class Program
         {
             try
             {
-                // Tabloları temizle ve seed et
+                // Tabloları temizle, seed et ve suçluyu rastgele seç
                 using var db = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
                 await db.OpenAsync();
                 using var cmd = db.CreateCommand();
@@ -185,10 +185,14 @@ class Program
                     UPDATE Clues SET Status = 'Pending';
                     UPDATE NPCs SET TrustLevel = 50, FearLevel = 30;
                     DELETE FROM DialogLogs;
+                    
+                    -- Suçluyu rastgele seç (Security)
+                    UPDATE NPCs SET IsGuilty = 0;
+                    UPDATE NPCs SET IsGuilty = 1 WHERE Id = (SELECT TOP 1 Id FROM NPCs ORDER BY NEWID());
                 ";
                 await cmd.ExecuteNonQueryAsync();
 
-                return Results.Ok(new { success = true, message = "Oyun durumu sıfırlandı." });
+                return Results.Ok(new { success = true, message = "Oyun durumu sıfırlandı ve yeni suçlu belirlendi." });
             }
             catch (Exception ex)
             {

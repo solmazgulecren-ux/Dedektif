@@ -242,9 +242,11 @@ function initGame() {
     currentTalkStage = 1;
     activeNpcId = null;
     
-    // Rastgele suçlu seç (1-5 arası)
-    guiltyNpcId = Math.floor(Math.random() * 5) + 1;
-    console.log('🔍 Suçlu NPC ID:', guiltyNpcId, '—', NPC_DATA[guiltyNpcId].name);
+    // Suçluyu backend API'den sıfırla (Frontend artık bilmiyor!)
+    fetch('/api/game/reset', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => console.log('🔍 API:', data.message))
+        .catch(err => console.error('API Error:', err));
     
     // Haritadaki binaları resetle
     document.querySelectorAll('.map-building').forEach(b => {
@@ -259,6 +261,12 @@ initGame();
 // =============================================================
 
 document.getElementById('start-btn').addEventListener('click', () => {
+    // Sesleri başlat
+    const bgMusic = document.getElementById('bg-music');
+    const rainSound = document.getElementById('rain-sound');
+    if (bgMusic) { bgMusic.volume = 0.3; bgMusic.play().catch(e=>console.log(e)); }
+    if (rainSound) { rainSound.volume = 0.5; rainSound.play().catch(e=>console.log(e)); }
+
     triggerTransition(() => {
         splashScreen.classList.add('hidden');
         storyIntroScreen.classList.remove('hidden');
@@ -271,6 +279,9 @@ const STORY_TEXT = 'Yağmurlu bir sonbahar gecesi... Kasabanın meydanında bir 
 function startTypewriter() {
     const el = document.getElementById('story-typewriter');
     const continueBtn = document.getElementById('story-continue-btn');
+    const typeSound = document.getElementById('typewriter-sound');
+    if (typeSound) { typeSound.volume = 0.4; typeSound.play().catch(e=>console.log(e)); }
+
     el.textContent = '';
     let i = 0;
     const speed = 40;
@@ -281,6 +292,7 @@ function startTypewriter() {
             i++;
             setTimeout(type, speed);
         } else {
+            if (typeSound) typeSound.pause();
             continueBtn.classList.remove('hidden');
         }
     }
@@ -341,6 +353,10 @@ function openBuilding(npcId) {
         container.appendChild(wrapper);
     });
     
+    // Kapı sesi
+    const doorCreak = document.getElementById('door-creak');
+    if (doorCreak) { doorCreak.volume = 0.7; doorCreak.currentTime = 0; doorCreak.play().catch(e=>console.log(e)); }
+
     triggerTransition(() => {
         townMapScreen.classList.add('hidden');
         interiorScreen.classList.remove('hidden');
@@ -521,8 +537,20 @@ function openBag() {
             </div>
         `).join('');
     }
+    
+    // Not Defterini Yükle
+    const notebook = document.getElementById('detective-notes');
+    if (notebook) {
+        notebook.value = localStorage.getItem('detectiveNotes') || '';
+    }
+
     bagModal.classList.remove('hidden');
 }
+
+// Notları kaydetme
+document.getElementById('detective-notes')?.addEventListener('input', (e) => {
+    localStorage.setItem('detectiveNotes', e.target.value);
+});
 
 document.getElementById('open-bag-btn')?.addEventListener('click', openBag);
 document.getElementById('interior-bag-btn')?.addEventListener('click', openBag);
@@ -603,7 +631,7 @@ document.getElementById('npc-history-close').addEventListener('click', () => {
     npcHistoryModal.classList.add('hidden');
 });
 
-// === ACCUSE NPC ===
+// === ACCUSE NPC (BACKEND CHECK) ===
 window.accuseNpc = function(npcId) {
     const npc = NPC_DATA[npcId];
     foundModal.classList.add('hidden');
@@ -613,36 +641,48 @@ window.accuseNpc = function(npcId) {
     document.getElementById('jail-npc-name').textContent = npc.name;
     jailOverlay.classList.remove('hidden');
     
-    setTimeout(() => {
+    // Animasyon sırasında API'ye sor
+    fetch('/api/game/accuse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ NpcId: npcId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        setTimeout(() => {
+            jailOverlay.classList.add('hidden');
+            
+            const resultIcon = document.getElementById('result-icon');
+            const resultTitle = document.getElementById('result-title');
+            const resultMessage = document.getElementById('result-message');
+            const retryBtn = document.getElementById('result-retry-btn');
+            
+            if (data.success) {
+                resultIcon.className = 'result-icon success';
+                resultIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
+                resultTitle.textContent = '🎉 TEBRİKLER! KAZANDINIZ!';
+                resultTitle.style.color = 'var(--success)';
+                resultMessage.textContent = data.message + ' Gizli Bilgi: ' + (data.secret || npc.secret);
+                retryBtn.innerHTML = '<i class="fa-solid fa-house"></i> Ana Menüye Dön';
+                retryBtn.classList.remove('hidden');
+            } else {
+                resultIcon.className = 'result-icon fail';
+                resultIcon.innerHTML = '<i class="fa-solid fa-skull-crossbones"></i>';
+                resultTitle.textContent = '❌ KAYBETTİNİZ!';
+                resultTitle.style.color = 'var(--danger)';
+                resultMessage.textContent = data.message;
+                retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Tekrar Oyna';
+                retryBtn.classList.remove('hidden');
+            }
+            
+            resultModal.classList.remove('hidden');
+        }, 2500);
+    })
+    .catch(err => {
+        console.error('Accuse Error:', err);
         jailOverlay.classList.add('hidden');
-        
-        // Sonucu göster
-        const isCorrect = npcId === guiltyNpcId;
-        const resultIcon = document.getElementById('result-icon');
-        const resultTitle = document.getElementById('result-title');
-        const resultMessage = document.getElementById('result-message');
-        const retryBtn = document.getElementById('result-retry-btn');
-        
-        if (isCorrect) {
-            resultIcon.className = 'result-icon success';
-            resultIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
-            resultTitle.textContent = '🎉 TEBRİKLER! KAZANDINIZ!';
-            resultTitle.style.color = 'var(--success)';
-            resultMessage.textContent = `${npc.name} gerçek suçluydu! Kasabanın sırrını çözdünüz. Gizli bilgi: ${npc.secret}`;
-            retryBtn.innerHTML = '<i class="fa-solid fa-house"></i> Ana Menüye Dön';
-            retryBtn.classList.remove('hidden');
-        } else {
-            resultIcon.className = 'result-icon fail';
-            resultIcon.innerHTML = '<i class="fa-solid fa-skull-crossbones"></i>';
-            resultTitle.textContent = '❌ KAYBETTİNİZ!';
-            resultTitle.style.color = 'var(--danger)';
-            resultMessage.textContent = `${npc.name} masum çıktı! Gerçek suçlu hâlâ serbest... Soruşturma başarısız oldu.`;
-            retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Tekrar Oyna';
-            retryBtn.classList.remove('hidden');
-        }
-        
-        resultModal.classList.remove('hidden');
-    }, 2500);
+        alert("Bağlantı hatası!");
+    });
 };
 
 window.innocentNpc = function(npcId) {

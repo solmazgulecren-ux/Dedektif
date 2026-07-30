@@ -155,13 +155,22 @@
     </div>
 
     <!-- 7. INVENTORY (BAG) MODAL -->
-    <div id="bag-modal" class="modal-backdrop hidden">
-        <div class="bag-card">
-            <button id="close-bag-btn" class="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
-            <h2><i class="fa-solid fa-briefcase"></i> Dedektif Çantası</h2>
-            <div id="bag-items-list" class="bag-items-grid">
-                <!-- Bulunan ipuçları buraya eklenecek -->
+    <div id="bag-modal" class="modal hidden">
+        <div class="modal-content bag-content">
+            <h2 class="modal-title"><i class="fa-solid fa-suitcase"></i> Dedektif Çantası</h2>
+            <div class="bag-grid">
+                <div class="bag-items-section">
+                    <h3>Toplanan İpuçları</h3>
+                    <div id="bag-items-list" class="bag-items-list">
+                        <!-- Items injected by JS -->
+                    </div>
+                </div>
+                <div class="bag-notes-section">
+                    <h3>Dedektif Notları</h3>
+                    <textarea id="detective-notes" placeholder="Şüphelilerin söylediklerini ve ipuçlarını buraya not et..."></textarea>
+                </div>
             </div>
+            <button id="close-bag-btn" class="btn btn-outline" style="margin-top:20px; width:100%;">Çantayı Kapat</button>
         </div>
     </div>
 
@@ -223,6 +232,16 @@
 
     <!-- TRANSITION OVERLAY -->
     <div id="transition-overlay" class="transition-overlay"></div>
+
+    <!-- AUDIO ELEMENTS -->
+    <!-- Noir ambiance/music (Pixabay free jazz background) -->
+    <audio id="bg-music" loop src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3"></audio>
+    <!-- Heavy Rain (Google Action Sounds) -->
+    <audio id="rain-sound" loop src="https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg"></audio>
+    <!-- Door Creak -->
+    <audio id="door-creak" src="https://actions.google.com/sounds/v1/doors/wood_door_open_creak.ogg"></audio>
+    <!-- Typewriter -->
+    <audio id="typewriter-sound" loop src="https://actions.google.com/sounds/v1/foley/typing_on_typewriter.ogg"></audio>
 
     <script src="js/app.js"></script>
 </body>
