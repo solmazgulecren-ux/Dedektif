@@ -1,400 +1,251 @@
-/* ==========================================================================
-   🔍 AKILLI DEDEKTİFLİK RPG - OYUN MANTIĞI & API ENTEGRASYONU (JS)
-   ========================================================================== */
-
-const API_BASE = '/api/game';
-
-// DOM Elementleri
 const splashScreen = document.getElementById('splash-screen');
-const gameScreen = document.getElementById('game-screen');
-const startBtn = document.getElementById('start-btn');
-const resetBtn = document.getElementById('reset-btn');
-const restartBtn = document.getElementById('restart-btn');
-
-// Şüpheliler ve İpuçları Alanları
-const suspectsList = document.getElementById('suspects-list');
-const sceneCluesList = document.getElementById('scene-clues-list');
-const bagCluesList = document.getElementById('bag-clues-list');
-
-// Sorgulama Modu
+const townMapScreen = document.getElementById('town-map-screen');
+const interiorScreen = document.getElementById('interior-screen');
 const interrogationModal = document.getElementById('interrogation-modal');
-const closeIntBtn = document.getElementById('close-int-btn');
-const intNpcName = document.getElementById('int-npc-name');
-const intNpcRole = document.getElementById('int-npc-role');
-const intNpcImg = document.getElementById('int-npc-img');
-const intNpcEmotionBadge = document.getElementById('int-npc-emotion-badge');
-const intTrustBar = document.getElementById('int-trust-bar');
-const intTrustText = document.getElementById('int-trust-text');
-const intFearBar = document.getElementById('int-fear-bar');
-const intFearText = document.getElementById('int-fear-text');
-const chatHistoryBox = document.getElementById('chat-history-box');
-const typingIndicator = document.getElementById('typing-indicator');
-const askForm = document.getElementById('ask-form');
-const questionInput = document.getElementById('question-input');
-const presentCluesContainer = document.getElementById('present-clues-container');
-const accuseBtn = document.getElementById('accuse-btn');
+const bagModal = document.getElementById('bag-modal');
+const objDescModal = document.getElementById('object-desc-modal');
+const transitionOverlay = document.getElementById('transition-overlay');
 
-// İpucu Karar Modalı
-const clueModal = document.getElementById('clue-modal');
-const clueDecideTitle = document.getElementById('clue-decide-title');
-const clueDecideDesc = document.getElementById('clue-decide-desc');
-const keepClueBtn = document.getElementById('keep-clue-btn');
-const ignoreClueBtn = document.getElementById('ignore-clue-btn');
-
-// Sonuç Ekranı
-const resultModal = document.getElementById('result-modal');
-const resultIcon = document.getElementById('result-icon');
-const resultTitle = document.getElementById('result-title');
-const resultMessage = document.getElementById('result-message');
-const secretInfoBox = document.getElementById('secret-info-box');
-const resultSecretText = document.getElementById('result-secret-text');
-
-// Aktif Sorgulanan NPC
+// Variables
+let currentNpcs = [];
+let currentBag = [];
+const MAX_BAG_SIZE = 3;
 let activeNpcId = null;
-let currentDecidingClueId = null;
+let currentPendingObject = null;
 
-// =============================================
-// UYGULAMA BAŞLANGICI VE OLAY YÖNETİCİLERİ
-// =============================================
+// Mock Data
+const MOCK_NPCS = {
+    1: { id: 1, name: 'Kasap Hasan', bg: 'images/butcher_interior.png' },
+    2: { id: 2, name: 'Eczacı Selma', bg: 'images/apothecary_interior.png' },
+    3: { id: 3, name: 'Muhtar Kemal', bg: 'images/town_hall_interior.png' }
+};
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Giriş Butonu
-    startBtn.addEventListener('click', () => {
+const MOCK_OBJECTS = {
+    1: [
+        { id: 1, name: 'Kanlı Satır', desc: 'Tezgaha sertçe saplanmış, üzerinde taze lekeler olan paslı bir satır.', top: '40%', left: '30%', img: 'images/bloody_cleaver.png' },
+        { id: 2, name: 'Kara Kaplı Defter', desc: 'Veresiye listesinde kurbanın isminin üzeri kırmızı kalemle çizilmiş.', top: '60%', left: '70%', img: 'images/black_notebook.png' },
+        { id: 3, name: 'Yırtık Önlük', desc: 'Kavga izleri taşıyan, yakası kopmuş bir kasap önlüğü.', top: '80%', left: '20%', img: 'images/torn_apron.png' }
+    ],
+    2: [
+        { id: 4, name: 'Boş İlaç Şişesi', desc: 'Zehirli olduğu bilinen, reçetesiz satılmayan ağır bir ilacın boş şişesi.', top: '50%', left: '20%', img: 'images/empty_medicine_bottle.png' },
+        { id: 5, name: 'Reçete Defteri', desc: 'Kurbanın adının geçtiği, son sayfaları aceleyle yırtılmış defter.', top: '70%', left: '80%', img: 'images/prescription_notebook.png' },
+        { id: 6, name: 'Zehirli Sarmaşık', desc: 'Tezgah altında kurumaya bırakılmış zehirli bir bitki türü.', top: '30%', left: '60%', img: 'images/poison_ivy.png' }
+    ],
+    3: [
+        { id: 7, name: 'Tehdit Mektubu', desc: 'Muhtarın çekmecesinde kurbana yazılmış, henüz gönderilmemiş bir tehdit mektubu.', top: '60%', left: '40%', img: 'images/threat_letter.png' },
+        { id: 8, name: 'Kırık Gözlük', desc: 'Kurbana ait olduğu düşünülen, camı kırık bir okuma gözlüğü.', top: '30%', left: '70%', img: 'images/broken_glasses.png' },
+        { id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa.', top: '80%', left: '30%', img: 'images/default_clue.png' }
+    ]
+};
+
+// Start Game
+document.getElementById('start-btn').addEventListener('click', () => {
+    triggerTransition(() => {
         splashScreen.classList.add('hidden');
-        gameScreen.classList.remove('hidden');
-        loadGameState();
+        townMapScreen.classList.remove('hidden');
     });
-
-    // Kapat Sorgulama
-    closeIntBtn.addEventListener('click', () => {
-        interrogationModal.classList.add('hidden');
-        activeNpcId = null;
-        loadGameState();
-    });
-
-    // Soru Sorma Formu
-    askForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const question = questionInput.value.trim();
-        if (!question) return;
-        askQuestion(question);
-    });
-
-    // Sıfırlama Butonları
-    resetBtn.addEventListener('click', resetGame);
-    restartBtn.addEventListener('click', () => {
-        resultModal.classList.add('hidden');
-        resetGame();
-    });
-
-    // Suçlama Butonu
-    accuseBtn.addEventListener('click', accuseSuspect);
 });
 
-// =============================================
-// OYUN DURUMUNU YÜKLE
-// =============================================
-
-async function loadGameState() {
-    try {
-        await Promise.all([
-            loadNPCs(),
-            loadClues()
-        ]);
-    } catch (err) {
-        console.error("Hata oluştu:", err);
-    }
-}
-
-// 1. Şüphelileri API'den Getir
-async function loadNPCs() {
-    const res = await fetch(`${API_BASE}/npcs`);
-    const npcs = await res.json();
-    
-    suspectsList.innerHTML = '';
-    
-    npcs.forEach(npc => {
-        const imagePath = `images/${npc.npcId === 1 ? 'hasan' : npc.npcId === 2 ? 'selma' : 'kemal'}.png`;
-        
-        const card = document.createElement('div');
-        card.className = 'suspect-card animate-fade-in';
-        card.innerHTML = `
-            <img src="${imagePath}" alt="${npc.name}">
-            <div class="suspect-info">
-                <h3>${npc.name}</h3>
-                <span class="role">${npc.role}</span>
-                <div class="suspect-stats">
-                    <div class="stat-mini">
-                        <label>🤝 Güven:</label>
-                        <span>${npc.trustLevel}%</span>
-                    </div>
-                    <div class="stat-mini">
-                        <label>😰 Korku:</label>
-                        <span>${npc.fearLevel}%</span>
-                    </div>
-                </div>
-            </div>
-        `;
-        card.addEventListener('click', () => openInterrogation(npc));
-        suspectsList.appendChild(card);
-    });
-}
-
-// 2. İpuçlarını API'den Getir
-async function loadClues() {
-    const res = await fetch(`${API_BASE}/clues`);
-    const clues = await res.json();
-
-    sceneCluesList.innerHTML = '';
-    bagCluesList.innerHTML = '';
-    presentCluesContainer.innerHTML = '';
-
-    let bagCount = 0;
-
-    clues.forEach(clue => {
-        if (clue.status === 'Pending') {
-            // Olay Yeri İpucu
-            const row = document.createElement('div');
-            row.className = 'clue-item-row';
-            row.innerHTML = `
-                <div class="clue-meta">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <span class="clue-title-mini">${clue.title}</span>
-                </div>
-                <div class="clue-item-actions">
-                    <button class="btn btn-primary btn-outline" onclick="openClueDecision(${clue.clueId}, '${clue.title.replace(/'/g, "\\'")}', '${clue.description.replace(/'/g, "\\'")}')">İncele</button>
-                </div>
-            `;
-            sceneCluesList.appendChild(row);
-        } else if (clue.status === 'KeptInBag') {
-            bagCount++;
-            // Çantadaki İpucu
-            const card = document.createElement('div');
-            card.className = 'inventory-item';
-            card.innerHTML = `
-                <i class="fa-solid fa-folder-closed"></i>
-                <span>${clue.title}</span>
-            `;
-            card.addEventListener('click', () => alert(`📌 ${clue.title}\n\n${clue.description}`));
-            bagCluesList.appendChild(card);
-
-            // Sorgulama sırasında sunulabilecek hap butonu
-            const pill = document.createElement('button');
-            pill.className = 'evidence-pill';
-            pill.innerHTML = `<i class="fa-solid fa-briefcase"></i> ${clue.title}`;
-            pill.addEventListener('click', () => {
-                questionInput.value = `Elindeki '${clue.title}' kanıtı hakkında ne diyeceksin? (${clue.description})`;
-                questionInput.focus();
+// Exit to main menu
+document.querySelectorAll('.global-exit-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        if(e.target.id === 'leave-building-btn') {
+            triggerTransition(() => {
+                interiorScreen.classList.add('hidden');
+                townMapScreen.classList.remove('hidden');
             });
-            presentCluesContainer.appendChild(pill);
+        } else {
+            triggerTransition(() => {
+                townMapScreen.classList.add('hidden');
+                splashScreen.classList.remove('hidden');
+            });
         }
     });
+});
 
-    if (bagCount === 0) {
-        bagCluesList.innerHTML = `
-            <div class="empty-inventory">
-                <i class="fa-solid fa-box-open"></i>
-                <p>Çantanız şu an boş. Olay yerindeki ipuçlarından saklamak istediklerinizi çantaya ekleyin.</p>
-            </div>
-        `;
-        presentCluesContainer.innerHTML = `<span class="text-muted" style="font-size:0.8rem;">(Çantada sunulacak kanıt yok)</span>`;
-    }
-}
-
-// =============================================
-// İPUCU KARAR AKIŞI (SAKLA / BIRAK)
-// =============================================
-
-function openClueDecision(clueId, title, desc) {
-    currentDecidingClueId = clueId;
-    clueDecideTitle.innerText = title;
-    clueDecideDesc.innerText = desc;
-    clueModal.classList.remove('hidden');
-
-    keepClueBtn.onclick = () => decideClue('KeptInBag');
-    ignoreClueBtn.onclick = () => decideClue('IgnoredAtScene');
-}
-
-async function decideClue(action) {
-    if (!currentDecidingClueId) return;
-
-    await fetch(`${API_BASE}/clues/${currentDecidingClueId}/action`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: action })
+// Open Bag
+document.querySelectorAll('.global-bag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const bagList = document.getElementById('bag-items-list');
+        bagList.innerHTML = currentBag.length === 0 ? '<p>Çanta boş.</p>' : currentBag.map(b => `<div style="border:1px solid #555; padding:10px; margin:5px; display:flex; align-items:center; gap:10px;"><img src="${b.img}" style="width:30px;"> ${b.name}</div>`).join('');
+        bagModal.classList.remove('hidden');
     });
+});
+document.getElementById('close-bag-btn').addEventListener('click', () => {
+    bagModal.classList.add('hidden');
+});
 
-    clueModal.classList.add('hidden');
-    currentDecidingClueId = null;
-    loadGameState();
-}
+// Click Building
+document.querySelectorAll('.map-building:not(.inactive)').forEach(b => {
+    b.addEventListener('click', () => {
+        const npcId = parseInt(b.getAttribute('data-npc-id'));
+        openBuilding(npcId);
+    });
+});
 
-// =============================================
-// ODAKLI SORGULAMA SİSTEMİ (BLUR MODAL)
-// =============================================
-
-function openInterrogation(npc) {
-    activeNpcId = npc.npcId;
-    intNpcName.innerText = npc.name;
-    intNpcRole.innerText = npc.role;
-    intNpcImg.src = `images/${npc.npcId === 1 ? 'hasan' : npc.npcId === 2 ? 'selma' : 'kemal'}.png`;
+function openBuilding(npcId) {
+    activeNpcId = npcId;
+    const npc = MOCK_NPCS[npcId];
+    if(!npc) return;
     
-    updateNpcStatsUI(npc);
+    // Set Background
+    interiorScreen.style.backgroundImage = `url('${npc.bg}')`;
+    document.getElementById('talk-npc-name').innerText = npc.name + " ile Konuş";
     
-    // Geçmiş konuşmaları temizle ve başlangıç mesajını ekle
-    chatHistoryBox.innerHTML = `
-        <div class="system-message">Sorgulama başladı. ${npc.name} karşınızda duruyor.</div>
-    `;
-    
-    // Envanter haplarını hazırla
-    loadClues();
-
-    interrogationModal.classList.remove('hidden');
-}
-
-function updateNpcStatsUI(npc) {
-    intTrustBar.style.width = `${npc.trustLevel}%`;
-    intTrustText.innerText = `${npc.trustLevel}%`;
-    intFearBar.style.width = `${npc.fearLevel}%`;
-    intFearText.innerText = `${npc.fearLevel}%`;
-}
-
-// NPC Duygu Emoji & Rozeti
-function getEmotionBadge(emotion) {
-    const em = emotion.toLowerCase();
-    if (em.includes("sinirli") || em.includes("saldırgan")) return "😡 Sinirli";
-    if (em.includes("korkmuş") || em.includes("tedirgin")) return "😰 Tedirgin";
-    if (em.includes("sakin")) return "😐 Sakin";
-    if (em.includes("samimi")) return "😊 Samimi";
-    if (em.includes("pişman")) return "😢 Pişman";
-    if (em.includes("şüpheli")) return "🤨 Şüpheli";
-    if (em.includes("sessiz") || em.includes("dalgın")) return "😶 Sessiz";
-    return `🗣️ ${emotion}`;
-}
-
-// 1. Soru Gönder ve Yanıtı Çiz
-async function askQuestion(question) {
-    if (!activeNpcId) return;
-
-    // Oyuncu Balonu
-    appendChatBubble('DEDEKTİF', question, 'player');
-    questionInput.value = '';
-    
-    // Typing indicator
-    typingIndicator.classList.remove('hidden');
-    chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
-
-    try {
-        const res = await fetch(`${API_BASE}/interrogate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ npcId: activeNpcId, question: question })
-        });
-        const data = await res.json();
-
-        typingIndicator.classList.add('hidden');
-
-        // NPC Balonu
-        appendChatBubble(data.updatedNpc.name, data.dialogue, 'npc');
-
-        // Canlı Stat Güncelle
-        updateNpcStatsUI(data.updatedNpc);
+    // Load Hotspots with Images
+    const container = document.getElementById('hotspots-container');
+    container.innerHTML = '';
+    const objects = MOCK_OBJECTS[npcId] || [];
+    objects.forEach(obj => {
+        const spotContainer = document.createElement('div');
+        spotContainer.style.position = 'absolute';
+        spotContainer.style.top = obj.top;
+        spotContainer.style.left = obj.left;
         
-        // Rozet Güncelle
-        intNpcEmotionBadge.innerText = getEmotionBadge(data.emotion);
+        const img = document.createElement('img');
+        img.src = obj.img ? obj.img : 'images/default_clue.png';
+        img.className = 'hotspot-img';
+        
+        spotContainer.appendChild(img);
+        spotContainer.addEventListener('click', () => {
+            currentPendingObject = obj;
+            // Dinamik Modal İçeriği
+            objDescModal.innerHTML = `
+            <div class="clue-decide-card" style="margin: auto; margin-top: 10%;">
+                <div class="text-section">
+                    <h3 style="color:var(--text-bright); margin-bottom:10px;">${obj.name}</h3>
+                    <p style="color:var(--text-muted); font-size:1.1rem;">${obj.desc}</p>
+                    
+                    <div style="margin-top:20px; display:flex; gap:10px; flex-direction:column;">
+                        <button onclick="takeItem()" class="btn btn-primary">Çantaya Al</button>
+                        <button onclick="leaveItem()" class="btn btn-outline">Olay Yerinde Bırak</button>
+                    </div>
+                </div>
+                <div class="image-section">
+                    <img src="${obj.img}" alt="${obj.name}">
+                </div>
+            </div>`;
+            objDescModal.classList.remove('hidden');
+        });
+        container.appendChild(spotContainer);
+    });
 
-        // Güven seviyesine göre renkli bildirim
-        const diffText = data.trustChange > 0 ? `+${data.trustChange}` : `${data.trustChange}`;
-        const changeMsg = document.createElement('div');
-        changeMsg.className = 'system-message';
-        changeMsg.style.borderColor = data.trustChange >= 0 ? 'var(--success)' : 'var(--danger)';
-        changeMsg.innerHTML = `📊 Güven Değişimi: <strong>${diffText}</strong>`;
-        chatHistoryBox.appendChild(changeMsg);
-
-        // Sır açığa çıkarsa
-        if (data.revealedSecret) {
-            const secretMsg = document.createElement('div');
-            secretMsg.className = 'system-message';
-            secretMsg.style.backgroundColor = 'rgba(207, 34, 46, 0.15)';
-            secretMsg.style.borderColor = 'var(--danger)';
-            secretMsg.innerHTML = `🔑 <strong>Açığa Çıkan Sır:</strong> ${data.revealedSecret}`;
-            chatHistoryBox.appendChild(secretMsg);
-        }
-
-        chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
-
-    } catch (err) {
-        typingIndicator.classList.add('hidden');
-        appendChatBubble('SİSTEM', 'Bir API hatası oluştu.', 'player');
-    }
+    triggerTransition(() => {
+        townMapScreen.classList.add('hidden');
+        interiorScreen.classList.remove('hidden');
+    }, 'open');
 }
 
-function appendChatBubble(speaker, text, type) {
-    const bubble = document.createElement('div');
-    bubble.className = `chat-bubble ${type}`;
-    bubble.innerHTML = `
-        <div class="speaker-name">${speaker}</div>
-        <div class="bubble-content">${text}</div>
-    `;
-    chatHistoryBox.appendChild(bubble);
-    chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
-}
-
-// =============================================
-// KATİLİ SUÇLAMA MEKANİZMASI
-// =============================================
-
-async function accuseSuspect() {
-    if (!activeNpcId) return;
-
-    if (!confirm("Bu şüpheliyi resmen katil ilan etmek istediğinizden emin misiniz?")) {
+window.takeItem = function() {
+    if(currentBag.length >= MAX_BAG_SIZE) {
+        alert("Çantanız doldu! Yeni bir eşya alabilmek için mevcut eşyalarla soruşturmayı ilerletin.");
+        objDescModal.classList.add('hidden');
         return;
     }
+    if(!currentBag.find(b => b.id === currentPendingObject.id)) {
+        currentBag.push(currentPendingObject);
+    }
+    objDescModal.classList.add('hidden');
+};
 
-    try {
-        const res = await fetch(`${API_BASE}/accuse`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ npcId: activeNpcId })
-        });
-        const result = await res.json();
+window.leaveItem = function() {
+    objDescModal.classList.add('hidden');
+};
 
-        interrogationModal.classList.add('hidden');
-        activeNpcId = null;
+// Interrogation
+document.getElementById('talk-npc-btn').addEventListener('click', () => {
+    document.getElementById('int-npc-name').innerText = MOCK_NPCS[activeNpcId].name;
+    document.getElementById('chat-history-box').innerHTML = '<div class="system-message">Sorgulama başladı. Seçeneklerden birine tıklayın.</div>';
+    loadDialogOptions(activeNpcId);
+    interrogationModal.classList.remove('hidden');
+});
+document.getElementById('close-int-btn').addEventListener('click', () => interrogationModal.classList.add('hidden'));
 
-        // Sonuç modalını göster
-        resultTitle.innerText = result.success ? "DAVA ÇÖZÜLDÜ!" : "BAŞARISIZ SORUŞTURMA";
-        resultMessage.innerText = result.message;
-        resultIcon.className = `result-icon ${result.success ? 'success' : 'fail'}`;
-        resultIcon.innerHTML = result.success 
-            ? `<i class="fa-solid fa-circle-check"></i>`
-            : `<i class="fa-solid fa-circle-xmark"></i>`;
+function loadDialogOptions(npcId) {
+    const container = document.getElementById('dialog-options-container');
+    container.innerHTML = '';
+    
+    // Hikayeli seçenekler veritabanı mock'u
+    let options = [];
+    if(npcId === 1) { // Kasap
+        options = [
+            { text: 'Cinayet gecesi tam olarak neredeydin?', req: null },
+            { text: 'Kurbanla aranızdaki husumeti herkes biliyor...', req: null },
+            { text: 'Bu kanlı satır senin tezgahından çıktı!', req: 1 }, 
+            { text: 'Kara kaplı defterinde kurbanın üstü neden çizili?', req: 2 } 
+        ];
+    } else if (npcId === 2) { // Eczacı
+        options = [
+            { text: 'Kasabadaki zehirlenme vakalarından haberin var mı?', req: null },
+            { text: 'Cinayet saati dükkanın açıktı, kimi gördün?', req: null },
+            { text: 'Bu boş ilaç şişesindeki zehri kime sattın?', req: 4 }, 
+            { text: 'Reçete defterinin son sayfasını neden yırttın?', req: 5 } 
+        ];
+    } else if (npcId === 3) { // Muhtar
+        options = [
+            { text: 'Kasabadaki gerginliğin sebebi nedir muhtar?', req: null },
+            { text: 'Kurbanın ölümü sana yaradı diyorlar.', req: null },
+            { text: 'Kurbana yazılan bu tehdit mektubunun senin çekmecende ne işi var?!', req: 7 }, 
+            { text: 'Kırık gözlük olay yerinde bulundu, bu sana mı ait?', req: 8 } 
+        ];
+    }
 
-        if (result.success && result.secret) {
-            secretInfoBox.classList.remove('hidden');
-            resultSecretText.innerText = result.secret;
-        } else {
-            secretInfoBox.classList.add('hidden');
-        }
+    let count = 0;
+    options.forEach(opt => {
+        if(opt.req !== null && !currentBag.find(b => b.id === opt.req)) return;
+        count++;
 
-        resultModal.classList.remove('hidden');
+        const btn = document.createElement('button');
+        btn.className = 'dialog-option-btn';
+        btn.innerHTML = `<i class="fa-solid fa-comment"></i> ${opt.text}`;
+        btn.onclick = () => askQuestion(npcId, opt.text, opt.req);
+        container.appendChild(btn);
+    });
 
-    } catch (err) {
-        alert("Suçlama işlemi sırasında bir hata oluştu.");
+    while(count < 4) {
+        const btn = document.createElement('button');
+        btn.className = 'dialog-option-btn inactive';
+        btn.style.opacity = '0.5';
+        btn.innerHTML = `<i class="fa-solid fa-lock"></i> Gizli Seçenek (İpucu Gerektirir)`;
+        container.appendChild(btn);
+        count++;
     }
 }
 
-// =============================================
-// OYUNU SIFIRLA
-// =============================================
+function askQuestion(npcId, q, reqId) {
+    const box = document.getElementById('chat-history-box');
+    box.innerHTML += `<div class="chat-bubble player"><div class="speaker-name">Dedektif</div><div class="bubble-content">${q}</div></div>`;
+    
+    setTimeout(() => {
+        let answer = "Bu konuda konuşmak istemiyorum.";
+        
+        // Custom Answers
+        if(npcId === 1) {
+            if(reqId === 1) answer = "O satırı çalındığını polise söylemiştim, benimle ilgisi yok! Terleyerek ve titreyerek...";
+            else if (reqId === 2) answer = "Veresiye borcu vardı, ödemeyince üstünü çizdim. Hepsi bu kadar.";
+            else answer = "Bütün gece dükkandaydım, et doğruyordum. Kimseyi görmedim.";
+        }
+        else if (npcId === 2) {
+            if(reqId === 4) answer = "O... o ilacı ben kimseye satmadım. Belki biri tezgahtan çalmıştır.";
+            else if(reqId === 5) answer = "Orada önemli bir not vardı, sadece yanlış yazdım ve kopardım!";
+            else answer = "Ben sadece ilaç satarım dedektif bey, insanların ne yaptığıyla ilgilenmem.";
+        }
+        else if (npcId === 3) {
+            if(reqId === 7) answer = "Bu... bunu ona göndermeyecektim! Sadece sinirle yazılmış bir şeydi.";
+            else if(reqId === 8) answer = "Benim gözlüğüm bende duruyor! Görmüyor musun gözümde işte.";
+            else answer = "Kasabanın huzurunu sağlamak benim görevim. Sizin gibi dışarıdan gelenler suyu bulandırıyor.";
+        }
+        
+        box.innerHTML += `<div class="chat-bubble npc"><div class="speaker-name">${MOCK_NPCS[npcId].name}</div><div class="bubble-content">${answer}</div></div>`;
+        box.scrollTop = box.scrollHeight;
+    }, 800);
+}
 
-async function resetGame() {
-    try {
-        const res = await fetch(`${API_BASE}/reset`, { method: 'POST' });
-        const data = await res.json();
-        alert(data.message);
-        loadGameState();
-    } catch (err) {
-        alert("Oyun sıfırlanırken hata oluştu.");
-    }
+let audioCtx = null;
+function triggerTransition(callback, type='open') {
+    transitionOverlay.classList.add('flash');
+    setTimeout(() => {
+        callback();
+        setTimeout(() => transitionOverlay.classList.remove('flash'), 300);
+    }, 500);
 }

@@ -125,24 +125,22 @@ class Program
             }
         });
 
-        // 4. Sorgulama Yap
+        // 4. Sorgulama Yap (Veritabanı Sabit Cevap)
         app.MapPost("/api/game/interrogate", async (InterrogationRequest request) =>
         {
             try
             {
-                var result = await dialogManagerInstance.ProcessQuestionAsync(request.NpcId, request.Question);
-                if (result == null)
-                {
-                    return Results.NotFound("Şüpheli bulunamadı.");
-                }
+                var npc = await repository.GetNPCByIdAsync(request.NpcId);
+                if (npc == null) return Results.NotFound("Şüpheli bulunamadı.");
 
+                // Hardcoded mock for now to bypass AI
                 return Results.Ok(new
                 {
-                    dialogue = result.Value.Response.Dialogue,
-                    emotion = result.Value.Response.Emotion,
-                    trustChange = result.Value.Response.TrustChange,
-                    revealedSecret = result.Value.Response.RevealedSecret,
-                    updatedNpc = result.Value.UpdatedNPC
+                    dialogue = "Bu konuda konuşmak istemiyorum. Zaten bildiğim her şeyi anlattım.",
+                    emotion = "Sinirli",
+                    trustChange = -10,
+                    revealedSecret = "",
+                    updatedNpc = npc
                 });
             }
             catch (Exception ex)
