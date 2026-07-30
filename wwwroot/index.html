@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Akıllı Dedektiflik RPG</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Special+Elite&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="noir-theme">
+
+    <!-- Yağmur Arka Plan Efekti -->
+    <div class="rain-overlay"></div>
+
+    <!-- 1. SİNEMATİK GİRİŞ EKRANI (SPLASH SCREEN) -->
+    <div id="splash-screen" class="splash-container">
+        <div class="splash-glass">
+            <h1 class="game-title">D E D E K T İ F L İ K</h1>
+            <h3 class="game-subtitle">KARANLIK KASABANIN SIRRI</h3>
+            
+            <div class="case-file-intro">
+                <p id="intro-text" class="typewriter-text">
+                    Kasım 1984. Yağmurlu ve soğuk bir kasaba gecesi. Saygın bir iş insanı olan kurbanın cansız bedeni çalışma odasında bulundu. İpuçları az, şüpheler yoğun. Kasap, Eczacı ve Muhtar... Her birinin söyleyecekleri var ama hangisi doğruları söylüyor? Sırları çöz, kanıtları doğru değerlendir ve katili adalete teslim et.
+                </p>
+            </div>
+
+            <div class="splash-actions">
+                <button id="start-btn" class="btn btn-primary btn-glow">
+                    <i class="fa-solid fa-folder-open"></i> DOSYAYI AÇ VE BAŞLA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. ANA OYUN EKRANI -->
+    <div id="game-screen" class="game-container hidden">
+        
+        <!-- ÜST PANEL -->
+        <header class="game-header">
+            <div class="header-title">
+                <h1>🔍 AKILLI DEDEKTİFLİK RPG</h1>
+                <span class="case-badge">DOSYA NO: #1984</span>
+            </div>
+            
+            <div class="header-actions">
+                <button id="reset-btn" class="btn btn-outline" title="Oyunu Sıfırla">
+                    <i class="fa-solid fa-rotate-right"></i> Sıfırla
+                </button>
+                <div class="audio-toggle">
+                    <i class="fa-solid fa-volume-high"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- ANA PANEL LAYOUT -->
+        <main class="game-layout">
+            
+            <!-- SOL PANEL: KASABA HARİTASI & ŞÜPHELİLER -->
+            <section class="left-section">
+                <div class="section-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-users"></i> KASABA ŞÜPHELİLERİ</h2>
+                        <p class="subtitle">Sorgulamak istediğiniz şüphelinin üzerine tıklayın</p>
+                    </div>
+                    
+                    <div class="suspect-grid" id="suspects-list">
+                        <!-- Suspect cards loaded dynamically -->
+                        <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Yükleniyor...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SAĞ PANEL: OLAY YERİ İPUÇLARI & DEDEKTİF ÇANTASI -->
+            <section class="right-section">
+                
+                <!-- OLAY YERİ İPUÇLARI -->
+                <div class="section-card scene-clues-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-magnifying-glass-location"></i> OLAY YERİ (İPUÇLARI)</h2>
+                        <p class="subtitle">Olay yerinde bulduğun materyalleri incele</p>
+                    </div>
+                    <div class="clues-list" id="scene-clues-list">
+                        <!-- Scene clues loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- DEDEKTİF ÇANTASI -->
+                <div class="section-card inventory-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-briefcase"></i> DEDEKTİF ÇANTASI (KANITLAR)</h2>
+                        <p class="subtitle">Sorguda kullanmak için sakladığın kanıtlar</p>
+                    </div>
+                    <div class="inventory-grid" id="bag-clues-list">
+                        <!-- Kept clues list -->
+                        <div class="empty-inventory">
+                            <i class="fa-solid fa-box-open"></i>
+                            <p>Çantanız şu an boş. Olay yerindeki ipuçlarından saklamak istediklerinizi çantaya ekleyin.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- 3. ODAK SORGULAMA MODALI (DETAILED INTERROGATION WITH BLUR) -->
+    <div id="interrogation-modal" class="modal-backdrop hidden">
+        <div class="interrogation-container">
+            
+            <div class="interrogation-header">
+                <div class="npc-mini-profile">
+                    <h2 id="int-npc-name">NPC İsim</h2>
+                    <span id="int-npc-role" class="npc-role-tag">Kasap</span>
+                </div>
+                <button id="close-int-btn" class="close-modal-btn">
+                    <i class="fa-solid fa-xmark"></i> Geri Dön
+                </button>
+            </div>
+
+            <!-- SORGULAMA ODAK ALANI -->
+            <div class="interrogation-focus-area">
+                
+                <!-- SOL: DEDEKTİF AVATARI -->
+                <div class="avatar-side player-side animate-fade-in-left">
+                    <img src="images/dedektif.png" alt="Dedektif" class="avatar-img">
+                    <span class="avatar-label">🕵️ DEDEKTİF</span>
+                </div>
+
+                <!-- ORTA: SOHBET GEÇMİŞİ -->
+                <div class="chat-console">
+                    <div class="chat-history" id="chat-history-box">
+                        <!-- Dialog items loaded dynamically -->
+                        <div class="system-message">Sorgulama başladı. NPC'ye sorularınızı yöneltin veya çantanızdan kanıt sunun.</div>
+                    </div>
+                    
+                    <div id="typing-indicator" class="typing-indicator hidden">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+
+                <!-- SAĞ: NPC AVATARI & DURUMU -->
+                <div class="avatar-side npc-side animate-fade-in-right">
+                    <div class="npc-image-container">
+                        <img id="int-npc-img" src="" alt="NPC" class="avatar-img">
+                        <span id="int-npc-emotion-badge" class="emotion-badge">😐 Sakin</span>
+                    </div>
+                    <span class="avatar-label">👤 ŞÜPHELİ</span>
+
+                    <!-- NPC Canlı Durum Barları -->
+                    <div class="npc-live-stats">
+                        <div class="stat-group">
+                            <label>🤝 Güven Seviyesi</label>
+                            <div class="progress-bar-container">
+                                <div id="int-trust-bar" class="progress-bar trust-bar" style="width: 50%;"></div>
+                            </div>
+                            <span id="int-trust-text" class="stat-val">50%</span>
+                        </div>
+                        <div class="stat-group">
+                            <label>😰 Korku Seviyesi</label>
+                            <div class="progress-bar-container">
+                                <div id="int-fear-bar" class="progress-bar fear-bar" style="width: 30%;"></div>
+                            </div>
+                            <span id="int-fear-text" class="stat-val">30%</span>
+                        </div>
+                    </div>
+
+                    <!-- NPC Suçlama Butonu -->
+                    <button id="accuse-btn" class="btn btn-danger btn-full btn-glow">
+                        <i class="fa-solid fa-gavel"></i> KATİL OLARAK SUÇLA
+                    </button>
+                </div>
+            </div>
+
+            <!-- SORGULAMA KONTROLLERİ (ALT KISIM) -->
+            <div class="interrogation-footer">
+                
+                <!-- Kanıt Sunma Alanı (Çantadan) -->
+                <div class="present-evidence-area">
+                    <span class="evidence-title"><i class="fa-solid fa-briefcase"></i> Kanıt Sun:</span>
+                    <div class="evidence-pill-container" id="present-clues-container">
+                        <!-- Clues pill list loaded dynamically from bag -->
+                    </div>
+                </div>
+
+                <!-- Metin Giriş Alanı -->
+                <form id="ask-form" class="ask-form">
+                    <input type="text" id="question-input" placeholder="Şüpheliye sormak istediğiniz soruyu buraya yazın..." required autocomplete="off">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Sor
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 4. İPUCU KARAR MODALI (İPUCU BULUNDUĞUNDA) -->
+    <div id="clue-modal" class="modal-backdrop hidden">
+        <div class="clue-decide-card">
+            <div class="clue-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+            <h2 id="clue-decide-title">Kanlı Bıçak</h2>
+            <p id="clue-decide-desc" class="clue-desc">Olay yerinde bulunan paslanmış bir kasap bıçağı.</p>
+            
+            <div class="clue-decide-actions">
+                <button id="keep-clue-btn" class="btn btn-primary">
+                    <i class="fa-solid fa-briefcase"></i> Çantaya Sakla
+                </button>
+                <button id="ignore-clue-btn" class="btn btn-outline">
+                    <i class="fa-solid fa-trash-can"></i> Olay Yerinde Bırak
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. OYUN SONU / SUÇLAMA MODALI -->
+    <div id="result-modal" class="modal-backdrop hidden">
+        <div class="result-card">
+            <div id="result-icon" class="result-icon success"><i class="fa-solid fa-circle-check"></i></div>
+            <h2 id="result-title">Soruşturma Sonucu</h2>
+            <p id="result-message" class="result-message">Mesaj...</p>
+            
+            <div id="secret-info-box" class="secret-info-box hidden">
+                <h4>🔑 ŞÜPHELİNİN SAKLADIĞI GERÇEK:</h4>
+                <p id="result-secret-text"></p>
+            </div>
+
+            <div class="result-actions">
+                <button id="restart-btn" class="btn btn-primary">
+                    <i class="fa-solid fa-rotate-left"></i> Yeniden Başla
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

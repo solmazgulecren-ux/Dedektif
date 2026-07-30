@@ -1,0 +1,974 @@
+/* ==========================================================================
+   🔍 AKILLI DEDEKTİFLİK RPG - DİZAYN SİSTEMİ (VANILLA CSS)
+   ========================================================================== */
+
+:root {
+    --bg-noir: #0b0c10;
+    --bg-card: rgba(26, 28, 32, 0.7);
+    --bg-glass: rgba(15, 17, 21, 0.85);
+    
+    --primary: #1f2833;
+    --primary-glow: #66fcf1;
+    --accent: #45f3ff;
+    
+    --text-primary: #f5f5f7;
+    --text-secondary: #c5c6c7;
+    --text-dark: #1a1a1d;
+    --text-muted: #8b949e;
+    
+    --success: #2ea44f;
+    --danger: #cf222e;
+    --warning: #dbab09;
+    
+    --border-color: rgba(69, 243, 255, 0.15);
+    --border-glow: rgba(69, 243, 255, 0.4);
+    
+    --font-heading: 'Cinzel', serif;
+    --font-typewriter: 'Special Elite', monospace;
+    --font-sans: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ==========================================================================
+   GENEL AYARLAR & ARKA PLAN EFEKTLERİ
+   ========================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-noir);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Yağmur ve Sis Efekti */
+.rain-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://user-images.githubusercontent.com/13848658/125430843-ef454c0b-4886-455b-bf99-cc273c683b5e.gif');
+    background-size: cover;
+    opacity: 0.12;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Scrollbar Özelleştirme */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #0d0e12;
+}
+::-webkit-scrollbar-thumb {
+    background: #1f2833;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================================
+   BUTONLAR & BİLEŞENLER
+   ========================================================================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background-color: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent);
+    color: var(--text-dark);
+    box-shadow: 0 0 15px var(--border-glow);
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-outline:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.btn-danger {
+    background-color: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+}
+
+.btn-danger:hover {
+    background-color: var(--danger);
+    color: var(--text-primary);
+    box-shadow: 0 0 15px rgba(207, 34, 46, 0.5);
+}
+
+.btn-full {
+    width: 100%;
+}
+
+.btn-glow {
+    animation: pulseGlow 2s infinite alternate;
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 5px rgba(69, 243, 255, 0.2);
+    }
+    100% {
+        box-shadow: 0 0 15px rgba(69, 243, 255, 0.5);
+    }
+}
+
+/* ==========================================================================
+   1. SİNEMATİK GİRİŞ EKRANI (SPLASH SCREEN)
+   ========================================================================== */
+
+.splash-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(15, 17, 21, 0.6) 0%, #050608 100%),
+                url('../images/town_bg.png') no-repeat center center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99;
+}
+
+.splash-glass {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 50px;
+    max-width: 650px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(69, 243, 255, 0.05);
+    backdrop-filter: blur(10px);
+    animation: zoomIn 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.game-title {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    letter-spacing: 12px;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.game-subtitle {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    letter-spacing: 6px;
+    color: var(--accent);
+    margin-bottom: 40px;
+}
+
+.case-file-intro {
+    background: rgba(0, 0, 0, 0.4);
+    border-left: 2px solid var(--accent);
+    padding: 20px;
+    margin-bottom: 40px;
+    text-align: left;
+    min-height: 120px;
+}
+
+.typewriter-text {
+    font-family: var(--font-typewriter);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   2. ANA OYUN EKRANI (DASHBOARD)
+   ========================================================================== */
+
+.game-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    z-index: 5;
+    position: relative;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-bottom: 25px;
+    backdrop-filter: blur(10px);
+}
+
+.header-title h1 {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+}
+
+.case-badge {
+    font-family: var(--font-typewriter);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.audio-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.audio-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* ANA PANEL DÜZENİ */
+.game-layout {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 25px;
+    flex-grow: 1;
+}
+
+.section-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 25px;
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 15px;
+}
+
+.card-header h2 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-header .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+/* ==========================================================================
+   ŞÜPHELİ KARTLARI (SUSPECTS GRID)
+   ========================================================================== */
+
+.suspect-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.suspect-card {
+    display: flex;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.suspect-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(69, 243, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.suspect-card img {
+    width: 80px;
+    height: 80px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.suspect-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.suspect-info h3 {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.suspect-info .role {
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+
+.suspect-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-mini {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+}
+
+.stat-mini label {
+    color: var(--text-muted);
+}
+
+.stat-mini span {
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   İPUÇLARI & ÇANTA SİSTEMİ
+   ========================================================================== */
+
+.clues-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.clue-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px 15px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.clue-item-row:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.clue-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.clue-meta i {
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+.clue-title-mini {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.clue-item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* ÇANTA / ENVANTER */
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
+    min-height: 150px;
+}
+
+.inventory-item {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(69, 243, 255, 0.1);
+    border-radius: 4px;
+    padding: 15px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.inventory-item:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(69, 243, 255, 0.15);
+}
+
+.inventory-item i {
+    font-size: 1.8rem;
+    color: var(--accent);
+}
+
+.inventory-item span {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.empty-inventory {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-muted);
+    gap: 15px;
+    padding: 30px;
+}
+
+.empty-inventory i {
+    font-size: 2.5rem;
+}
+
+.empty-inventory p {
+    font-size: 0.85rem;
+    max-width: 250px;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   3. ODAK SORGULAMA EKRANI (BLURRY DETECTOR FOCUS)
+   ========================================================================== */
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(5, 6, 8, 0.85);
+    backdrop-filter: blur(12px) brightness(0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: all 0.4s ease;
+}
+
+.interrogation-container {
+    width: 95%;
+    max-width: 1200px;
+    height: 90vh;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 50px rgba(69, 243, 255, 0.08);
+}
+
+.interrogation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.npc-mini-profile h2 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+}
+
+.npc-role-tag {
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.close-modal-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.close-modal-btn:hover {
+    color: var(--text-primary);
+}
+
+/* SORGULAMA ODAK ALANI LAYOUT */
+.interrogation-focus-area {
+    display: grid;
+    grid-template-columns: 200px 1fr 240px;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.avatar-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    gap: 15px;
+}
+
+.avatar-img {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 20px rgba(69, 243, 255, 0.2);
+}
+
+.avatar-label {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+}
+
+.npc-image-container {
+    position: relative;
+}
+
+.emotion-badge {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--accent);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* NPC CANLI İSTATİSTİKLERİ */
+.npc-live-stats {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 4px;
+}
+
+.stat-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-group label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+}
+
+.trust-bar {
+    background: linear-gradient(90deg, #dbab09, var(--success));
+}
+
+.fear-bar {
+    background: linear-gradient(90deg, #1f2833, var(--danger));
+}
+
+.stat-val {
+    font-size: 0.75rem;
+    font-weight: 600;
+    align-self: flex-end;
+}
+
+/* ORTA KONSOL: SOHBET KUTUSU */
+.chat-console {
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    height: 100%;
+}
+
+.chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.chat-bubble {
+    max-width: 80%;
+    padding: 15px;
+    border-radius: 6px;
+    line-height: 1.5;
+    font-size: 0.95rem;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.chat-bubble.player {
+    background-color: var(--primary);
+    border: 1px solid rgba(69, 243, 255, 0.1);
+    align-self: flex-start;
+    border-top-left-radius: 0;
+}
+
+.chat-bubble.npc {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    align-self: flex-end;
+    border-top-right-radius: 0;
+}
+
+.chat-bubble .speaker-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 5px;
+}
+
+.chat-bubble.npc .speaker-name {
+    color: var(--warning);
+}
+
+.system-message {
+    align-self: center;
+    background: rgba(69, 243, 255, 0.05);
+    border: 1px dashed var(--border-color);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* YAZIYOR GÖSTERGESİ */
+.typing-indicator {
+    padding: 15px 25px;
+    display: flex;
+    gap: 5px;
+}
+
+.typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+}
+
+/* SORGULAMA KONTROLLERİ */
+.interrogation-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 15px 30px;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.present-evidence-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.evidence-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.evidence-pill-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+}
+
+.evidence-pill {
+    background: rgba(69, 243, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.evidence-pill:hover {
+    background: var(--accent);
+    color: var(--text-dark);
+}
+
+.ask-form {
+    display: flex;
+    gap: 15px;
+}
+
+.ask-form input {
+    flex-grow: 1;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 12px 20px;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.ask-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(69, 243, 255, 0.1);
+}
+
+/* ==========================================================================
+   4. KANIT / İPUCU KARAR MODALI
+   ========================================================================== */
+
+.clue-decide-card {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clue-icon {
+    font-size: 3rem;
+    color: var(--accent);
+}
+
+.clue-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.clue-decide-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.clue-decide-actions button {
+    flex-grow: 1;
+}
+
+/* ==========================================================================
+   5. OYUN SONU / SONUÇ MODALI
+   ========================================================================== */
+
+.result-card {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    max-width: 550px;
+    width: 90%;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.result-icon {
+    font-size: 4rem;
+}
+
+.result-icon.success {
+    color: var(--success);
+}
+
+.result-icon.fail {
+    color: var(--danger);
+}
+
+.result-message {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.secret-info-box {
+    width: 100%;
+    background: rgba(207, 34, 46, 0.1);
+    border: 1px solid rgba(207, 34, 46, 0.2);
+    border-radius: 4px;
+    padding: 15px;
+    text-align: left;
+}
+
+.secret-info-box h4 {
+    color: var(--danger);
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.secret-info-box p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   ANİMASYONLAR
+   ========================================================================== */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in-left {
+    animation: fadeInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in-right {
+    animation: fadeInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInLeft {
+    from { transform: translateX(-30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeInRight {
+    from { transform: translateX(30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--text-muted);
+    padding: 40px;
+}

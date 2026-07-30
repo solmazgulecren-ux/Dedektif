@@ -1,142 +1,215 @@
 using DedektiflikRPG.Data;
+using DedektiflikRPG.Models;
 using DedektiflikRPG.Services;
 using DedektiflikRPG.UI;
 using System.Text.Json;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace DedektiflikRPG;
 
-/// <summary>
-/// AI Destekli Dedektiflik RPG — Ana Giriş Noktası
-/// Veritabanı bağlantısını kurar, servisleri başlatır ve oyun döngüsünü çalıştırır.
-/// </summary>
 class Program
 {
     static async Task Main(string[] args)
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-        // =============================================
-        // 1. Konfigürasyonu oku
-        // =============================================
         var config = LoadConfiguration();
-
         var connectionString = config.ConnectionString;
         var geminiApiKey = config.GeminiApiKey;
         var geminiModel = config.GeminiModel;
 
-        // Ortam değişkenlerinden de okunabilir
         if (string.IsNullOrEmpty(geminiApiKey))
             geminiApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? "";
 
-        // =============================================
-        // 2. Başlangıç kontrolleri
-        // =============================================
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("\n  🔧 AI Dedektiflik RPG başlatılıyor...\n");
-        Console.ResetColor();
-
-        // Veritabanı bağlantısı kontrolü
+        // Veritabanı kontrolü ve Seed
         var repository = new DatabaseRepository(connectionString);
-        Console.Write("  📡 Veritabanı bağlantısı kontrol ediliyor... ");
+        bool dbConnected = await repository.TestConnectionAsync();
 
-        if (await repository.TestConnectionAsync())
+        if (dbConnected)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("✅ Bağlantı başarılı!");
-            Console.ResetColor();
+            if (await repository.TablesExistAsync())
+            {
+                await repository.SeedDataAsync();
+            }
         }
-        else
+
+        // Eğer console modunda çalıştırılmak istenirse
+        if (args.Contains("--console"))
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("❌ Bağlantı başarısız!");
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\n  ⚠️  SQL Server bağlantı hatası.");
-            Console.WriteLine("  Lütfen aşağıdakileri kontrol edin:");
-            Console.WriteLine("    1. SQL Server'ın çalışır durumda olduğunu");
-            Console.WriteLine("    2. appsettings.json dosyasındaki ConnectionString değerini");
-            Console.WriteLine("    3. Data/schema.sql dosyasını SQL Server'da çalıştırdığınızı");
-            Console.ResetColor();
-            Console.WriteLine("\n  Devam etmek için bir tuşa basın...");
-            SafeReadKey();
+            if (!dbConnected)
+            {
+                Console.WriteLine("Hata: Veritabanı bağlantısı kurulamadı. Konsol modu başlatılamıyor.");
+                return;
+            }
+            var aiService = new AntigravityAiService(geminiApiKey, geminiModel);
+            var dialogManager = new DialogManager(repository, aiService);
+            var consoleUI = new ConsoleUI(repository, dialogManager);
+            await consoleUI.RunAsync();
             return;
         }
 
-        // Tabloların varlığını kontrol et
-        Console.Write("  📋 Tablolar kontrol ediliyor... ");
-        if (await repository.TablesExistAsync())
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("✅ Tablolar mevcut.");
-            Console.ResetColor();
-        }
-        else
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("❌ Tablolar bulunamadı!");
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\n  ⚠️  Veritabanında gerekli tablolar mevcut değil.");
-            Console.WriteLine("  Lütfen 'Data/schema.sql' dosyasını SQL Server'da çalıştırın.");
-            Console.ResetColor();
-            Console.WriteLine("\n  Devam etmek için bir tuşa basın...");
-            SafeReadKey();
-            return;
-        }
+        // Web Modu (Default)
+        var builder = WebApplication.CreateBuilder(args);
 
-        // Seed data yükle
-        Console.Write("  🌱 Varsayılan veriler yükleniyor... ");
-        await repository.SeedDataAsync();
+        // CORS Ekle
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", policy =>
+            {
+                policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+            });
+        });
+
+        var app = builder.Build();
+
+        // Statik Dosyaları Sun
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
+        app.UseCors("AllowAll");
+
+        // Servisleri oluştur
+        var aiServiceInstance = new AntigravityAiService(geminiApiKey, geminiModel);
+        var dialogManagerInstance = new DialogManager(repository, aiServiceInstance);
+
+        // =============================================
+        // API Uç Noktaları (Endpoints)
+        // =============================================
+
+        // 1. Şüpheli Listesi
+        app.MapGet("/api/game/npcs", async () =>
+        {
+            try
+            {
+                var npcs = await repository.GetAllNPCsAsync();
+                return Results.Ok(npcs);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // 2. İpuçları Listesi
+        app.MapGet("/api/game/clues", async () =>
+        {
+            try
+            {
+                var clues = await repository.GetAllCluesAsync();
+                return Results.Ok(clues);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // 3. İpucu Durumu Güncelle (Sakla / Gereksiz)
+        app.MapPost("/api/game/clues/{id}/action", async (int id, ClueActionRequest request) =>
+        {
+            try
+            {
+                // status: "KeptInBag" veya "IgnoredAtScene"
+                if (request.Status != "KeptInBag" && request.Status != "IgnoredAtScene" && request.Status != "Pending")
+                {
+                    return Results.BadRequest("Geçersiz durum değeri.");
+                }
+
+                await repository.UpdateClueStatusAsync(id, request.Status);
+                return Results.Ok(new { success = true, clueId = id, status = request.Status });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // 4. Sorgulama Yap
+        app.MapPost("/api/game/interrogate", async (InterrogationRequest request) =>
+        {
+            try
+            {
+                var result = await dialogManagerInstance.ProcessQuestionAsync(request.NpcId, request.Question);
+                if (result == null)
+                {
+                    return Results.NotFound("Şüpheli bulunamadı.");
+                }
+
+                return Results.Ok(new
+                {
+                    dialogue = result.Value.Response.Dialogue,
+                    emotion = result.Value.Response.Emotion,
+                    trustChange = result.Value.Response.TrustChange,
+                    revealedSecret = result.Value.Response.RevealedSecret,
+                    updatedNpc = result.Value.UpdatedNPC
+                });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // 5. Suçlamada Bulun
+        app.MapPost("/api/game/accuse", async (AccuseRequest request) =>
+        {
+            try
+            {
+                var npc = await repository.GetNPCByIdAsync(request.NpcId);
+                if (npc == null) return Results.NotFound("Şüpheli bulunamadı.");
+
+                if (npc.IsGuilty)
+                {
+                    return Results.Ok(new { success = true, message = $"Tebrikler! Suçlunun {npc.Name} olduğunu doğru tahmin ettiniz.", secret = npc.SecretInfo });
+                }
+                else
+                {
+                    return Results.Ok(new { success = false, message = $"{npc.Name} masum çıktı! Soruşturma başarısız oldu." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // 6. Oyunu Sıfırla
+        app.MapPost("/api/game/reset", async () =>
+        {
+            try
+            {
+                // Tabloları temizle ve seed et
+                using var db = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
+                await db.OpenAsync();
+                using var cmd = db.CreateCommand();
+                cmd.CommandText = @"
+                    UPDATE Clues SET Status = 'Pending';
+                    UPDATE NPCs SET TrustLevel = 50, FearLevel = 30;
+                    DELETE FROM DialogLogs;
+                ";
+                await cmd.ExecuteNonQueryAsync();
+
+                return Results.Ok(new { success = true, message = "Oyun durumu sıfırlandı." });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("✅ Veriler hazır.");
+        Console.WriteLine("\n  🌍 Akıllı Dedektiflik RPG Web Sunucusu Başlatıldı!");
+        Console.WriteLine("  👉 Tarayıcıda Açın: http://localhost:5000 \n");
         Console.ResetColor();
 
-        // API key kontrolü
-        Console.Write("  🤖 Gemini API anahtarı kontrol ediliyor... ");
-        if (string.IsNullOrEmpty(geminiApiKey))
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("⚠️  API anahtarı bulunamadı!");
-            Console.ResetColor();
-            Console.WriteLine("  appsettings.json veya GEMINI_API_KEY ortam değişkenini ayarlayın.");
-            Console.WriteLine("  Oyun AI desteği olmadan başlatılıyor...");
-            Thread.Sleep(2000);
-        }
-        else
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"✅ Model: {geminiModel}");
-            Console.ResetColor();
-        }
-
-        // =============================================
-        // 3. Servisleri başlat
-        // =============================================
-        var aiService = new AntigravityAiService(geminiApiKey, geminiModel);
-        var dialogManager = new DialogManager(repository, aiService);
-        var consoleUI = new ConsoleUI(repository, dialogManager);
-
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("\n  ✅ Tüm sistemler hazır! Oyun başlıyor...\n");
-        Console.ResetColor();
-        Thread.Sleep(1500);
-
-        // =============================================
-        // 4. Oyun döngüsünü başlat
-        // =============================================
-        await consoleUI.RunAsync();
+        await app.RunAsync("http://localhost:5000");
     }
 
-    /// <summary>
-    /// appsettings.json dosyasından konfigürasyonu okur.
-    /// </summary>
     private static AppConfig LoadConfiguration()
     {
         var configPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
-
-        // Eğer debug/geliştirme sırasında dosya proje kökünde ise onu dene
-        if (!File.Exists(configPath))
-            configPath = "appsettings.json";
+        if (!File.Exists(configPath)) configPath = "appsettings.json";
 
         if (File.Exists(configPath))
         {
@@ -149,14 +222,8 @@ class Program
                 });
                 return config ?? new AppConfig();
             }
-            catch
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("  ⚠️  appsettings.json okunamadı, varsayılan ayarlar kullanılıyor.");
-                Console.ResetColor();
-            }
+            catch { }
         }
-
         return new AppConfig();
     }
 
@@ -169,13 +236,25 @@ class Program
     }
 }
 
-/// <summary>
-/// Uygulama konfigürasyon modeli
-/// </summary>
+public class ClueActionRequest
+{
+    public string Status { get; set; } = string.Empty;
+}
+
+public class InterrogationRequest
+{
+    public int NpcId { get; set; }
+    public string Question { get; set; } = string.Empty;
+}
+
+public class AccuseRequest
+{
+    public int NpcId { get; set; }
+}
+
 public class AppConfig
 {
-    public string ConnectionString { get; set; } =
-        "Server=(localdb)\\MSSQLLocalDB;Database=DedektiflikRPG;Trusted_Connection=true;TrustServerCertificate=true;";
+    public string ConnectionString { get; set; } = "Server=(localdb)\\MSSQLLocalDB;Database=DedektiflikRPG;Trusted_Connection=true;TrustServerCertificate=true;";
     public string GeminiApiKey { get; set; } = "";
     public string GeminiModel { get; set; } = "gemini-2.0-flash";
 }
