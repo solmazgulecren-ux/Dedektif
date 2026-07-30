@@ -175,7 +175,7 @@ class Program
 public class AppConfig
 {
     public string ConnectionString { get; set; } =
-        "Server=localhost;Database=DedektiflikRPG;Trusted_Connection=true;TrustServerCertificate=true;";
+        "Server=(localdb)\\MSSQLLocalDB;Database=DedektiflikRPG;Trusted_Connection=true;TrustServerCertificate=true;";
     public string GeminiApiKey { get; set; } = "";
     public string GeminiModel { get; set; } = "gemini-2.0-flash";
 }

@@ -39,8 +39,8 @@ public class ConsoleUI
     /// </summary>
     public async Task RunAsync()
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
-        Console.Title = "🔍 AI Destekli Dedektiflik RPG";
+        try { Console.OutputEncoding = System.Text.Encoding.UTF8; } catch { }
+        try { Console.Title = "🔍 Akıllı Dedektiflik RPG"; } catch { }
 
         ShowSplashScreen();
         await ShowMainMenuAsync();
@@ -52,7 +52,7 @@ public class ConsoleUI
 
     private void ShowSplashScreen()
     {
-        Console.Clear();
+        SafeClear();
         WriteLineColored(@"
     ╔══════════════════════════════════════════════════════════╗
     ║                                                          ║
@@ -83,7 +83,7 @@ public class ConsoleUI
     {
         while (true)
         {
-            Console.Clear();
+            SafeClear();
             DrawHeader("🏘️  KASABA MERKEZİ");
             Console.WriteLine();
 
@@ -181,7 +181,7 @@ public class ConsoleUI
 
         _currentNPC = npc;
 
-        Console.Clear();
+        SafeClear();
         DrawHeader($"🔍 SORGULAMA: {npc.Name.ToUpperInvariant()}");
         Console.WriteLine();
         WriteLineColored($"  📋 Rol: {npc.Role}", InfoColor);
@@ -300,7 +300,7 @@ public class ConsoleUI
 
     private async Task ShowCluesAsync()
     {
-        Console.Clear();
+        SafeClear();
         DrawHeader("🔎 İPUÇLARI");
         Console.WriteLine();
 
@@ -345,7 +345,7 @@ public class ConsoleUI
 
     private async Task ShowDialogHistoryMenuAsync()
     {
-        Console.Clear();
+        SafeClear();
         DrawHeader("📜 SORGULAMA GEÇMİŞİ");
         Console.WriteLine();
 
@@ -372,7 +372,7 @@ public class ConsoleUI
             var logs = await _dialogManager.GetDialogHistoryAsync(npcId);
             var logList = logs.ToList();
 
-            Console.Clear();
+            SafeClear();
             DrawHeader($"📜 {npc.Name} — SORGULAMA GEÇMİŞİ");
             Console.WriteLine();
 
@@ -406,7 +406,7 @@ public class ConsoleUI
 
     private void ShowExitScreen()
     {
-        Console.Clear();
+        SafeClear();
         WriteLineColored(@"
     ╔══════════════════════════════════════════════════════════╗
     ║                                                          ║
@@ -481,6 +481,14 @@ public class ConsoleUI
         if (!Console.IsInputRedirected)
         {
             try { Console.ReadKey(true); } catch { }
+        }
+    }
+
+    private static void SafeClear()
+    {
+        if (!Console.IsOutputRedirected)
+        {
+            try { Console.Clear(); } catch { }
         }
     }
 }
