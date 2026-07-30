@@ -72,7 +72,7 @@ public class ConsoleUI
 ", TitleColor);
 
         WriteLineColored("    Devam etmek için bir tuşa basın...", InfoColor);
-        Console.ReadKey(true);
+        SafeReadKey();
     }
 
     // =============================================
@@ -323,7 +323,7 @@ public class ConsoleUI
         }
 
         WriteLineColored("  Devam etmek için bir tuşa basın...", InfoColor);
-        Console.ReadKey(true);
+        SafeReadKey();
     }
 
     private async Task ShowCluesInline()
@@ -396,7 +396,7 @@ public class ConsoleUI
             }
 
             WriteLineColored("  Devam etmek için bir tuşa basın...", InfoColor);
-            Console.ReadKey(true);
+            SafeReadKey();
         }
     }
 
@@ -474,5 +474,13 @@ public class ConsoleUI
         Console.ForegroundColor = color;
         Console.WriteLine(text);
         Console.ForegroundColor = prev;
+    }
+
+    private static void SafeReadKey()
+    {
+        if (!Console.IsInputRedirected)
+        {
+            try { Console.ReadKey(true); } catch { }
+        }
     }
 }

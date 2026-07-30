@@ -58,7 +58,7 @@ class Program
             Console.WriteLine("    3. Data/schema.sql dosyasını SQL Server'da çalıştırdığınızı");
             Console.ResetColor();
             Console.WriteLine("\n  Devam etmek için bir tuşa basın...");
-            Console.ReadKey(true);
+            SafeReadKey();
             return;
         }
 
@@ -80,7 +80,7 @@ class Program
             Console.WriteLine("  Lütfen 'Data/schema.sql' dosyasını SQL Server'da çalıştırın.");
             Console.ResetColor();
             Console.WriteLine("\n  Devam etmek için bir tuşa basın...");
-            Console.ReadKey(true);
+            SafeReadKey();
             return;
         }
 
@@ -158,6 +158,14 @@ class Program
         }
 
         return new AppConfig();
+    }
+
+    public static void SafeReadKey()
+    {
+        if (!Console.IsInputRedirected)
+        {
+            try { Console.ReadKey(true); } catch { }
+        }
     }
 }
 
