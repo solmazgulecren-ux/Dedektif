@@ -1,0 +1,31 @@
+# =============================================
+# AI Destekli Dedektiflik RPG - .gitignore
+# =============================================
+
+# .NET Build çıktıları
+bin/
+obj/
+
+# IDE ve Editör dosyaları
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln.docstates
+
+# NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# Hassas konfigürasyon (API key, veritabanı şifreleri)
+appsettings.json
+appsettings.Development.json
+
+# OS dosyaları
+Thumbs.db
+.DS_Store
+
+# Rider
+.idea/
+*.sln.iml
