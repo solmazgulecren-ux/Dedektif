@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔍 Akıllı Dedektiflik RPG</title>
+    <title>🔍 Dedektif — Karanlık Kasabanın Sırrı</title>
+    <meta name="description" content="Yağmurlu bir gecede işlenen cinayeti çöz! 5 şüpheli, 5 bina, sayısız sır.">
     <!-- Google Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Special+Elite&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap"
@@ -28,11 +29,28 @@
         </div>
     </div>
 
-    <!-- 2. FULL SCREEN TOWN MAP -->
+    <!-- 2. STORY INTRO SCREEN -->
+    <div id="story-intro-screen" class="story-intro-container hidden">
+        <div class="story-bg-blur"></div>
+        <div class="rain-overlay"></div>
+        <div class="story-content">
+            <div class="story-text-box">
+                <div class="story-badge"><i class="fa-solid fa-file-lines"></i> DAVA DOSYASI #2026-731</div>
+                <p id="story-typewriter" class="typewriter-text"></p>
+                <div class="story-cursor">|</div>
+            </div>
+            <button id="story-continue-btn" class="btn btn-primary btn-glow hidden"
+                style="margin-top:30px; font-size:1.2rem; padding:12px 40px;">
+                <i class="fa-solid fa-magnifying-glass"></i> SORUŞTURMAYI BAŞLAT
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. FULL SCREEN TOWN MAP -->
     <div id="town-map-screen" class="full-screen-map hidden">
-        <button id="exit-game-btn" class="global-exit-btn"><i class="fa-solid fa-door-open"></i> Oyundan Çık / Ana
-            Menü</button>
+        <button id="exit-game-btn" class="global-exit-btn"><i class="fa-solid fa-door-open"></i> Ana Menü</button>
         <button id="open-bag-btn" class="global-bag-btn"><i class="fa-solid fa-briefcase"></i> Çanta</button>
+        <button id="found-btn" class="found-btn"><i class="fa-solid fa-gavel"></i> BULDUM!</button>
 
         <!-- Dağınık Binalar -->
         <!-- Eczane -->
@@ -50,19 +68,19 @@
             <i class="fa-solid fa-building-flag"></i>
             <span class="map-building-label">Muhtarlık</span>
         </div>
-        <!-- Karakol (Pasif) -->
-        <div class="map-building inactive" style="top: 75%; left: 10%;" data-npc-id="4">
+        <!-- Karakol -->
+        <div class="map-building" style="top: 75%; left: 10%;" data-npc-id="4">
             <i class="fa-solid fa-building-shield"></i>
             <span class="map-building-label">Karakol</span>
         </div>
-        <!-- Terzi (Pasif) -->
-        <div class="map-building inactive" style="top: 65%; right: 15%;" data-npc-id="5">
+        <!-- Terzi -->
+        <div class="map-building" style="top: 65%; right: 15%;" data-npc-id="5">
             <i class="fa-solid fa-scissors"></i>
             <span class="map-building-label">Terzi</span>
         </div>
     </div>
 
-    <!-- 3. BUILDING INTERIOR SCREEN -->
+    <!-- 4. BUILDING INTERIOR SCREEN -->
     <div id="interior-screen" class="full-screen-interior hidden">
         <div class="rain-overlay"></div>
 
@@ -76,11 +94,67 @@
             <i class="fa-solid fa-comments"></i> <span id="talk-npc-name">Karakter İle Konuş</span>
         </button>
 
-        <!-- Hotspots for Objects (Dynamically injected) -->
+        <!-- Hotspots for Objects -->
         <div id="hotspots-container"></div>
     </div>
 
-    <!-- INVENTORY (BAG) MODAL -->
+    <!-- 5. CLUE INSPECTION MODAL (REDESIGNED) -->
+    <div id="clue-inspect-modal" class="modal-backdrop hidden">
+        <div class="clue-inspect-container">
+            <!-- Sol Taraf: Bilgi -->
+            <div class="clue-inspect-info">
+                <div class="clue-inspect-badge"><i class="fa-solid fa-magnifying-glass"></i> DELİL İNCELEME</div>
+                <h2 id="clue-inspect-title" class="clue-inspect-name">Nesne Adı</h2>
+                <div class="clue-inspect-divider"></div>
+                <p id="clue-inspect-desc" class="clue-inspect-description">Nesne açıklaması...</p>
+                <div class="clue-inspect-actions">
+                    <button id="clue-take-btn" class="btn btn-primary btn-full">
+                        <i class="fa-solid fa-briefcase"></i> Çantaya Al
+                    </button>
+                    <button id="clue-leave-btn" class="btn btn-outline btn-full">
+                        <i class="fa-solid fa-location-dot"></i> Olay Yerinde Bırak
+                    </button>
+                </div>
+            </div>
+            <!-- Sağ Taraf: Görsel (NPC arka plan buhulu + ipucu büyük) -->
+            <div class="clue-inspect-visual">
+                <div id="clue-inspect-bg" class="clue-inspect-bg-blur"></div>
+                <img id="clue-inspect-img" class="clue-inspect-item-img" src="" alt="İpucu Görseli">
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. NPC TALK FULLSCREEN -->
+    <div id="npc-talk-modal" class="modal-backdrop hidden">
+        <div class="npc-talk-container">
+            <!-- NPC Full Background -->
+            <div id="npc-talk-bg" class="npc-talk-bg"></div>
+            <!-- Dark overlay for readability -->
+            <div class="npc-talk-overlay"></div>
+
+            <!-- Back button -->
+            <button id="npc-talk-close" class="npc-talk-back-btn">
+                <i class="fa-solid fa-arrow-left"></i> Geri Dön
+            </button>
+
+            <!-- Stage indicator -->
+            <div id="npc-talk-stage" class="npc-talk-stage-indicator">Kademe 1/5</div>
+
+            <!-- Chat area (left side) -->
+            <div id="npc-talk-chat" class="npc-talk-chat-area">
+                <!-- Messages will be dynamically added -->
+            </div>
+
+            <!-- Bottom: 4 question buttons -->
+            <div class="npc-talk-buttons-area">
+                <div id="npc-talk-buttons" class="npc-talk-buttons-grid">
+                    <!-- 4 buttons dynamically loaded -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. INVENTORY (BAG) MODAL -->
     <div id="bag-modal" class="modal-backdrop hidden">
         <div class="bag-card">
             <button id="close-bag-btn" class="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
@@ -91,59 +165,58 @@
         </div>
     </div>
 
-    <!-- OBJECT DESCRIPTION MODAL (Mini Yazı) -->
-    <div id="object-desc-modal" class="modal-backdrop hidden" style="background: rgba(0,0,0,0.4); z-index: 2000;">
-        <div class="clue-decide-card" style="max-width: 400px; text-align:center;">
-            <div class="clue-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
-            <h3 id="obj-title" style="color:var(--text-bright); margin-bottom:10px;">Nesne Adı</h3>
-            <p id="obj-desc" style="color:var(--text-muted); font-size:1.1rem;">Nesne Açıklaması...</p>
-            <button id="obj-close-btn" class="btn btn-primary" style="margin-top:20px; width:100%;">Tamam (Çantaya
-                Eklendi)</button>
+    <!-- 8. FOUND / ACCUSATION SCREEN -->
+    <div id="found-modal" class="modal-backdrop hidden">
+        <div class="found-container">
+            <div class="found-header">
+                <h2><i class="fa-solid fa-gavel"></i> SUÇLUYU BELİRLE</h2>
+                <button id="found-close-btn" class="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="found-npc-cards" class="found-npc-grid">
+                <!-- NPC cards dynamically rendered -->
+            </div>
         </div>
     </div>
 
-    <!-- INTERROGATION MODAL -->
-    <div id="interrogation-modal" class="modal-backdrop hidden">
-        <div class="interrogation-container">
-            <div class="interrogation-header">
-                <div class="npc-mini-profile">
-                    <h2 id="int-npc-name">NPC İsim</h2>
-                </div>
-                <button id="close-int-btn" class="close-modal-btn"><i class="fa-solid fa-xmark"></i> Geri Dön</button>
+    <!-- 9. NPC CONVERSATION HISTORY MODAL -->
+    <div id="npc-history-modal" class="modal-backdrop hidden">
+        <div class="npc-history-card">
+            <button id="npc-history-close" class="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+            <h2 id="npc-history-title"><i class="fa-solid fa-comments"></i> Konuşma Geçmişi</h2>
+            <div id="npc-history-content" class="npc-history-content">
+                <!-- History messages -->
             </div>
+        </div>
+    </div>
 
-            <div class="interrogation-focus-area">
-                <div class="chat-console" style="flex:2;">
-                    <div class="chat-history" id="chat-history-box"></div>
-                </div>
+    <!-- 10. JAIL ANIMATION OVERLAY -->
+    <div id="jail-overlay" class="jail-overlay hidden">
+        <div class="jail-bars"></div>
+        <img id="jail-npc-img" class="jail-npc-img" src="" alt="">
+        <div id="jail-npc-name" class="jail-npc-name"></div>
+    </div>
 
-                <div class="avatar-side npc-side" style="flex:1;">
-                    <div class="npc-live-stats">
-                        <div class="stat-group">
-                            <label>🤝 Güven Seviyesi</label>
-                            <div class="progress-bar-container">
-                                <div id="int-trust-bar" class="progress-bar trust-bar" style="width: 50%;"></div>
-                            </div>
-                            <span id="int-trust-text" class="stat-val">50%</span>
-                        </div>
-                        <div class="stat-group">
-                            <label>😰 Korku Seviyesi</label>
-                            <div class="progress-bar-container">
-                                <div id="int-fear-bar" class="progress-bar fear-bar" style="width: 30%;"></div>
-                            </div>
-                            <span id="int-fear-text" class="stat-val">30%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- 11. GAME RESULT MODAL -->
+    <div id="result-modal" class="modal-backdrop hidden">
+        <div class="result-card">
+            <div id="result-icon" class="result-icon"></div>
+            <h2 id="result-title"></h2>
+            <p id="result-message" class="result-message"></p>
+            <button id="result-retry-btn" class="btn btn-primary btn-full hidden" style="margin-top:20px;">
+                <i class="fa-solid fa-rotate-right"></i> Tekrar Oyna
+            </button>
+        </div>
+    </div>
 
-            <div class="interrogation-footer">
-                <div class="dialog-options-wrapper" style="width:100%;">
-                    <span class="evidence-title"><i class="fa-solid fa-comments"></i> Sorular:</span>
-                    <div class="dialog-options-container" id="dialog-options-container">
-                        <!-- Dialog buttons dynamically loaded -->
-                    </div>
-                </div>
+    <!-- 12. BUILDING EXIT WARNING MODAL -->
+    <div id="exit-warning-modal" class="modal-backdrop hidden" style="z-index: 3000;">
+        <div class="exit-warning-card">
+            <div class="exit-warning-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h3>Binadan Ayrılmak İstediğinize Emin Misiniz?</h3>
+            <p>Bu binaya tekrar giremezsiniz! Tüm ipuçlarını topladığınızdan ve NPC ile konuştuğunuzdan emin olun.</p>
+            <div class="exit-warning-actions">
+                <button id="exit-confirm-btn" class="btn btn-danger"><i class="fa-solid fa-door-open"></i> Evet, Ayrıl</button>
+                <button id="exit-cancel-btn" class="btn btn-primary"><i class="fa-solid fa-arrow-left"></i> Hayır, Kal</button>
             </div>
         </div>
     </div>
