@@ -76,6 +76,24 @@ public class DatabaseRepository
     }
 
     /// <summary>
+    /// Sadece oyuncunun çantasına sakladığı ipuçlarını getirir.
+    /// </summary>
+    public async Task<IEnumerable<Clue>> GetCluesInBagAsync()
+    {
+        using var db = CreateConnection();
+        return await db.QueryAsync<Clue>("SELECT * FROM Clues WHERE Status = 'KeptInBag' ORDER BY ClueId");
+    }
+
+    /// <summary>
+    /// İpucunun durumunu günceller ("KeptInBag" veya "IgnoredAtScene").
+    /// </summary>
+    public async Task UpdateClueStatusAsync(int clueId, string status)
+    {
+        using var db = CreateConnection();
+        await db.ExecuteAsync("UPDATE Clues SET Status = @Status WHERE ClueId = @ClueId", new { ClueId = clueId, Status = status });
+    }
+
+    /// <summary>
     /// Belirli bir NPC'ye bağlı ipuçlarını getirir.
     /// </summary>
     public async Task<IEnumerable<Clue>> GetCluesByNPCIdAsync(int npcId)

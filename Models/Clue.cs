@@ -10,4 +10,6 @@ public class Clue
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int? RelatedNPCId { get; set; }
+    public string Status { get; set; } = "Pending"; // "Pending", "KeptInBag", "IgnoredAtScene"
+    public string Location { get; set; } = "Olay Yeri";
 }

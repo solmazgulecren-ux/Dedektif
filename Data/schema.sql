@@ -33,6 +33,8 @@ CREATE TABLE dbo.Clues (
     Title           NVARCHAR(200)   NOT NULL,
     Description     NVARCHAR(1000)  NOT NULL,
     RelatedNPCId    INT             NULL,
+    Status          NVARCHAR(50)    NOT NULL DEFAULT 'Pending',     -- 'Pending', 'KeptInBag', 'IgnoredAtScene'
+    Location        NVARCHAR(200)   NOT NULL DEFAULT N'Olay Yeri',
     CONSTRAINT FK_Clues_NPCs FOREIGN KEY (RelatedNPCId)
         REFERENCES dbo.NPCs(NPCId)
         ON DELETE SET NULL
