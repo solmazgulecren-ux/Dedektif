@@ -1507,15 +1507,149 @@ body {
     color: var(--accent);
     margin-bottom: 15px;
 }
-. a u t o p s y - t i m e r - c o n t a i n e r   {   p o s i t i o n :   a b s o l u t e ;   t o p :   1 2 0 p x ;   r i g h t :   2 0 p x ;   b a c k g r o u n d :   r g b a ( 5 ,   6 ,   8 ,   0 . 8 5 ) ;   c o l o r :   # f f f ;   p a d d i n g :   1 5 p x   2 0 p x ;   b o r d e r :   1 p x   s o l i d   # 4 5 f 3 f f ;   b o x - s h a d o w :   0   0   1 5 p x   r g b a ( 6 9 ,   2 4 3 ,   2 5 5 ,   0 . 3 ) ;   b o r d e r - r a d i u s :   8 p x ;   f o n t - s i z e :   1 . 1 r e m ;   z - i n d e x :   1 0 0 ;   t r a n s i t i o n :   a l l   0 . 3 s ;   } 
- . a u t o p s y - t i m e r - c o n t a i n e r . r e a d y   {   b a c k g r o u n d :   r g b a ( 1 6 8 ,   2 0 ,   2 0 ,   0 . 9 ) ;   b o r d e r - c o l o r :   # f f 3 3 3 3 ;   b o x - s h a d o w :   0   0   2 0 p x   r g b a ( 2 5 5 ,   5 1 ,   5 1 ,   0 . 6 ) ;   a n i m a t i o n :   p u l s e A l e r t   1 . 5 s   i n f i n i t e ;   c u r s o r :   p o i n t e r ;   } 
- . a u t o p s y - t i m e r - c o n t a i n e r . r e a d y : h o v e r   {   t r a n s f o r m :   s c a l e ( 1 . 0 5 ) ;   } 
- @ k e y f r a m e s   p u l s e A l e r t   {   0 %   {   b o x - s h a d o w :   0   0   1 0 p x   r g b a ( 2 5 5 , 5 1 , 5 1 , 0 . 4 ) ;   }   5 0 %   {   b o x - s h a d o w :   0   0   3 0 p x   r g b a ( 2 5 5 , 5 1 , 5 1 , 0 . 8 ) ;   }   1 0 0 %   {   b o x - s h a d o w :   0   0   1 0 p x   r g b a ( 2 5 5 , 5 1 , 5 1 , 0 . 4 ) ;   }   } 
- . a u t o p s y - c o n t e n t   {   b a c k g r o u n d :   # f d f 5 e 6 ;   w i d t h :   6 0 0 p x ;   m a x - w i d t h :   9 5 % ;   m a x - h e i g h t :   8 0 v h ;   m a r g i n :   5 v h   a u t o ;   p a d d i n g :   4 0 p x ;   b o r d e r - r a d i u s :   5 p x ;   b o x - s h a d o w :   0   0   4 0 p x   r g b a ( 0 , 0 , 0 , 0 . 8 ) ;   p o s i t i o n :   r e l a t i v e ;   c o l o r :   # 1 1 1 ;   o v e r f l o w - y :   a u t o ;   f o n t - f a m i l y :   ' C o u r i e r   N e w ' ,   C o u r i e r ,   m o n o s p a c e ;   } 
- . a u t o p s y - h e a d e r   {   d i s p l a y :   f l e x ;   j u s t i f y - c o n t e n t :   s p a c e - b e t w e e n ;   a l i g n - i t e m s :   c e n t e r ;   b o r d e r - b o t t o m :   2 p x   s o l i d   # 3 3 3 ;   p a d d i n g - b o t t o m :   2 0 p x ;   m a r g i n - b o t t o m :   3 0 p x ;   } 
- . a u t o p s y - h e a d e r   h 2   {   f o n t - s i z e :   1 . 8 r e m ;   f o n t - w e i g h t :   b o l d ;   m a r g i n :   0 ;   c o l o r :   # b 1 1 ;   t e x t - t r a n s f o r m :   u p p e r c a s e ;   l e t t e r - s p a c i n g :   2 p x ;   } 
- . a u t o p s y - h e a d e r   . c l o s e - b t n   {   c o l o r :   # 3 3 3 ;   f o n t - s i z e :   2 r e m ;   b a c k g r o u n d :   n o n e ;   b o r d e r :   n o n e ;   c u r s o r :   p o i n t e r ;   } 
- . a u t o p s y - h e a d e r   . c l o s e - b t n : h o v e r   {   c o l o r :   # b 1 1 ;   } 
- . a u t o p s y - b o d y   {   p o s i t i o n :   r e l a t i v e ;   f o n t - s i z e :   1 . 2 r e m ;   l i n e - h e i g h t :   1 . 8 ;   w h i t e - s p a c e :   p r e - w r a p ;   } 
- . a u t o p s y - s t a m p   {   p o s i t i o n :   a b s o l u t e ;   t o p :   1 0 p x ;   r i g h t :   2 0 p x ;   c o l o r :   r g b a ( 1 8 0 ,   2 0 ,   2 0 ,   0 . 3 ) ;   f o n t - s i z e :   4 r e m ;   f o n t - w e i g h t :   b o l d ;   t r a n s f o r m :   r o t a t e ( - 1 5 d e g ) ;   p o i n t e r - e v e n t s :   n o n e ;   b o r d e r :   5 p x   s o l i d   r g b a ( 1 8 0 ,   2 0 ,   2 0 ,   0 . 3 ) ;   p a d d i n g :   5 p x   1 5 p x ;   b o r d e r - r a d i u s :   1 0 p x ;   }  
- 
+
+/* ========================================================= */
+/* OTOPSİ ZAMANLAYICISI VE MODALI                            */
+/* ========================================================= */
+
+.autopsy-timer-container {
+    position: absolute;
+    top: 130px;
+    right: 25px;
+    background: rgba(11, 12, 16, 0.95);
+    color: var(--text-primary);
+    padding: 15px 25px;
+    border: 1px solid var(--accent);
+    border-left: 5px solid var(--accent);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8), 0 0 10px rgba(69, 243, 255, 0.2);
+    border-radius: 4px;
+    font-size: 1.2rem;
+    font-family: var(--font-heading);
+    z-index: 100;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    backdrop-filter: blur(10px);
+    pointer-events: none; /* Sayım sırasında tıklanmasın */
+}
+
+.autopsy-timer-container i {
+    font-size: 1.8rem;
+    color: var(--accent);
+    animation: tickTock 2s infinite ease-in-out;
+}
+
+@keyframes tickTock {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+}
+
+.autopsy-timer-container.ready {
+    background: rgba(139, 0, 0, 0.95);
+    border-color: var(--danger);
+    border-left-color: var(--danger);
+    color: var(--text-bright);
+    box-shadow: 0 0 30px rgba(207, 34, 46, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.2);
+    animation: pulseAlert 1.2s infinite alternate;
+    cursor: pointer;
+    pointer-events: auto; /* Geldiğinde tıklanabilsin */
+}
+
+.autopsy-timer-container.ready i {
+    color: var(--text-bright);
+    animation: none;
+}
+
+.autopsy-timer-container.ready:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 5px 35px rgba(207, 34, 46, 0.9);
+}
+
+@keyframes pulseAlert {
+    0% { box-shadow: 0 0 15px rgba(207, 34, 46, 0.5); }
+    100% { box-shadow: 0 0 40px rgba(207, 34, 46, 1); }
+}
+
+.autopsy-content {
+    background: #e8e3d3; /* Old paper look */
+    background-image: repeating-linear-gradient(#e8e3d3 0, #e8e3d3 24px, #d5c8a8 25px);
+    width: 650px;
+    max-width: 95%;
+    max-height: 85vh;
+    margin: 5vh auto;
+    padding: 50px;
+    border-radius: 2px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.9), inset 0 0 50px rgba(100,80,50,0.2);
+    position: relative;
+    color: #1a1a1a;
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.autopsy-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px double #111;
+    padding-bottom: 25px;
+    margin-bottom: 35px;
+}
+
+.autopsy-header h2 {
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin: 0;
+    color: #111;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.autopsy-header h2 i {
+    color: #800;
+}
+
+.autopsy-header .close-btn {
+    color: #111;
+    font-size: 2.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, color 0.2s;
+}
+
+.autopsy-header .close-btn:hover {
+    color: #900;
+    transform: rotate(90deg);
+}
+
+.autopsy-body {
+    position: relative;
+    font-size: 1.3rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    font-weight: bold;
+}
+
+.autopsy-stamp {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: rgba(200, 20, 20, 0.4);
+    font-size: 5rem;
+    font-weight: 900;
+    transform: rotate(-12deg);
+    pointer-events: none;
+    border: 8px solid rgba(200, 20, 20, 0.4);
+    padding: 10px 25px;
+    border-radius: 5px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    font-family: Impact, sans-serif;
+}

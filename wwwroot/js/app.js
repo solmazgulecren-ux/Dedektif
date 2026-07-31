@@ -260,11 +260,11 @@ function toggleMute() {
 
 // YENİ OTOPSİ ZAMANLAYICISI SİSTEMİ
 let autopsyTimer = null;
-let autopsyTimeLeft = 60; // 60 saniye süre verildi
+let autopsyTimeLeft = 240; // 4 dakika süre verildi (240 saniye)
 let isAutopsyReady = false;
 
 function startAutopsyTimer() {
-    autopsyTimeLeft = 60;
+    autopsyTimeLeft = 240;
     isAutopsyReady = false;
     const container = document.getElementById('autopsy-timer-container');
     const timerSpan = document.getElementById('autopsy-timer');
