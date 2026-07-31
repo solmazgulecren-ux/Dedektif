@@ -289,11 +289,19 @@ function startAutopsyTimer() {
             container.classList.add('ready');
             container.innerHTML = '<i class="fa-solid fa-file-signature"></i> Otopsi Raporu Geldi! (Tıkla)';
             
-            // Mesaj Bildirimi
-            alert("Yeni Bilgi: Adli Tıp Merkezi'nden Otopsi Raporu geldi! Harita ekranındaki rapora tıklayarak inceleyebilirsiniz.");
+            // Mesaj Bildirimi (Custom Modal)
+            const notifModal = document.getElementById('global-notification-modal');
+            if (notifModal) {
+                notifModal.classList.remove('hidden');
+            }
         }
     }, 1000);
 }
+
+// Global notification modal close event
+document.getElementById('notification-ok-btn')?.addEventListener('click', () => {
+    document.getElementById('global-notification-modal').classList.add('hidden');
+});
 
 // Otopsi Tıklama Olayı
 document.getElementById('autopsy-timer-container').addEventListener('click', () => {
