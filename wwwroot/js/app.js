@@ -908,7 +908,7 @@ window.accuseNpc = function(accusedId) {
     fetch('/api/game/accuse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ NpcId: npcId })
+        body: JSON.stringify({ NpcId: accusedId }) // HATA BURADAYDI, npcId değil accusedId
     })
     .then(res => res.json())
     .then(data => {
@@ -920,20 +920,24 @@ window.accuseNpc = function(accusedId) {
             const resultMessage = document.getElementById('result-message');
             const retryBtn = document.getElementById('result-retry-btn');
             
+            // Gerçek hikaye kurgusu
+            const realKiller = NPC_DATA[guiltyNpcId];
+            const storyText = `<br><br><strong>O Gecenin Aslı:</strong> ${realKiller.secret}`;
+            
             if (data.success) {
                 resultIcon.className = 'result-icon success';
                 resultIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
                 resultTitle.textContent = 'TEBRİKLER! KAZANDINIZ!';
                 resultTitle.style.color = 'var(--success)';
-                resultMessage.textContent = data.message + ' Gizli Bilgi: ' + (data.secret || npc.secret);
-                retryBtn.innerHTML = '<i class="fa-solid fa-house"></i> Ana Men\u00FCye D\u00F6n';
+                resultMessage.innerHTML = `${data.message} <br> Gerçekten de katil ${npc.name} idi. ${storyText}`;
+                retryBtn.innerHTML = '<i class="fa-solid fa-house"></i> Ana Menüye Dön';
                 retryBtn.classList.remove('hidden');
             } else {
                 resultIcon.className = 'result-icon fail';
                 resultIcon.innerHTML = '<i class="fa-solid fa-skull-crossbones"></i>';
                 resultTitle.textContent = 'KAYBETTİNİZ!';
                 resultTitle.style.color = 'var(--danger)';
-                resultMessage.textContent = data.message;
+                resultMessage.innerHTML = `${data.message} <br> Yanlış kişiyi hapse attınız! Gerçek katil <strong>${realKiller.name}</strong> idi. ${storyText}`;
                 retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Tekrar Oyna';
                 retryBtn.classList.remove('hidden');
             }
