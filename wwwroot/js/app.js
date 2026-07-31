@@ -41,11 +41,11 @@ let askedQuestionCount = {}; // { npcId: count }
 
 // === GAME DATA ===
 const NPC_DATA = {
-    1: { id: 1, name: 'Kasap Hasan', building: 'Kasap', role: 'Kasabadaki eski kasap', img: 'images/hasan.png', bg: 'images/butcher_interior.png', secret: 'Cinayet gecesi d\u00FCkk\u00E2n\u0131nda gizlice muhtara et satt\u0131.' },
-    2: { id: 2, name: 'Eczac\u0131 Selma', building: 'Eczane', role: 'Eczane sahibi', img: 'images/selma.png', bg: 'images/apothecary_interior.png', secret: 'Kurban\u0131n zehirlendi\u011Fini biliyordu ama gizledi.' },
-    3: { id: 3, name: 'Muhtar Kemal', building: 'Muhtar\u0131l\u0131k', role: 'Kasaban\u0131n muhtar\u0131', img: 'images/kemal.png', bg: 'images/town_hall_interior.png', secret: 'Kurbanla arazi anla\u015Fmazl\u0131\u011F\u0131 vard\u0131.' },
-    4: { id: 4, name: 'Komiser G\u00FCne\u015F', building: 'Karakol', role: 'Kad\u0131n polis komiseri', img: 'images/gunes.png', bg: 'images/police_interior.png', secret: 'Olay yerindeki delilleri saklad\u0131.' },
-    5: { id: 5, name: 'Terzi Yahya', building: 'Terzi', role: 'Kasaban\u0131n terzisi', img: 'images/yahya.png', bg: 'images/tailor_interior.png', secret: 'Kurbana gizli cepli ceket dikti, son g\u00F6ren ki\u015Fi.' }
+    1: { id: 1, name: 'Kasap Hasan', building: 'Kasap', role: 'Kasabadaki eski kasap', img: 'images/hasan.png', bg: 'images/butcher_interior.png', secret: 'Cinayet gecesi dükkânında gizlice muhtara et sattı.' },
+    2: { id: 2, name: 'Eczacı Selma', building: 'Eczane', role: 'Eczane sahibi', img: 'images/selma.png', bg: 'images/apothecary_interior.png', secret: 'Kurbanın zehirlendiğini biliyordu ama gizledi.' },
+    3: { id: 3, name: 'Muhtar Kemal', building: 'Muhtarlık', role: 'Kasabanın muhtarı', img: 'images/kemal.png', bg: 'images/town_hall_interior.png', secret: 'Kurbanla arazi anlaşmazlığı vardı.' },
+    4: { id: 4, name: 'Komiser Güneş', building: 'Karakol', role: 'Kadın polis komiseri', img: 'images/gunes.png', bg: 'images/police_interior.png', secret: 'Olay yerindeki delilleri sakladı.' },
+    5: { id: 5, name: 'Terzi Yahya', building: 'Terzi', role: 'Kasabanın terzisi', img: 'images/yahya.png', bg: 'images/tailor_interior.png', secret: 'Kurbana gizli cepli ceket dikti, son gören kişi.' }
 };
 
 const SCENE_OBJECTS = {
@@ -505,34 +505,46 @@ function openNpcTalk(npcId) {
     // Kalan soru sayısını güncelle
     updateQuestionIndicator(npcId);
     
-    // Rastgele 4 soru seç ve butonlara yükle
-    loadRandomQuestions(npcId);
+    // Sıradaki mantıksal soruları yükle
+    loadContextualQuestions(npcId);
     
     npcTalkModal.classList.remove('hidden');
 }
 
 function updateQuestionIndicator(npcId) {
-    const remaining = npcQuestionPools[npcId] ? npcQuestionPools[npcId].length : 0;
     const asked = askedQuestionCount[npcId] || 0;
-    document.getElementById('npc-talk-stage').textContent = `Soru ${asked}/${asked + remaining}`;
+    const remainingLimit = 5 - asked;
+    document.getElementById('npc-talk-stage').textContent = `Kalan Soru Hakkı: ${remainingLimit}/5`;
 }
 
-function loadRandomQuestions(npcId) {
+function loadContextualQuestions(npcId) {
     const container = document.getElementById('npc-talk-buttons');
     container.innerHTML = '';
     
     const pool = npcQuestionPools[npcId];
-    if (!pool || pool.length === 0) {
-        // Konuşma bitti
-        container.innerHTML = '<div class="npc-talk-end-msg"><i class="fa-solid fa-check-circle"></i> Sorgu tamamlandı. Geri dönebilirsiniz.</div>';
+    const askedCount = askedQuestionCount[npcId] || 0;
+    
+    // 5 SORU LİMİTİ KONTROLÜ
+    if (askedCount >= 5 || !pool || pool.length === 0) {
+        // Konuşma bitti (5 soru limitine ulaşıldı veya soru bitti)
+        container.innerHTML = '<div class="npc-talk-end-msg"><i class="fa-solid fa-check-circle"></i> Sorgu tamamlandı. NPC artık konuşmak istemiyor. Geri dönebilirsiniz.</div>';
         npcTalkCompleted[npcId] = true;
         return;
     }
     
-    // Havuzdan rastgele 4 soru seç (veya kalan kadar)
-    const count = Math.min(4, pool.length);
+    // MANTIKSAL AKIŞ KATEGORİSİNİ BELİRLE
+    const categories = ['tanisma', 'derinlesme', 'yuzlestirme', 'baski', 'son'];
+    const currentCategory = categories[askedCount] || 'son';
+    
+    // O kategoriye ait soruları filtrele
+    const contextualPool = pool.filter(q => q.category === currentCategory);
+    
+    // Eğer o kategoride soru kalmadıysa fallback olarak havuzdan herhangi 4 soru al
+    const questionsToShow = contextualPool.length > 0 ? contextualPool : pool;
+    
+    const count = Math.min(4, questionsToShow.length);
     const selected = [];
-    const tempPool = [...pool];
+    const tempPool = [...questionsToShow];
     
     for (let i = 0; i < count; i++) {
         const randIdx = Math.floor(Math.random() * tempPool.length);
@@ -607,7 +619,7 @@ function handleRandomTalkChoice(npcId, question) {
         updateQuestionIndicator(npcId);
         
         setTimeout(() => {
-            loadRandomQuestions(npcId);
+            loadContextualQuestions(npcId);
         }, 500);
         
     }, 800);
@@ -619,18 +631,137 @@ document.getElementById('npc-talk-close').addEventListener('click', () => {
 });
 
 // =============================================================
-// 6. BAG (ÇANTA)
+// 6. BAG (ÇANTA) VE DETAYLI İNCELEME
 // =============================================================
+
+const detailedClueModal = document.getElementById('detailed-clue-modal');
+
+function getClueDetailedText(clueId) {
+    // Suçlu NPC'ye göre dinamik ipucu metinleri (Kurbanı içerecek şekilde)
+    // 1: Kasap, 2: Eczacı, 3: Muhtar, 4: Komiser, 5: Terzi
+    let text = "Bu nesne karanlık sırlar barındırıyor...";
+    const isGuilty = (npcId) => guiltyNpcId === npcId;
+
+    switch(clueId) {
+        case 1: // Kanlı Satır
+            text = "Üzerindeki kan lekeleri Osman Bey'e ait gibi görünüyor. " + 
+                   (isGuilty(1) ? "Sapındaki el izi net bir şekilde Kasap Hasan'ı işaret ediyor." : "Ancak satırın sapında kasaba ait olmayan, eldivenle tutulmuş gibi garip izler var.");
+            break;
+        case 2: // Kara Kaplı Defter
+            text = "Sayfalarda Osman Bey'in adı kırmızıyla çizilmiş. Yanında bir not: " +
+                   (isGuilty(1) ? "'Borcunu ödemedi, cezasını çekecek.'" : "'Bu borç sadece başlangıç.'");
+            break;
+        case 3: // Yırtık Önlük
+            text = "Kavga izleri taşıyan önlük... Osman Bey'in ceketinin düğmesi önlüğün cebinde bulunuyor. " +
+                   (isGuilty(1) ? "Hasan o gece kurbanla boğuşmuş olmalı." : "");
+            break;
+        case 4: // Boş İlaç Şişesi
+            text = "Zehirli bir ilacın boş şişesi. Reçetede Osman Bey'in adı var. " +
+                   (isGuilty(2) ? "Etiketin arkasında Selma'nın el yazısıyla 'Son Doz' yazıyor." : "Şişe aceleyle alınmış gibi, kapağı zorlanmış.");
+            break;
+        case 5: // Reçete Defteri
+            text = "Osman Bey'e verilen ilaçların listesi. Son sayfa yırtık. " +
+                   (isGuilty(2) ? "Yırtık sayfanın izinde 'Zehir' kelimesi okunabiliyor." : "Birisi kanıtları yok etmek için defteri zorla yırtmış.");
+            break;
+        case 6: // Zehirli Sarmaşık
+            text = "Bu bitkinin özü, Osman Bey'in kanında bulunan zehirle aynı. " +
+                   (isGuilty(2) ? "Selma bunu kasten hazırlamış." : "Birisi Selma'nın dükkanından bu otu gizlice almış olabilir.");
+            break;
+        case 7: // Tehdit Mektubu
+            text = "Mektupta 'Osman, o araziler benim, sonun yaklaşıyor' yazıyor. " +
+                   (isGuilty(3) ? "Muhtar Kemal açıkça kurbanı tehdit etmiş ve bunu gerçekleştirmiş." : "Ancak mektup asla postalanmamış, sadece bir sinir anında yazılmış.");
+            break;
+        case 8: // Kırık Gözlük
+            text = "Osman Bey'in kırık gözlüğü... " +
+                   (isGuilty(3) ? "Muhtarın odasında şiddetli bir kavga yaşanmış." : "Gözlük bir başka yerde kırılıp buraya bırakılmış olabilir.");
+            break;
+        case 9: // Gizli Kasa
+            text = "Kasada Osman Bey'in arazilerine ait sahte tapular var. " +
+                   (isGuilty(3) ? "Kemal her şeyi planlamış, cinayet sebebi bu tapular." : "Bu tapular sadece muhtarın açgözlülüğünü gösteriyor, cinayeti değil.");
+            break;
+        case 10: // Polis Rozeti
+            text = "Rozetin numarası kazınmış. Osman Bey'in cesedinin hemen yanında bulundu. " +
+                   (isGuilty(4) ? "Güneş, kurbanla olay yerinde boğuşurken rozetini düşürmüş." : "Rozet oraya özellikle bir polisi suçlamak için bırakılmış.");
+            break;
+        case 11: // Gizli Dosya
+            text = "Dosyada Osman Bey'in gizli geçmişi var. " +
+                   (isGuilty(4) ? "Komiser Güneş, bu geçmişi kullanarak kurbanı şantaj yapıyordu." : "Dosya sadece prosedür gereği tutulmuş.");
+            break;
+        case 12: // Kayıp Düğme
+            text = "Pahalı bir palto düğmesi. Osman Bey'in cebinden çıktı. " +
+                   (isGuilty(4) ? "Güneş'in paltosundan kopmuş, arbede sırasında Osman Bey onu tutmuş." : "Bu düğme terzinin bir müşterisine de ait olabilir.");
+            break;
+        case 13: // Kanlı İplik Makarası
+            text = "İplik, Osman Bey'in ceketinin dikişleriyle aynı. Üzerindeki kan... " +
+                   (isGuilty(5) ? "Kurbanın kanı. Yahya kurbanı öldürürken makara elindeydi." : "Terzinin dikiş yaparken kendi elini kestiği bir kaza olabilir.");
+            break;
+        case 14: // Yırtık Kumaş
+            text = "Osman Bey'in ceketinden kopan kumaş. " +
+                   (isGuilty(5) ? "Yahya kurbanla boğuşurken kumaş yırtıldı." : "Kumaş sadece bir terzi artığı olabilir.");
+            break;
+        case 15: // Gizli Cep
+            text = "Cepteki notta 'Osman, bu gece gel konuşalım' yazıyor. " +
+                   (isGuilty(5) ? "Yahya onu çağırdı ve tuzağa düşürdü." : "Yahya çağırdı ama gittiğinde onu ölü buldu.");
+            break;
+        default:
+            text = "Bu delil Osman Bey'in son anlarına dair karanlık sırlar taşıyor.";
+    }
+    return text;
+}
+
+function inspectClue(clueId) {
+    const clue = currentBag.find(c => c.id === clueId);
+    if (!clue) return;
+    
+    // İşaretle: İncelendi
+    clue.inspected = true;
+    
+    // Arayüzü güncelle (Çıkar butonunu disable yap)
+    openBag(); 
+    
+    // Detaylı ekranı aç
+    document.getElementById('detailed-clue-title').textContent = clue.name;
+    document.getElementById('detailed-clue-img').src = clue.img;
+    document.getElementById('detailed-clue-text').innerHTML = getClueDetailedText(clue.id);
+    
+    detailedClueModal.classList.remove('hidden');
+}
+
+function removeClue(clueId) {
+    const idx = currentBag.findIndex(c => c.id === clueId);
+    if (idx > -1) {
+        if (currentBag[idx].inspected) {
+            alert("İncelenen deliller çantadan çıkarılamaz!");
+            return;
+        }
+        currentBag.splice(idx, 1);
+        openBag();
+    }
+}
+
+document.getElementById('close-detailed-clue-btn')?.addEventListener('click', () => {
+    detailedClueModal.classList.add('hidden');
+});
 
 function openBag() {
     const bagList = document.getElementById('bag-items-list');
     if (currentBag.length === 0) {
-        bagList.innerHTML = '<p style="color: var(--text-muted); text-align:center; padding:30px;">\u00C7anta bo\u015F. Binalardaki ipu\u00E7lar\u0131n\u0131 toplay\u0131n.</p>';
+        bagList.innerHTML = '<p style="color: var(--text-muted); text-align:center; padding:30px;">Çanta boş. Binalardaki ipuçlarını toplayın.</p>';
     } else {
         bagList.innerHTML = currentBag.map(b => `
             <div class="bag-item">
-                <img src="${b.img}" alt="${b.name}">
-                <span>${b.name}</span>
+                <div class="bag-item-left">
+                    <img src="${b.img}" alt="${b.name}">
+                    <span>${b.name}</span>
+                </div>
+                <div class="bag-item-actions">
+                    <button class="btn btn-primary" onclick="inspectClue(${b.id})">
+                        <i class="fa-solid fa-magnifying-glass"></i> İncele
+                    </button>
+                    <button class="btn btn-danger" onclick="removeClue(${b.id})" ${b.inspected ? 'disabled style="opacity:0.5;" title="İncelendi, çıkarılamaz"' : ''}>
+                        <i class="fa-solid fa-trash"></i> ${b.inspected ? 'Çıkarılamaz' : 'Çıkar'}
+                    </button>
+                </div>
             </div>
         `).join('');
     }
@@ -730,16 +861,25 @@ document.getElementById('npc-history-close').addEventListener('click', () => {
 });
 
 // === ACCUSE NPC (BACKEND CHECK) — YENİ HAPİS ANİMASYONU ===
-window.accuseNpc = function(npcId) {
-    const npc = NPC_DATA[npcId];
+window.accuseNpc = function(accusedId) {
+    const npc = NPC_DATA[accusedId];
     foundModal.classList.add('hidden');
+    
+    // YENİ HAPİS GÖRSELLERİNİ KULLAN
+    const jailImages = {
+        1: 'images/jail_hasan.png',
+        2: 'images/jail_selma.png',
+        3: 'images/jail_kemal.png',
+        4: 'images/jail_gunes.png',
+        5: 'images/jail_yahya.png'
+    };
     
     // Yeni hapis animasyonu — NPC tam boy parmaklıkların arkasında
     const jailNpcFull = document.getElementById('jail-npc-full');
     const jailNpcName = document.getElementById('jail-npc-name');
     const jailArrestedText = document.getElementById('jail-arrested-text');
     
-    if (jailNpcFull) jailNpcFull.src = npc.img;
+    if (jailNpcFull) jailNpcFull.src = jailImages[npc.id] || npc.img;
     if (jailNpcName) jailNpcName.textContent = npc.name;
     
     // Animasyonu sıfırla
