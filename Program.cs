@@ -200,29 +200,29 @@ class Program
                 switch (guiltyNpc.NPCId)
                 {
                     case 1: // Kasap
-                        report += "- Boyun bölgesinde derin ve tırtıklı bir kesici alet (satır) yarası tespit edilmiştir.\n";
-                        report += "- Yara açısı, failin güçlü ve kurbanın tanıdığı biri olduğunu gösteriyor.\n";
-                        report += "- Kurbanın tırnak aralarında siyah deri önlük parçaları bulundu.";
+                        report += "- Boyun bölgesinde ağır ve nispeten kör bir kesici aletle oluşturulmuş geniş ve derin bir yara mevcuttur.\n";
+                        report += "- Yaranın yapısı, darbenin oldukça yüksek bir kuvvetle indirildiğini göstermektedir.\n";
+                        report += "- Kurbanın sağ el tırnak altı dokularında, mücadele esnasında koptuğu anlaşılan kalın, koyu renkli ve muhtemelen deri veya benzeri dayanıklı bir kumaş türüne ait mikroskobik lifler ve parçacıklar izole edilmiştir.";
                         break;
                     case 2: // Eczacı
-                        report += "- Fiziksel travma veya darbe izine rastlanmamıştır.\n";
-                        report += "- Toksikoloji raporunda yüksek dozda nadir bir zehirli bitki (Sarmaşık) özü bulunmuştur.\n";
-                        report += "- Zehir, kurbanın normalde kullandığı kalp ilacına profesyonelce karıştırılmıştır.";
+                        report += "- Kurbanın vücudunda boğuşmaya veya herhangi bir fiziksel travmaya bağlı harici bir ize rastlanmamıştır.\n";
+                        report += "- Kan örneği üzerinde yapılan detaylı toksikolojik tarama sonucunda, kardiyovasküler sistemi doğrudan hedef alan nadir bitkisel bir toksin türünün varlığı saptanmıştır.\n";
+                        report += "- Toksinin kurbanın sistemine, muhtemelen düzenli kullandığı farmakolojik bir madde üzerinden alındığı, bu maddenin yavaşça etki gösterecek dozajda hazırlandığı tespit edilmiştir.";
                         break;
                     case 3: // Muhtar
-                        report += "- Ölüm öncesi şiddetli boğuşma izleri ve yüz bölgesinde künt travma mevcuttur.\n";
-                        report += "- Kurbanın cebinde yırtılmış sahte tapu belgelerine ait mürekkep izleri bulundu.\n";
-                        report += "- Ölüm sebebi: Ağır darbe sonucu beyin kanaması.";
+                        report += "- Kurbanın kollarında ve göğsünde belirgin savunma yaraları ve ciddi bir arbedenin izleri mevcuttur.\n";
+                        report += "- Kafatasının sağ paryetal bölgesinde, düz yüzeyli ağır ve sert bir cisimle oluşturulmuş künt travmaya bağlı kırık ve subdural kanama saptanmıştır.\n";
+                        report += "- Kurbanın kıyafetleri üzerinde yapılan kimyasal analizde, yakın zamanda yoğun bir basınca maruz kalmış mürekkep lekeleri ve sert kâğıt kalıntıları gözlemlenmiştir.";
                         break;
                     case 4: // Komiser
-                        report += "- Vücutta savunma yaraları ve standart bir polis copuna ait olabilecek darbe izleri tespit edildi.\n";
-                        report += "- Olay yeri çok profesyonelce temizlenmeye çalışılmış.\n";
-                        report += "- Ölüm sebebi: Yakın mesafeden alınan travmatik darbe ve havasız kalma.";
+                        report += "- Gövde ve kollar üzerinde uzun, silindirik, esnek fakat ağır bir nesnenin tekrar tekrar vurulması sonucu oluşan hematomlar izlenmiştir.\n";
+                        report += "- Kurbanın boyun çevresinde, travmaya ek olarak asfiksiye (havasız kalma) işaret eden kanamalar ve sıkışma bulguları saptanmıştır.\n";
+                        report += "- Cesedin üzerindeki bazı epitel dokuların özel bir solüsyonla silindiği, olay sonrasında delilleri yok etmeye yönelik sistemli bir çaba gösterildiği saptanmıştır.";
                         break;
                     case 5: // Terzi
-                        report += "- Boyun bölgesinde ince bir tel veya çok sağlam bir iplikle boğulma izleri mevcuttur.\n";
-                        report += "- Kurbanın ceketinde sonradan eklenmiş gizli bir cep bulundu.\n";
-                        report += "- Failin, kurbanla yakın mesafede bulunacak kadar ona yaklaşabildiği açıktır.";
+                        report += "- Kurbanın boyun çevresinde çepeçevre uzanan, çok ince, pürüzsüz ancak aşırı yüksek gerilime dayanıklı bir bağ (özel büküm materyal) ile oluşturulmuş ligatür izi (boğulma) görülmektedir.\n";
+                        report += "- Tırnak altlarında savunma izine rastlanmamış olması, eylemin kurbanın arkasından, aniden ve kurbanın failin yaklaşmasına müsaade ettiği bir mesafeden gerçekleştirildiğini göstermektedir.\n";
+                        report += "- Kurbanın dış giysisinde (ceket) sıradışı bir ağırlık dengesizliği ve iç astarına sonradan eklenmiş, oldukça nizami gizli bir bölme tespit edilmiştir.";
                         break;
                     default:
                         report += "- Kesin ölüm sebebi belirlenemedi. Adli tıp incelemesi sürüyor.";

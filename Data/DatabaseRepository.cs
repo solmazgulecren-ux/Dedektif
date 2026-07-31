@@ -146,8 +146,13 @@ public class DatabaseRepository
         if (npcCount >= 5)
             return; // Veri zaten var, seed yapma
 
-        // Tabloları temizle
-        await db.ExecuteAsync("DELETE FROM DialogLogs; DELETE FROM Clues; DELETE FROM NPCs;");
+        // Tabloları temizle ve ID'leri sıfırla
+        await db.ExecuteAsync(@"
+            DELETE FROM DialogLogs; 
+            DELETE FROM Clues; 
+            DELETE FROM NPCs;
+            DBCC CHECKIDENT ('NPCs', RESEED, 0);
+            DBCC CHECKIDENT ('Clues', RESEED, 0);");
 
         // NPC'leri ekle
         await db.ExecuteAsync(@"
