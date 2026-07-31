@@ -177,26 +177,38 @@ class Program
         {
             try
             {
-                // Tabloları temizle, seed et ve suçluyu rastgele seç
-                using var db = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
-                await db.OpenAsync();
-                using var cmd = db.CreateCommand();
-                cmd.CommandText = @"
-                    UPDATE Clues SET Status = 'Pending';
-                    UPDATE NPCs SET TrustLevel = 50, FearLevel = 30;
-                    DELETE FROM DialogLogs;
-                    
-                    -- Suçluyu rastgele seç (Security)
-                    UPDATE NPCs SET IsGuilty = 0;
-                    UPDATE NPCs SET IsGuilty = 1 WHERE Id = (SELECT TOP 1 Id FROM NPCs ORDER BY NEWID());
-                ";
-                await cmd.ExecuteNonQueryAsync();
+                // Rastgele suçlu seç (1-5 arası)
+                var random = new Random();
+                int guiltyId = random.Next(1, 6);
+                
+                try
+                {
+                    // Veritabanı varsa güncelle
+                    using var db = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
+                    await db.OpenAsync();
+                    using var cmd = db.CreateCommand();
+                    cmd.CommandText = @"
+                        IF OBJECT_ID('Clues', 'U') IS NOT NULL UPDATE Clues SET Status = 'Pending';
+                        UPDATE NPCs SET TrustLevel = 50, FearLevel = 30;
+                        DELETE FROM DialogLogs;
+                        UPDATE NPCs SET IsGuilty = 0;
+                        UPDATE NPCs SET IsGuilty = 1 WHERE NPCId = @GuiltyId;
+                    ";
+                    cmd.Parameters.AddWithValue("@GuiltyId", guiltyId);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+                catch
+                {
+                    // DB bağlantısı yoksa sadece client-side suçlu belirle
+                }
 
-                return Results.Ok(new { success = true, message = "Oyun durumu sıfırlandı ve yeni suçlu belirlendi." });
+                return Results.Ok(new { success = true, message = "Oyun durumu sıfırlandı ve yeni suçlu belirlendi.", guiltyNpcId = guiltyId });
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                // Fallback: veritabanı olmasa bile suçlu belirle
+                var fallbackGuilty = new Random().Next(1, 6);
+                return Results.Ok(new { success = true, message = "Oyun sıfırlandı (offline mod).", guiltyNpcId = fallbackGuilty });
             }
         });
 

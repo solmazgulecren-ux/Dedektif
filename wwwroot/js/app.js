@@ -1,6 +1,6 @@
 // =============================================================
-// 🔍 DEDEKTİFLİK RPG - TAM OYUN MOTORU
-// 5 NPC, 5 Kademe Diyalog, Rastgele Suçlu, Buldum Sistemi
+// 🔍 DEDEKTİFLİK RPG - TAM OYUN MOTORU v2.0
+// 5 NPC, Kademesiz Karışık Diyalog, Rastgele Suçlu, Ses Sistemi
 // =============================================================
 
 // === DOM ELEMENTS ===
@@ -18,24 +18,34 @@ const resultModal = document.getElementById('result-modal');
 const exitWarningModal = document.getElementById('exit-warning-modal');
 const transitionOverlay = document.getElementById('transition-overlay');
 
+// === AUDIO ELEMENTS ===
+const bgMusic = document.getElementById('bg-music');
+const rainSound = document.getElementById('rain-sound');
+const doorCreak = document.getElementById('door-creak');
+const doorClose = document.getElementById('door-close');
+const npcMumble = document.getElementById('npc-mumble');
+const typewriterSound = document.getElementById('typewriter-sound');
+
 // === GAME STATE ===
 let currentBag = [];
 const MAX_BAG_SIZE = 10;
 let activeNpcId = null;
 let currentPendingObject = null;
 let visitedBuildings = new Set();
-let dialogHistory = {}; // { npcId: [{player, npc, stage}] }
-let currentTalkStage = 1;
+let dialogHistory = {}; // { npcId: [{player, npc}] }
 let guiltyNpcId = null;
 let npcTalkCompleted = {}; // { npcId: true/false }
+let isMuted = localStorage.getItem('gameMuted') === 'true';
+let npcQuestionPools = {}; // { npcId: [remaining questions] }
+let askedQuestionCount = {}; // { npcId: count }
 
-// === GAME DATA (Client-side, SQL benzeri) ===
+// === GAME DATA ===
 const NPC_DATA = {
-    1: { id: 1, name: 'Kasap Hasan', building: 'Kasap', role: 'Kasabadaki eski kasap', img: 'images/hasan.png', bg: 'images/butcher_interior.png', secret: 'Cinayet gecesi dükkânında gizlice muhtara et sattı.' },
-    2: { id: 2, name: 'Eczacı Selma', building: 'Eczane', role: 'Eczane sahibi', img: 'images/selma.png', bg: 'images/apothecary_interior.png', secret: 'Kurbanın zehirlendiğini biliyordu ama gizledi.' },
-    3: { id: 3, name: 'Muhtar Kemal', building: 'Muhtarlık', role: 'Kasabanın muhtarı', img: 'images/kemal.png', bg: 'images/town_hall_interior.png', secret: 'Kurbanla arazi anlaşmazlığı vardı.' },
-    4: { id: 4, name: 'Komiser Güneş', building: 'Karakol', role: 'Kadın polis komiseri', img: 'images/gunes.png', bg: 'images/police_interior.png', secret: 'Olay yerindeki delilleri sakladı.' },
-    5: { id: 5, name: 'Terzi Yahya', building: 'Terzi', role: 'Kasabanın terzisi', img: 'images/yahya.png', bg: 'images/tailor_interior.png', secret: 'Kurbana gizli cepli ceket dikti, son gören kişi.' }
+    1: { id: 1, name: 'Kasap Hasan', building: 'Kasap', role: 'Kasabadaki eski kasap', img: 'images/hasan.png', bg: 'images/butcher_interior.png', secret: 'Cinayet gecesi d\u00FCkk\u00E2n\u0131nda gizlice muhtara et satt\u0131.' },
+    2: { id: 2, name: 'Eczac\u0131 Selma', building: 'Eczane', role: 'Eczane sahibi', img: 'images/selma.png', bg: 'images/apothecary_interior.png', secret: 'Kurban\u0131n zehirlendi\u011Fini biliyordu ama gizledi.' },
+    3: { id: 3, name: 'Muhtar Kemal', building: 'Muhtar\u0131l\u0131k', role: 'Kasaban\u0131n muhtar\u0131', img: 'images/kemal.png', bg: 'images/town_hall_interior.png', secret: 'Kurbanla arazi anla\u015Fmazl\u0131\u011F\u0131 vard\u0131.' },
+    4: { id: 4, name: 'Komiser G\u00FCne\u015F', building: 'Karakol', role: 'Kad\u0131n polis komiseri', img: 'images/gunes.png', bg: 'images/police_interior.png', secret: 'Olay yerindeki delilleri saklad\u0131.' },
+    5: { id: 5, name: 'Terzi Yahya', building: 'Terzi', role: 'Kasaban\u0131n terzisi', img: 'images/yahya.png', bg: 'images/tailor_interior.png', secret: 'Kurbana gizli cepli ceket dikti, son g\u00F6ren ki\u015Fi.' }
 };
 
 const SCENE_OBJECTS = {
@@ -66,169 +76,203 @@ const SCENE_OBJECTS = {
     ]
 };
 
-// 5 NPC × 5 Kademe × 4 Buton = 100 Diyalog
-const NPC_DIALOGUES = {
-    1: { // Kasap Hasan
-        1: [
-            { q: 'Cinayet gecesi neredeydin Hasan?', a: 'Buradaydım, dükkânımda. Gece geç saate kadar et doğruyordum. Kimsecikler yoktu ortalıkta, yağmur bardaktan boşalırcasına yağıyordu.' },
-            { q: 'Kurbanı ne kadar iyi tanıyordun?', a: 'Osman Bey mi? Herkes tanır onu. İyi müşterimdi, her hafta gelirdi. Ama son zamanlarda arası bazılarıyla açılmıştı...' },
-            { q: 'Kasabada düşmanı olan var mıydı?', a: 'Düşman mı? Ha, bir sürü... Muhtar Kemal\'le arazi meselesinden dolayı birbirlerine giriyorlardı. Eczacı Selma da ondan pek hazzetmezdi.' },
-            { q: 'Dükkânında şüpheli bir şey gördün mü?', a: 'Şüpheli mi? Ben sadece kasabım dedektif bey. Ama... o gece garip sesler duydum sokaktan.' }
-        ],
-        2: [
-            { q: 'O gece duyduğun garip sesler neydi?', a: 'Bağrışma gibiydi... Ama yağmurdan net duyamadım. Saat gece yarısı civarıydı. Sonra bir araba kapısı çarpma sesi... Sonra sessizlik.' },
-            { q: 'Dükkânına gelen şüpheli biri oldu mu?', a: 'Cinayet gecesi muhtar Kemal geldi aslında. Gece vakti et istedi. Aceleyle aldı gitti. Garip buldum ama sormadım.' },
-            { q: 'Kurbanla son ne zaman konuştun?', a: 'Cinayet gününden bir gün önce geldi. "Yarın büyük bir para gelecek" dedi. Bir daha göremedim...' },
-            { q: 'Seni şüpheli görüyorlar, biliyor musun?', a: 'Ha! Beni mi? Ben niye öldüreyim müşterimi? Borcunu ödeyecekti, öldürsem para gider! Aklını kullan dedektif...' }
-        ],
-        3: [
-            { q: 'Bu kanlı satır senin tezgahından çıktı!', a: 'O... o satır çalınmıştı! Bir hafta önce kayboldu, polise söyledim ama kimse ciddiye almadı! Birisi beni suçlu göstermek istiyor!' },
-            { q: 'Kara defterdeki kurbanın ismi neden çizili?', a: 'Veresiye borcunu ödeyeceğini söyledi diye çizdim! O kadar! Herkes veresiye defteri tutar!' },
-            { q: 'Yırtık önlüğündeki anahtar neyin anahtarı?', a: '*Terler* O... o anahtar arka odanın anahtarı. Soğuk hava deposu. İçinde sadece etler var...' },
-            { q: 'Muhtar cinayet gecesi sana geldiğini inkâr ediyor.', a: 'Yalancı! O gece buraya geldi, gözleri dönmüştü! Eğer inkâr ediyorsa gizleyecek bir şeyi var demektir!' }
-        ],
-        4: [
-            { q: 'Soğuk hava deposunda sadece et mi var?', a: '... İyi tamam. Orada eski belgeler de var. Kurbanın bazı evrakları... O bana emanet bırakmıştı.' },
-            { q: 'Kurbanın sana emanet bıraktığı şey neydi?', a: 'Bir zarf... İçinde arazi tapuları vardı. Muhtarın üzerine kayıtlı arazilerin aslında kurbana ait olduğunu gösteren belgeler.' },
-            { q: 'Neden bu belgeleri polise vermedin?', a: 'Korktum! Muhtar bu kasabada herkesin efendisi! Komiser Güneş zaten muhtarın adamı, kime güveneyim?' },
-            { q: 'Terziden kurbanın ceketini aldığını biliyoruz.', a: 'Hayır! Ben terziye hiç gitmedim! ... Tamam, Yahya\'dan bir bıçak kılıfı diktirdim ama kurbanla alakası yok!' }
-        ],
-        5: [
-            { q: 'Son sözün nedir Hasan?', a: 'Ben masum bir kasabım! Evet, korkağım, belgeleri sakladım, ama kimseyi öldürmedim! Gerçek katili bulun!' },
-            { q: 'Katil kim sence?', a: 'Muhtar Kemal! Arazi meselesi yüzünden... Ama komiser de bu işin içinde olabilir. O gece karanlıkta bir kadın silueti gördüm...' },
-            { q: 'Söylemediklerin var mı hâlâ?', a: '*Uzun sessizlik* Eczacı Selma... O gece dükkânını geç kapattı. Pencereden ışık gördüm. Elinde bir şişe vardı...' },
-            { q: 'Masum olduğunu kanıtlayamazsan...', a: 'Emanet zarfı açın! İçindeki belgeler her şeyi anlatır! Ben sadece bir kasabım, korkak bir kasap...' }
-        ]
-    },
-    2: { // Eczacı Selma
-        1: [
-            { q: 'Cinayet gecesi eczaneniz açık mıydı?', a: 'Gece yarısına kadar açıktı. Envanter sayımı yapıyordum... Dışarıda yağmur yağıyordu, içeri müşteri gelmedi.' },
-            { q: 'Kurbanla ilişkiniz nasıldı?', a: 'Sadece müşterimdi. Düzenli ilaç alırdı, kronik bir rahatsızlığı vardı. Son zamanlarda daha sık geliyordu...' },
-            { q: 'Kasabada zehirlenme vakaları olduğunu duydunuz mu?', a: 'Ne zehirlenmesi? Ben eczacıyım, ilaç satarım! Zehir değil! Böyle iftiralar atılmasına tahammülüm yok!' },
-            { q: 'Kurbanın sağlık durumu hakkında bilginiz var mı?', a: 'Hasta bir adamdı. Kalp ilacı kullanıyordu. Ama son haftalarda reçetesiz bir ilaç daha istemeye başladı...' }
-        ],
-        2: [
-            { q: 'Kurban reçetesiz hangi ilacı istedi?', a: 'Güçlü bir uyku ilacı. Uykusuzluk çektiğini söyledi ama... O dozda kalp hastası için çok tehlikeli olurdu.' },
-            { q: 'Gece yarısına kadar neden açıktınız?', a: '... Birini bekliyordum tamam mı? Muhtar Kemal aradı, "Acil ilaç lazım, geç geleceğim" dedi. Ama gelmedi.' },
-            { q: 'Komiser Güneş sizi cinayet gecesi gördüğünü söylüyor.', a: 'Nerede görmüş? Ben dükkânımdan çıkmadım! Eğer öyle diyorsa yalan söylüyor...' },
-            { q: 'Kurbanın ölüm sebebi zehirlenme olabilir mi?', a: '*Yüzü solar* Zehirlenme mi? Bu... bu çok kötü. Ben hiçbir şey satmadım, yemin ederim!' }
-        ],
-        3: [
-            { q: 'Bu boş ilaç şişesindeki zehri kime sattın?', a: 'O... o ilacı ben kimseye satmadım! Şişe çalınmış olmalı! Belki biri gece dükkâna girdi ve aldı...' },
-            { q: 'Reçete defterinin son sayfasını neden yırttın?', a: '*Titreyerek* Orada önemli bir not vardı. Kurbanın gerçek teşhisi... Mesleki sorumluluğum...' },
-            { q: 'Tezgah altındaki zehirli sarmaşık ne için?', a: 'Tıbbi araştırma! Geleneksel tıpta kullanılır! Ben onu ilaç yapmak için yetiştiriyorum, zehir olarak değil!' },
-            { q: 'Kurbanın gerçek teşhisi neydi?', a: '*Uzun sessizlik* Osman Bey zehirleniyordu... Yavaş yavaş. Ama ben yapmadım! Birisi ona düzenli olarak küçük dozlarda zehir veriyordu.' }
-        ],
-        4: [
-            { q: 'Neden polise söylemedin zehirlenme şüpheni?', a: 'Komiser Güneş\'e söyledim! Ama ciddiye almadı. Defteri gösterdim. Sonra... bazı sayfaları kayboldu.' },
-            { q: 'Komiser defterin sayfalarını mı aldı?', a: 'Bilmiyorum! Ama o gün komiserin gelişinden sonra sayfalar yoktu. Belki tesadüftür... belki değildir.' },
-            { q: 'Muhtar neden seni arayıp ilaç istedi o gece?', a: 'Stres ilacı istedi. "Çok gerginim, uyuyamıyorum" dedi. Ama sesinde korku vardı... Normal değildi.' },
-            { q: 'Terzi Yahya\'yla ilişkin nedir?', a: 'Yahya mı? Komşuyuz, bazen çay içeriz. Ama... Yahya kurbanın son günlerinde onu çok sık ziyaret etti.' }
-        ],
-        5: [
-            { q: 'Son sözün nedir Selma?', a: 'Ben eczacıyım, insanları iyileştirmek için çalışıyorum! Evet, şüphemi sakladım ama korktum!' },
-            { q: 'Katil kim sence?', a: 'Muhtar ve komiser arasında bir bağ var. Cinayet gecesi muhtar et almaya gitti, komiser olay yerini geç inceledi...' },
-            { q: 'Sakladığın başka bir şey var mı?', a: 'Cinayet gecesi... Pencereden Terzi Yahya\'yı gördüm. Elinde bir paket vardı ve kurbanın evine doğru gidiyordu.' },
-            { q: 'Bu zehirli bitkiyi kurban için mi kullandın?', a: 'HAYIR! O bitki deneysel ilaç çalışmam için! Ben birini zehirlemek istesem... şey, yani teorik olarak...' }
-        ]
-    },
-    3: { // Muhtar Kemal
-        1: [
-            { q: 'Muhtar bey, cinayet gecesi neredeydiniz?', a: 'Evimdeydim tabii ki. Televizyon izledim, sonra uyudum. Muhtarın gece sokakta ne işi olur?' },
-            { q: 'Kurbanla aranızdaki ilişki nasıldı?', a: 'Normal komşuluk. Bazen anlaşamadığımız konular oldu ama siyasette düşman olmak cinayet sebebi değildir.' },
-            { q: 'Kasabada gerginliğin sebebi nedir?', a: 'Arazi meseleleri... Belediye yeni yol geçirecek, bazı araziler kamulaştırılacak. Herkes pay kapmaya çalışıyor.' },
-            { q: 'Kurbanın ölümü sana yaradı diyorlar.', a: 'Kim diyor? Kimin diline düşmüşüm? Osman\'ın ölümü bana hiçbir şey kazandırmadı!' }
-        ],
-        2: [
-            { q: 'Arazi meselesi hakkında detay ver.', a: 'Kurbanın arazisi yolun tam üzerinde. Kamulaştırma bedeli çok yüksek olacaktı. Osman satmak istemiyordu...' },
-            { q: 'Cinayet gecesi kasaba gidip et aldığın doğru mu?', a: '*Duraksır* Kim söyledi? Kasap Hasan mı? Sadece kısa bir yürüyüşe çıktım. Kasabın önünden geçtim ama et almadım!' },
-            { q: 'Eczacı Selma seni aradığını söylüyor o gece.', a: 'Hayır! Ben kimseyi aramadım! Selma yanlış hatırlıyor... Ya da bilerek yalan söylüyor.' },
-            { q: 'Kurbanla son görüşmeniz ne zamandı?', a: 'Cinayet gününden iki gün önce. Bağırdı çağırdı. "Arazimi vermeyeceğim, mahkemeye giderim!" dedi.' }
-        ],
-        3: [
-            { q: 'Bu tehdit mektubunu sen yazdın, çekmecende bulduk!', a: '*Yüzü kızarır* Bunu sinirle yazdım! Göndermeyecektim! Herkes kızgınken bir şeyler yazar!' },
-            { q: 'Kurbanın kırık gözlüğü senin odanda ne işi var?', a: 'Kavga ettiğimizde düştü! Kırdım evet, ama sonra pişman oldum. Geri verecektim...' },
-            { q: 'Kasadaki sahte belgeler neyin nesi?', a: '*Terler* Onlar... eski belediye evrakları. Bazen prosedürler hızlansın diye bazı belgeler... düzenlenir.' },
-            { q: 'Kasap Hasan cinayet gecesi geldiğini kanıtlayabilir.', a: 'Tamam! Evet, kasaba gittim! Et aldım! Ama bu beni katil yapmaz!' }
-        ],
-        4: [
-            { q: 'Gece yarısı et almak için mi çıktın gerçekten?', a: '... Tamam, et bahaneydi. Kurbanın evinin önünden geçmek istedim. Tehdit mektubu yazdığım için vicdan azabı çekiyordum.' },
-            { q: 'Kurbanın evinde ne gördün?', a: 'Işıklar yanıyordu. Bir gölge gördüm pencerede... Kurban değildi. Başka birisi vardı orada.' },
-            { q: 'Komiser Güneş\'le ilişkin nedir?', a: 'Resmi ilişkimiz var... *duraksır* Bazen bazı dosyaların kapanması konusunda ortak çalışırız. Hepsi bu.' },
-            { q: 'Arazi tapuları aslında kurbanın üzerineymiş.', a: '*Şok olur* Ne?! Tapular... Kim söyledi bunu?! O araziler yasal olarak belediyeye aittir!' }
-        ],
-        5: [
-            { q: 'Son sözün nedir Kemal?', a: 'Ben bu kasabanın muhtarıyım! 20 yıldır hizmet ediyorum. Evet hatalarım oldu ama kimseyi öldürmedim!' },
-            { q: 'Katil kim sence?', a: 'Kasap Hasan! O satırla... Ama belki eczacı. O kadının ne zehirler bildiğini düşünün! Ya da terzi...' },
-            { q: 'Söylemediklerin var mı?', a: '*İç çeker* Komiser Güneş... O gece beni aradı. "Muhtar, evinde kal" dedi. Neden böyle dediğini hiç sormadım...' },
-            { q: 'Kurbanın evindeki gölge kim olabilir?', a: 'Uzun boylu biriydi... Terzi Yahya\'nın boyu uzundur... O gece herkes bir yerlere gidiyordu bu kasabada.' }
-        ]
-    },
-    4: { // Komiser Güneş
-        1: [
-            { q: 'Komiser, olay yerine ilk gelen siz miydiniz?', a: 'Evet, saat 02:30 civarında ihbar aldık. 10 dakika içinde oradaydım. Ceset meydanda yatıyordu, yağmur izleri siliyordu.' },
-            { q: 'Kurban hakkında ne biliyorsunuz?', a: 'Osman Bey, 58 yaşında, tüccar. Kasabada tanınan bir isim. Arazi anlaşmazlıkları dışında bilinen düşmanı yoktu...' },
-            { q: 'Cinayet gecesi siz neredeydiniz?', a: 'Karakolda nöbetteydim. Evrak işleriyle uğraşıyordum. Yağmurlu gecelerde genelde sakin olur kasaba...' },
-            { q: 'İlk bulgular neler?', a: 'Kafa travması. Sert bir cisimle vurulmuş. Ölüm saati 23:00-01:00 arası. Olay yerinde az sayıda fiziksel delil vardı.' }
-        ],
-        2: [
-            { q: 'Olay yerinde hangi delilleri buldunuz?', a: 'Bir düğme, bazı ayak izleri... Yağmur çoğunu sildi. Standart prosedür uyguladık.' },
-            { q: 'Neden dış dedektif çağrıldı?', a: '*Rahatsız olur* Üst makamın kararı. "Tarafsız göz lazım" dediler. Kasabada herkes birbirini tanıyor.' },
-            { q: 'Muhtar Kemal\'le ilişkiniz profesyonel mi?', a: 'Tabii ki profesyonel! Muhtar resmi makam, ben de polis. Başka bir ilişki yok!' },
-            { q: 'Eczacı Selma zehirlenme şüphesini bildirmiş miydi?', a: '*Duraksır* Selma mı söyledi? Bir keresinde "kan değerleri garip" gibi bir şey demişti ama somut kanıt yoktu.' }
-        ],
-        3: [
-            { q: 'Bu polis rozeti olay yerinde bulundu!', a: '*Yüzü değişir* Kayıp olarak rapor edilmişti. Bir ay önce karakoldan çalındı. Kim aldıysa olay yerine bırakmış.' },
-            { q: 'Gizli dosyadaki bilgiler neden rapor edilmedi?', a: 'O dosya devam eden bir soruşturmanın parçası! Her şeyi kamuoyuyla paylaşamam. Prosedür gereği gizli!' },
-            { q: 'Bu düğme terzi Yahya\'nın diktiği paltoya ait.', a: 'İlginç... Yahya\'dan düğmenin kime ait olduğunu sorduk ama net cevap vermedi.' },
-            { q: 'Eczacının defterinden sayfaları siz mi aldınız?', a: 'NE?! Ben kimsenin defterinden sayfa almadım! Bu çok ciddi bir itham! Kanıtınız var mı?' }
-        ],
-        4: [
-            { q: 'O gece muhtarı neden arayıp evinde kalmasını söylediniz?', a: '*Şaşırır* Muhtar bunu mu söyledi? Ben onu güvenlik için uyardım! İhbar gelmişti!' },
-            { q: 'İhbar gelmeden ÖNCE muhtarı aradığınız kanıtlandı.', a: '*Uzun sessizlik* ... Birisi beni aradı. Tanımadığım numara. "Meydanda bir şey olacak" dedi. Ciddiye aldım.' },
-            { q: 'Delilleri karartma şüpheniz var.', a: 'Karartma mı?! 15 yıllık polisim! Evet, bazı bilgileri gizli tuttum ama prosedür gereği!' },
-            { q: 'Olay yerinden rapora yazmadığınız neler var?', a: '*Masaya bakar* Bir mektup... Kurbanın cebinden. "Beni takip ediyorlar, bu gece her şeyi açıklayacağım" yazıyordu...' }
-        ],
-        5: [
-            { q: 'Son sözünüz nedir Komiser?', a: 'Ben görevimi yaptım! Prosedür hataları oldu ama tarafsız kalmak zor... Adaletin yanındayım.' },
-            { q: 'Katil kim sizce?', a: 'Kanıtlar muhtarı gösteriyor... Arazi meselesi, tehdit mektubu, o gece dışarı çıkması. Ama kasap da şüpheli.' },
-            { q: 'Sakladığınız başka bilgi var mı?', a: 'Kurbanın cebindeki mektupta: "Yahya her şeyi biliyor" yazıyordu. Ne anlama geliyor bilmiyorum.' },
-            { q: 'Sizi de şüpheli listesine ekliyorum.', a: '*Sertleşir* Bu sizin hakkınız. Ama gerçek katili bulun, o zaman masumiyetimi görürsünüz.' }
-        ]
-    },
-    5: { // Terzi Yahya
-        1: [
-            { q: 'Yahya usta, cinayet gecesi neredeydin?', a: 'Dükkânımdaydım, gece geç saate kadar dikiş dikiyordum. Sipariş yetişmesi lazımdı. Makinenin sesinden başka bir şey duymadım.' },
-            { q: 'Kurbanı tanıyor muydun?', a: 'Eski müşterimdi. Son birkaç haftadır sık geliyordu. Özel bir ceket sipariş etmişti... Teslim edemedim.' },
-            { q: 'Kasabadaki gerginliklerden haberin var mı?', a: 'Ben terziyim, kumaşla uğraşırım. İnsanların kavgalarına karışmam. Ama... son zamanlarda herkes gergindi.' },
-            { q: 'Dükkânında ilginç bir şey fark ettin mi?', a: 'İlginç mi? Hayır, her şey normal... Dikişler, kumaşlar, müşteriler. *Gözlerini kaçırır*' }
-        ],
-        2: [
-            { q: 'Kurbanın sipariş ettiği ceket nasıl bir ceketti?', a: 'Özel bir ceket... Gizli cepleri olan, astarı kalın. "İçine belgeler koyacağım" demişti.' },
-            { q: 'Kurban sana belge saklatmak mı istedi?', a: 'Hayır! Sadece cekete cep dikeyim dedi. Belgeleri kendisi koyacaktı. Ben sadece terziyim!' },
-            { q: 'Cinayet gecesi dükkânından çıktın mı?', a: '*Duraksır* Bir kez çıktım. Sigara içmeye. Ama hemen döndüm. 10 dakika bile sürmedi.' },
-            { q: 'Eczacı Selma seni kurbanın evine giderken gördü.', a: 'Selma mı?! Yanılmış olmalı! Sadece sigara içmeye çıktım! *Elleri titrer*' }
-        ],
-        3: [
-            { q: 'Bu kanlı iplik makarası senin dükkânından!', a: 'Kan mı?! İmkânsız! Kumaş keserken elimi keserim, o benim kanım olabilir!' },
-            { q: 'Bu yırtık kumaş kurbanın ceketinden kopmuş.', a: '*Yutkunur* O kumaş bende vardı evet. Ceketi dikerken artan parça. Her terzi artık kumaş saklar!' },
-            { q: 'Gizli cepteki not "Bu gece gel, konuşalım" yazıyor. Senin el yazın!', a: '*Terler* Ben yazdım evet. Kurban benimle konuşmak istedi! Gizli bir şey anlatacaktı ama... varamadım!' },
-            { q: 'Neden varamadın? Yola çıktığını biliyoruz.', a: 'Çıktım evet! Ama yarı yolda döndüm! Korktum... Gölge gibi bir figür gördüm. Korkup geri döndüm!' }
-        ],
-        4: [
-            { q: 'Gördüğün gölge kim olabilir?', a: 'Bilmiyorum! Karanlıktı, yağmur yağıyordu... Uzun bir palto giyiyordu. Belki muhtarın paltosu.' },
-            { q: 'Kasap Hasan\'a bıçak kılıfı diktin mi?', a: '*Gözleri büyür* Kim söyledi?! Evet diktim. Normal bir sipariş! Kasap bıçak kılıfı kullanır!' },
-            { q: 'Kurbanın sana anlattığı gizli şey neydi?', a: 'Tam anlatmadı. "Bu kasabada herkes bir şeyler gizliyor, dikkat et Yahya" dedi. Tapulardan, belgelerden bahsetti.' },
-            { q: 'Komiserin gizli dosyasında senin adın geçiyor.', a: 'BENİM ADIM MI?! Ne yazıyor?! Ben hiçbir suç işlemedim! Sadece elbise dikerim! *Panik yapar*' }
-        ],
-        5: [
-            { q: 'Son sözün nedir Yahya?', a: 'Ben masum bir terziyim! Kurbanla görüşmeye çalıştım ama varamadım! O gece herkes sokaktaydı...' },
-            { q: 'Katil kim sence?', a: 'Muhtar Kemal! Arazi meselesi yüzünden... Ya da komiser. O kadın bir şeyler saklıyor, gözlerinden belli.' },
-            { q: 'Sakladığın son bir şey var mı?', a: '*Gözyaşları* Kurbanın ceketi... Bitmiş haliyle duvarda asılı. İçindeki gizli cepte bir USB bellek var. Kimseye vermedim.' },
-            { q: 'USB bellekte ne var?', a: 'Bilmiyorum! Açmadım! Kurban "Başıma bir şey gelirse bunu doğru kişiye ver" demişti. Doğru kişi kim?' }
-        ]
-    }
+// =============================================================
+// KADEMESIZ DIYALOG HAVUZU — 20 SORU HER NPC İÇİN (KARIŞIK)
+// Her soru difficulty (1-5) ve category ile etiketli
+// Suçlu NPC'ye göre dinamik cevaplar: guiltyResponse
+// =============================================================
+
+const NPC_ALL_QUESTIONS = {
+    1: [ // Kasap Hasan — TÜM 20 SORU TEK HAVUZDA
+        // Eski Kademe 1 (Tanışma - kolay)
+        { q: 'Cinayet gecesi neredeydin Hasan?', a: 'Buradaydım, dükkânımda. Gece geç saate kadar et doğruyordum. Kimsecikler yoktu ortalıkta, yağmur bardaktan boşalırcasına yağıyordu.', difficulty: 1, category: 'tanisma', relatedClues: [] },
+        { q: 'Kurbanı ne kadar iyi tanıyordun?', a: 'Osman Bey mi? Herkes tanır onu. İyi müşterimdi, her hafta gelirdi. Ama son zamanlarda arası bazılarıyla açılmıştı...', difficulty: 1, category: 'tanisma', relatedClues: [] },
+        { q: 'Kasabada düşmanı olan var mıydı?', a: 'Düşman mı? Ha, bir sürü... Muhtar Kemal\'le arazi meselesinden dolayı birbirlerine giriyorlardı. Eczacı Selma da ondan pek hazzetmezdi.', difficulty: 1, category: 'tanisma', relatedClues: [7, 8] },
+        { q: 'Dükkânında şüpheli bir şey gördün mü?', a: 'Şüpheli mi? Ben sadece kasabım dedektif bey. Ama... o gece garip sesler duydum sokaktan.', difficulty: 1, category: 'tanisma', relatedClues: [] },
+        // Eski Kademe 2 (Derinleşme)
+        { q: 'O gece duyduğun garip sesler neydi?', a: 'Bağrışma gibiydi... Ama yağmurdan net duyamadım. Saat gece yarısı civarıydı. Sonra bir araba kapısı çarpma sesi... Sonra sessizlik.', difficulty: 2, category: 'derinlesme', relatedClues: [] },
+        { q: 'Dükkânına gelen şüpheli biri oldu mu?', a: 'Cinayet gecesi muhtar Kemal geldi aslında. Gece vakti et istedi. Aceleyle aldı gitti. Garip buldum ama sormadım.', difficulty: 2, category: 'derinlesme', relatedClues: [7] },
+        { q: 'Kurbanla son ne zaman konuştun?', a: 'Cinayet gününden bir gün önce geldi. "Yarın büyük bir para gelecek" dedi. Bir daha göremedim...', difficulty: 2, category: 'derinlesme', relatedClues: [] },
+        { q: 'Seni şüpheli görüyorlar, biliyor musun?', a: 'Ha! Beni mi? Ben niye öldüreyim müşterimi? Borcunu ödeyecekti, öldürsem para gider! Aklını kullan dedektif...', difficulty: 2, category: 'derinlesme', relatedClues: [1, 2] },
+        // Eski Kademe 3 (Yüzleştirme - orta)
+        { q: 'Bu kanlı satır senin tezgahından çıktı!', a: 'O... o satır çalınmıştı! Bir hafta önce kayboldu, polise söyledim ama kimse ciddiye almadı! Birisi beni suçlu göstermek istiyor!', difficulty: 3, category: 'yuzlestirme', relatedClues: [1], guiltyResponse: { 1: '*Yüzü bembeyaz olur* O... o satır... Evet, benim ama çalınmıştı! İnanın bana, birisi... birisi çerçeveliyor!', 2: 'Eczacıya sorun! O kadın her şeyi biliyor, zehirler, ilaçlar... Satırı çalan da o olabilir!', 3: 'Muhtar\'ın adamları çalmış olmalı! O gece dükkâna gelen Kemal\'di, belki de satırı o aldı!', 4: 'Komiser Güneş bunu neden araştırmadı? Kayıp bildirimi yaptım ama dosya kayboldu!', 5: 'Terzi Yahya bir bıçak kılıfı diktirdi benden... Acaba o kılıf bu satır için miydi?' } },
+        { q: 'Kara defterdeki kurbanın ismi neden çizili?', a: 'Veresiye borcunu ödeyeceğini söyledi diye çizdim! O kadar! Herkes veresiye defteri tutar!', difficulty: 3, category: 'yuzlestirme', relatedClues: [2] },
+        { q: 'Yırtık önlüğündeki anahtar neyin anahtarı?', a: '*Terler* O... o anahtar arka odanın anahtarı. Soğuk hava deposu. İçinde sadece etler var...', difficulty: 3, category: 'yuzlestirme', relatedClues: [3] },
+        { q: 'Muhtar cinayet gecesi sana geldiğini inkâr ediyor.', a: 'Yalancı! O gece buraya geldi, gözleri dönmüştü! Eğer inkâr ediyorsa gizleyecek bir şeyi var demektir!', difficulty: 3, category: 'yuzlestirme', relatedClues: [7] },
+        // Eski Kademe 4 (Baskı - zor)
+        { q: 'Soğuk hava deposunda sadece et mi var?', a: '... İyi tamam. Orada eski belgeler de var. Kurbanın bazı evrakları... O bana emanet bırakmıştı.', difficulty: 4, category: 'baski', relatedClues: [3, 9], guiltyResponse: { 1: '*Çok terler* Tamam... orada... sadece belgeler değil... Kurbanla son tartışmamızda... İşler kontrolden çıktı. Ama yemin ederim kaza oldu!', 2: 'O belgeler Selma\'nın zehir siparişlerini gösteriyor! Korktum, sakladım!', 3: 'Muhtar\'ın sahte tapuları orada! Kurban bana emanet bıraktı!', 4: 'Komiser\'in kapatmaya çalıştığı dosyanın kopyası orada... Delil karartıyor!', 5: 'Yahya\'nın diktiği ceketteki USB\'nin kopyası orada...' } },
+        { q: 'Kurbanın sana emanet bıraktığı şey neydi?', a: 'Bir zarf... İçinde arazi tapuları vardı. Muhtarın üzerine kayıtlı arazilerin aslında kurbana ait olduğunu gösteren belgeler.', difficulty: 4, category: 'baski', relatedClues: [9, 7] },
+        { q: 'Neden bu belgeleri polise vermedin?', a: 'Korktum! Muhtar bu kasabada herkesin efendisi! Komiser Güneş zaten muhtarın adamı, kime güveneyim?', difficulty: 4, category: 'baski', relatedClues: [10, 11] },
+        { q: 'Terziden kurbanın ceketini aldığını biliyoruz.', a: 'Hayır! Ben terziye hiç gitmedim! ... Tamam, Yahya\'dan bir bıçak kılıfı diktirdim ama kurbanla alakası yok!', difficulty: 4, category: 'baski', relatedClues: [13, 14] },
+        // Eski Kademe 5 (Son - çok zor)
+        { q: 'Son sözün nedir Hasan?', a: 'Ben masum bir kasabım! Evet, korkağım, belgeleri sakladım, ama kimseyi öldürmedim! Gerçek katili bulun!', difficulty: 5, category: 'son', relatedClues: [], guiltyResponse: { 1: '*Gözyaşları* Ben... ben sadece kızdım. O gece Osman borcunu ödemeyeceğini söyledi, tartıştık... Satır elimdeydi... Bir anlık öfke... Ama ben katil değilim, bu bir kazaydı!', 2: 'Selma\'nın elindeki zehir şişesini sorun! Ben değilim!', 3: 'Muhtar\'ın tapuları sahte! O öldürdü!', 4: 'Komiser delilleri saklıyor, gerçek katil o!', 5: 'Yahya\'daki USB\'yi açın, her şey orada!' } },
+        { q: 'Katil kim sence?', a: 'Muhtar Kemal! Arazi meselesi yüzünden... Ama komiser de bu işin içinde olabilir. O gece karanlıkta bir kadın silueti gördüm...', difficulty: 5, category: 'son', relatedClues: [7, 10] },
+        { q: 'Söylemediklerin var mı hâlâ?', a: '*Uzun sessizlik* Eczacı Selma... O gece dükkânını geç kapattı. Pencereden ışık gördüm. Elinde bir şişe vardı...', difficulty: 5, category: 'son', relatedClues: [4, 6] },
+        { q: 'Masum olduğunu kanıtlayamazsan...', a: 'Emanet zarfı açın! İçindeki belgeler her şeyi anlatır! Ben sadece bir kasabım, korkak bir kasap...', difficulty: 5, category: 'son', relatedClues: [9] }
+    ],
+    2: [ // Eczacı Selma — TÜM 20 SORU
+        { q: 'Cinayet gecesi eczaneniz açık mıydı?', a: 'Gece yarısına kadar açıktı. Envanter sayımı yapıyordum... Dışarıda yağmur yağıyordu, içeri müşteri gelmedi.', difficulty: 1, category: 'tanisma', relatedClues: [] },
+        { q: 'Kurbanla ilişkiniz nasıldı?', a: 'Sadece müşterimdi. Düzenli ilaç alırdı, kronik bir rahatsızlığı vardı. Son zamanlarda daha sık geliyordu...', difficulty: 1, category: 'tanisma', relatedClues: [4] },
+        { q: 'Kasabada zehirlenme vakaları olduğunu duydunuz mu?', a: 'Ne zehirlenmesi? Ben eczacıyım, ilaç satarım! Zehir değil! Böyle iftiralar atılmasına tahammülüm yok!', difficulty: 1, category: 'tanisma', relatedClues: [6] },
+        { q: 'Kurbanın sağlık durumu hakkında bilginiz var mı?', a: 'Hasta bir adamdı. Kalp ilacı kullanıyordu. Ama son haftalarda reçetesiz bir ilaç daha istemeye başladı...', difficulty: 1, category: 'tanisma', relatedClues: [4, 5] },
+        { q: 'Kurban reçetesiz hangi ilacı istedi?', a: 'Güçlü bir uyku ilacı. Uykusuzluk çektiğini söyledi ama... O dozda kalp hastası için çok tehlikeli olurdu.', difficulty: 2, category: 'derinlesme', relatedClues: [4] },
+        { q: 'Gece yarısına kadar neden açıktınız?', a: '... Birini bekliyordum tamam mı? Muhtar Kemal aradı, "Acil ilaç lazım, geç geleceğim" dedi. Ama gelmedi.', difficulty: 2, category: 'derinlesme', relatedClues: [7], guiltyResponse: { 1: 'Kasap Hasan o gece geldi, çok gergindi. Ellerinde kan lekesi vardı, "Kesildim" dedi ama inanmadım...', 2: '*Titrer* Tamam... Muhtar\'ı beklemiyordum. Ben... kurbanı bekliyordum. Son ilaç dozunu verecektim ama... dozajı yanlış hesaplamış olabilirim.', 3: 'Muhtar aradı evet, ama sesinde panik vardı. "Selma, beni örtbas et" dedi. Ne demek istediğini anlayamadım...', 4: 'Komiser o gece geldi dükkâna. Defterimi istedi, "Bunu bana ver" dedi. Sayfaları o yırttı!', 5: 'Yahya\'nın o gece paketini gördüm... Kurbanın evine gidiyordu. İçinde ne vardı bilmiyorum ama ağırdı.' } },
+        { q: 'Komiser Güneş sizi cinayet gecesi gördüğünü söylüyor.', a: 'Nerede görmüş? Ben dükkânımdan çıkmadım! Eğer öyle diyorsa yalan söylüyor...', difficulty: 2, category: 'derinlesme', relatedClues: [10, 11] },
+        { q: 'Kurbanın ölüm sebebi zehirlenme olabilir mi?', a: '*Yüzü solar* Zehirlenme mi? Bu... bu çok kötü. Ben hiçbir şey satmadım, yemin ederim!', difficulty: 2, category: 'derinlesme', relatedClues: [4, 6] },
+        { q: 'Bu boş ilaç şişesindeki zehri kime sattın?', a: 'O... o ilacı ben kimseye satmadım! Şişe çalınmış olmalı! Belki biri gece dükkâna girdi ve aldı...', difficulty: 3, category: 'yuzlestirme', relatedClues: [4], guiltyResponse: { 1: 'Kasap\'a sorun! O gece dükkânıma girip çıkan birini gördüm, iri yarı biriydi!', 2: '*Yıkılır* O şişe... benim. Kurbanın ilacına karıştırdım ama öldürmek için değil! Acısını dindirmek için! O çok acı çekiyordu, yalvardı bana!', 3: 'Muhtar istedi o ilacı! "Birisi için lazım" dedi. Kim için olduğunu sormadım...', 4: 'O şişeyi komiser aldı! Benden zorla aldı, "Delil" dedi ama rapora yazmadı!', 5: 'Yahya\'nın gizli cepte sakladığı not... O notta bu ilaçtan bahsediliyor olabilir.' } },
+        { q: 'Reçete defterinin son sayfasını neden yırttın?', a: '*Titreyerek* Orada önemli bir not vardı. Kurbanın gerçek teşhisi... Mesleki sorumluluğum...', difficulty: 3, category: 'yuzlestirme', relatedClues: [5] },
+        { q: 'Tezgah altındaki zehirli sarmaşık ne için?', a: 'Tıbbi araştırma! Geleneksel tıpta kullanılır! Ben onu ilaç yapmak için yetiştiriyorum, zehir olarak değil!', difficulty: 3, category: 'yuzlestirme', relatedClues: [6] },
+        { q: 'Kurbanın gerçek teşhisi neydi?', a: '*Uzun sessizlik* Osman Bey zehirleniyordu... Yavaş yavaş. Ama ben yapmadım! Birisi ona düzenli olarak küçük dozlarda zehir veriyordu.', difficulty: 3, category: 'yuzlestirme', relatedClues: [4, 5, 6] },
+        { q: 'Neden polise söylemedin zehirlenme şüpheni?', a: 'Komiser Güneş\'e söyledim! Ama ciddiye almadı. Defteri gösterdim. Sonra... bazı sayfaları kayboldu.', difficulty: 4, category: 'baski', relatedClues: [5, 10, 11] },
+        { q: 'Komiser defterin sayfalarını mı aldı?', a: 'Bilmiyorum! Ama o gün komiserin gelişinden sonra sayfalar yoktu. Belki tesadüftür... belki değildir.', difficulty: 4, category: 'baski', relatedClues: [11] },
+        { q: 'Muhtar neden seni arayıp ilaç istedi o gece?', a: 'Stres ilacı istedi. "Çok gerginim, uyuyamıyorum" dedi. Ama sesinde korku vardı... Normal değildi.', difficulty: 4, category: 'baski', relatedClues: [7] },
+        { q: 'Terzi Yahya\'yla ilişkin nedir?', a: 'Yahya mı? Komşuyuz, bazen çay içeriz. Ama... Yahya kurbanın son günlerinde onu çok sık ziyaret etti.', difficulty: 4, category: 'baski', relatedClues: [13, 14, 15] },
+        { q: 'Son sözün nedir Selma?', a: 'Ben eczacıyım, insanları iyileştirmek için çalışıyorum! Evet, şüphemi sakladım ama korktum!', difficulty: 5, category: 'son', relatedClues: [] },
+        { q: 'Katil kim sence?', a: 'Muhtar ve komiser arasında bir bağ var. Cinayet gecesi muhtar et almaya gitti, komiser olay yerini geç inceledi...', difficulty: 5, category: 'son', relatedClues: [7, 10] },
+        { q: 'Sakladığın başka bir şey var mı?', a: 'Cinayet gecesi... Pencereden Terzi Yahya\'yı gördüm. Elinde bir paket vardı ve kurbanın evine doğru gidiyordu.', difficulty: 5, category: 'son', relatedClues: [13, 15] },
+        { q: 'Bu zehirli bitkiyi kurban için mi kullandın?', a: 'HAYIR! O bitki deneysel ilaç çalışmam için! Ben birini zehirlemek istesem... şey, yani teorik olarak...', difficulty: 5, category: 'son', relatedClues: [6] }
+    ],
+    3: [ // Muhtar Kemal — TÜM 20 SORU
+        { q: 'Muhtar bey, cinayet gecesi neredeydiniz?', a: 'Evimdeydim tabii ki. Televizyon izledim, sonra uyudum. Muhtarın gece sokakta ne işi olur?', difficulty: 1, category: 'tanisma', relatedClues: [] },
+        { q: 'Kurbanla aranızdaki ilişki nasıldı?', a: 'Normal komşuluk. Bazen anlaşamadığımız konular oldu ama siyasette düşman olmak cinayet sebebi değildir.', difficulty: 1, category: 'tanisma', relatedClues: [7] },
+        { q: 'Kasabada gerginliğin sebebi nedir?', a: 'Arazi meseleleri... Belediye yeni yol geçirecek, bazı araziler kamulaştırılacak. Herkes pay kapmaya çalışıyor.', difficulty: 1, category: 'tanisma', relatedClues: [9] },
+        { q: 'Kurbanın ölümü sana yaradı diyorlar.', a: 'Kim diyor? Kimin diline düşmüşüm? Osman\'ın ölümü bana hiçbir şey kazandırmadı!', difficulty: 1, category: 'tanisma', relatedClues: [7, 9] },
+        { q: 'Arazi meselesi hakkında detay ver.', a: 'Kurbanın arazisi yolun tam üzerinde. Kamulaştırma bedeli çok yüksek olacaktı. Osman satmak istemiyordu...', difficulty: 2, category: 'derinlesme', relatedClues: [9] },
+        { q: 'Cinayet gecesi kasaba gidip et aldığın doğru mu?', a: '*Duraksır* Kim söyledi? Kasap Hasan mı? Sadece kısa bir yürüyüşe çıktım. Kasabın önünden geçtim ama et almadım!', difficulty: 2, category: 'derinlesme', relatedClues: [1, 2], guiltyResponse: { 1: 'Hasan yalancı! O gece kasabın önünden bile geçmedim! ... Tamam, geçtim ama et almak için değil.', 2: 'Selma\'yı aradığımı itiraf ediyorum. Stres ilacı lazımdı. Ama gitmediğimi yemin ederim!', 3: '*Sinirlenir* Tamam! Et aldım! Ama cinayet saatinden ÇOK önce! Saat 10\'da gidip geldim. Sonra eve döndüm. Sonra... yürüyüşe çıktım tekrar. Kurbanın evinin önünden geçtim. Ama ona dokunmadım! ...En azından öyle hatırlıyorum.', 4: 'Komiser beni uyardı, "Evinde kal" dedi. Ama dinlemedim, merak ettim ne oluyor diye...', 5: 'Yahya\'yı o gece sokakta gördüm! O da dışarıdaydı!' } },
+        { q: 'Eczacı Selma seni aradığını söylüyor o gece.', a: 'Hayır! Ben kimseyi aramadım! Selma yanlış hatırlıyor... Ya da bilerek yalan söylüyor.', difficulty: 2, category: 'derinlesme', relatedClues: [4, 5] },
+        { q: 'Kurbanla son görüşmeniz ne zamandı?', a: 'Cinayet gününden iki gün önce. Bağırdı çağırdı. "Arazimi vermeyeceğim, mahkemeye giderim!" dedi.', difficulty: 2, category: 'derinlesme', relatedClues: [7] },
+        { q: 'Bu tehdit mektubunu sen yazdın, çekmecende bulduk!', a: '*Yüzü kızarır* Bunu sinirle yazdım! Göndermeyecektim! Herkes kızgınken bir şeyler yazar!', difficulty: 3, category: 'yuzlestirme', relatedClues: [7] },
+        { q: 'Kurbanın kırık gözlüğü senin odanda ne işi var?', a: 'Kavga ettiğimizde düştü! Kırdım evet, ama sonra pişman oldum. Geri verecektim...', difficulty: 3, category: 'yuzlestirme', relatedClues: [8] },
+        { q: 'Kasadaki sahte belgeler neyin nesi?', a: '*Terler* Onlar... eski belediye evrakları. Bazen prosedürler hızlansın diye bazı belgeler... düzenlenir.', difficulty: 3, category: 'yuzlestirme', relatedClues: [9] },
+        { q: 'Kasap Hasan cinayet gecesi geldiğini kanıtlayabilir.', a: 'Tamam! Evet, kasaba gittim! Et aldım! Ama bu beni katil yapmaz!', difficulty: 3, category: 'yuzlestirme', relatedClues: [1, 2] },
+        { q: 'Gece yarısı et almak için mi çıktın gerçekten?', a: '... Tamam, et bahaneydi. Kurbanın evinin önünden geçmek istedim. Tehdit mektubu yazdığım için vicdan azabı çekiyordum.', difficulty: 4, category: 'baski', relatedClues: [7], guiltyResponse: { 1: 'Kasap\'ın söylediklerine inanmayın! O adam yalancının teki!', 2: 'Selma beni çerçevelemeye çalışıyor! O zehirci kadın!', 3: '*Masayı yumruklar* TAMAM! Kurbanın evine gittim! Konuşmak istedim, barışmak... Ama o beni kovdu, aşağıladı. "Sahte tapularını biliyorum" dedi. Tartıştık... ve ben... kontrol... *susar*', 4: 'Komiser Güneş her şeyi biliyor! O gece beni aradı, "Muhtar sakin ol" dedi. Neden böyle dedi?', 5: 'Yahya\'nın elinde bir paket vardı o gece, onu araştırın!' } },
+        { q: 'Kurbanın evinde ne gördün?', a: 'Işıklar yanıyordu. Bir gölge gördüm pencerede... Kurban değildi. Başka birisi vardı orada.', difficulty: 4, category: 'baski', relatedClues: [] },
+        { q: 'Komiser Güneş\'le ilişkin nedir?', a: 'Resmi ilişkimiz var... *duraksır* Bazen bazı dosyaların kapanması konusunda ortak çalışırız. Hepsi bu.', difficulty: 4, category: 'baski', relatedClues: [10, 11] },
+        { q: 'Arazi tapuları aslında kurbanın üzerineymiş.', a: '*Şok olur* Ne?! Tapular... Kim söyledi bunu?! O araziler yasal olarak belediyeye aittir!', difficulty: 4, category: 'baski', relatedClues: [9] },
+        { q: 'Son sözün nedir Kemal?', a: 'Ben bu kasabanın muhtarıyım! 20 yıldır hizmet ediyorum. Evet hatalarım oldu ama kimseyi öldürmedim!', difficulty: 5, category: 'son', relatedClues: [] },
+        { q: 'Katil kim sence?', a: 'Kasap Hasan! O satırla... Ama belki eczacı. O kadının ne zehirler bildiğini düşünün! Ya da terzi...', difficulty: 5, category: 'son', relatedClues: [1, 4, 13] },
+        { q: 'Söylemediklerin var mı?', a: '*İç çeker* Komiser Güneş... O gece beni aradı. "Muhtar, evinde kal" dedi. Neden böyle dediğini hiç sormadım...', difficulty: 5, category: 'son', relatedClues: [10, 11] },
+        { q: 'Kurbanın evindeki gölge kim olabilir?', a: 'Uzun boylu biriydi... Terzi Yahya\'nın boyu uzundur... O gece herkes bir yerlere gidiyordu bu kasabada.', difficulty: 5, category: 'son', relatedClues: [13, 14, 15] }
+    ],
+    4: [ // Komiser Güneş — TÜM 20 SORU
+        { q: 'Komiser, olay yerine ilk gelen siz miydiniz?', a: 'Evet, saat 02:30 civarında ihbar aldık. 10 dakika içinde oradaydım. Ceset meydanda yatıyordu, yağmur izleri siliyordu.', difficulty: 1, category: 'tanisma', relatedClues: [] },
+        { q: 'Kurban hakkında ne biliyorsunuz?', a: 'Osman Bey, 58 yaşında, tüccar. Kasabada tanınan bir isim. Arazi anlaşmazlıkları dışında bilinen düşmanı yoktu...', difficulty: 1, category: 'tanisma', relatedClues: [] },
+        { q: 'Cinayet gecesi siz neredeydiniz?', a: 'Karakolda nöbetteydim. Evrak işleriyle uğraşıyordum. Yağmurlu gecelerde genelde sakin olur kasaba...', difficulty: 1, category: 'tanisma', relatedClues: [10] },
+        { q: 'İlk bulgular neler?', a: 'Kafa travması. Sert bir cisimle vurulmuş. Ölüm saati 23:00-01:00 arası. Olay yerinde az sayıda fiziksel delil vardı.', difficulty: 1, category: 'tanisma', relatedClues: [1, 12] },
+        { q: 'Olay yerinde hangi delilleri buldunuz?', a: 'Bir düğme, bazı ayak izleri... Yağmur çoğunu sildi. Standart prosedür uyguladık.', difficulty: 2, category: 'derinlesme', relatedClues: [12] },
+        { q: 'Neden dış dedektif çağrıldı?', a: '*Rahatsız olur* Üst makamın kararı. "Tarafsız göz lazım" dediler. Kasabada herkes birbirini tanıyor.', difficulty: 2, category: 'derinlesme', relatedClues: [] },
+        { q: 'Muhtar Kemal\'le ilişkiniz profesyonel mi?', a: 'Tabii ki profesyonel! Muhtar resmi makam, ben de polis. Başka bir ilişki yok!', difficulty: 2, category: 'derinlesme', relatedClues: [7, 9], guiltyResponse: { 1: 'Kasap Hasan\'ın dükkânında şüpheli evraklar bulundu, onu soruşturuyorum!', 2: 'Eczacı Selma\'nın zehir stoku var, bunu raporladım ama üst makam ilgilenmedi.', 3: 'Muhtar Kemal... *duraksır* Evet, bazen dosyaları birlikte kapattık. Ama bu normal prosedür!', 4: '*Sertleşir* Ben 15 yıllık polisim! Muhtar\'la profesyonel ilişkimiz var, ama cinayet gecesi... tamam, onu aradım. Uyardım. Çünkü bilgi aldım, ihbar vardı. Ama bu bilgiyi... resmi kanaldan almadım. Bir kaynak... söyleyemem.', 5: 'Terzinin dosyasında adı geçiyor ama bu gizli bir soruşturma!' } },
+        { q: 'Eczacı Selma zehirlenme şüphesini bildirmiş miydi?', a: '*Duraksır* Selma mı söyledi? Bir keresinde "kan değerleri garip" gibi bir şey demişti ama somut kanıt yoktu.', difficulty: 2, category: 'derinlesme', relatedClues: [4, 5] },
+        { q: 'Bu polis rozeti olay yerinde bulundu!', a: '*Yüzü değişir* Kayıp olarak rapor edilmişti. Bir ay önce karakoldan çalındı. Kim aldıysa olay yerine bırakmış.', difficulty: 3, category: 'yuzlestirme', relatedClues: [10] },
+        { q: 'Gizli dosyadaki bilgiler neden rapor edilmedi?', a: 'O dosya devam eden bir soruşturmanın parçası! Her şeyi kamuoyuyla paylaşamam. Prosedür gereği gizli!', difficulty: 3, category: 'yuzlestirme', relatedClues: [11] },
+        { q: 'Bu düğme terzi Yahya\'nın diktiği paltoya ait.', a: 'İlginç... Yahya\'dan düğmenin kime ait olduğunu sorduk ama net cevap vermedi.', difficulty: 3, category: 'yuzlestirme', relatedClues: [12, 14] },
+        { q: 'Eczacının defterinden sayfaları siz mi aldınız?', a: 'NE?! Ben kimsenin defterinden sayfa almadım! Bu çok ciddi bir itham! Kanıtınız var mı?', difficulty: 3, category: 'yuzlestirme', relatedClues: [5] },
+        { q: 'O gece muhtarı neden arayıp evinde kalmasını söylediniz?', a: '*Şaşırır* Muhtar bunu mu söyledi? Ben onu güvenlik için uyardım! İhbar gelmişti!', difficulty: 4, category: 'baski', relatedClues: [7] },
+        { q: 'İhbar gelmeden ÖNCE muhtarı aradığınız kanıtlandı.', a: '*Uzun sessizlik* ... Birisi beni aradı. Tanımadığım numara. "Meydanda bir şey olacak" dedi. Ciddiye aldım.', difficulty: 4, category: 'baski', relatedClues: [10, 11], guiltyResponse: { 1: 'Kasap\'ın soğuk hava deposunu araştırın!', 2: 'Eczacının tezgah altındaki bitkileri inceleyin!', 3: 'Muhtar\'ın kasasındaki sahte belgeleri bulun!', 4: '*Masaya yumruğunu vurur* TAMAM! Evet, muhtarı ihbardan önce aradım. Çünkü BEN o ihbarı aldım... kendi kendime. Anonim aramanın kaynağını biliyordum çünkü... o ses benim tanıdığımdı. Ve ben... olay yerine gittiğimde delilleri... düzenledim. Ama öldürmedim! Birisi bana talimat verdi!', 5: 'Yahya\'nın USB belleğinde her şey var!' } },
+        { q: 'Delilleri karartma şüpheniz var.', a: 'Karartma mı?! 15 yıllık polisim! Evet, bazı bilgileri gizli tuttum ama prosedür gereği!', difficulty: 4, category: 'baski', relatedClues: [10, 11] },
+        { q: 'Olay yerinden rapora yazmadığınız neler var?', a: '*Masaya bakar* Bir mektup... Kurbanın cebinden. "Beni takip ediyorlar, bu gece her şeyi açıklayacağım" yazıyordu...', difficulty: 4, category: 'baski', relatedClues: [15] },
+        { q: 'Son sözünüz nedir Komiser?', a: 'Ben görevimi yaptım! Prosedür hataları oldu ama tarafsız kalmak zor... Adaletin yanındayım.', difficulty: 5, category: 'son', relatedClues: [] },
+        { q: 'Katil kim sizce?', a: 'Kanıtlar muhtarı gösteriyor... Arazi meselesi, tehdit mektubu, o gece dışarı çıkması. Ama kasap da şüpheli.', difficulty: 5, category: 'son', relatedClues: [1, 7] },
+        { q: 'Sakladığınız başka bilgi var mı?', a: 'Kurbanın cebindeki mektupta: "Yahya her şeyi biliyor" yazıyordu. Ne anlama geliyor bilmiyorum.', difficulty: 5, category: 'son', relatedClues: [15] },
+        { q: 'Sizi de şüpheli listesine ekliyorum.', a: '*Sertleşir* Bu sizin hakkınız. Ama gerçek katili bulun, o zaman masumiyetimi görürsünüz.', difficulty: 5, category: 'son', relatedClues: [10, 11] }
+    ],
+    5: [ // Terzi Yahya — TÜM 20 SORU
+        { q: 'Yahya usta, cinayet gecesi neredeydin?', a: 'Dükkânımdaydım, gece geç saate kadar dikiş dikiyordum. Sipariş yetişmesi lazımdı. Makinenin sesinden başka bir şey duymadım.', difficulty: 1, category: 'tanisma', relatedClues: [] },
+        { q: 'Kurbanı tanıyor muydun?', a: 'Eski müşterimdi. Son birkaç haftadır sık geliyordu. Özel bir ceket sipariş etmişti... Teslim edemedim.', difficulty: 1, category: 'tanisma', relatedClues: [14, 15] },
+        { q: 'Kasabadaki gerginliklerden haberin var mı?', a: 'Ben terziyim, kumaşla uğraşırım. İnsanların kavgalarına karışmam. Ama... son zamanlarda herkes gergindi.', difficulty: 1, category: 'tanisma', relatedClues: [] },
+        { q: 'Dükkânında ilginç bir şey fark ettin mi?', a: 'İlginç mi? Hayır, her şey normal... Dikişler, kumaşlar, müşteriler. *Gözlerini kaçırır*', difficulty: 1, category: 'tanisma', relatedClues: [13] },
+        { q: 'Kurbanın sipariş ettiği ceket nasıl bir ceketti?', a: 'Özel bir ceket... Gizli cepleri olan, astarı kalın. "İçine belgeler koyacağım" demişti.', difficulty: 2, category: 'derinlesme', relatedClues: [14, 15] },
+        { q: 'Kurban sana belge saklatmak mı istedi?', a: 'Hayır! Sadece cekete cep dikeyim dedi. Belgeleri kendisi koyacaktı. Ben sadece terziyim!', difficulty: 2, category: 'derinlesme', relatedClues: [15] },
+        { q: 'Cinayet gecesi dükkânından çıktın mı?', a: '*Duraksır* Bir kez çıktım. Sigara içmeye. Ama hemen döndüm. 10 dakika bile sürmedi.', difficulty: 2, category: 'derinlesme', relatedClues: [], guiltyResponse: { 1: 'Kasap\'ın dükkânında ışık yanıyordu ama girmedim oraya!', 2: 'Eczane\'nin ışığı da açıktı. Selma pencereden baktı ama beni görmemiş olmalı... *yutkunur*', 3: 'Muhtar\'ın sokakta olduğunu gördüm, ama yüzünü seçemedim.', 4: 'Komiser\'in devriye aracı geçti sokaktan... Beni görmüş olabilir.', 5: '*Elleri titrer* Tamam... 10 dakikadan fazla dışarıdaydım. Kurbanın evine gittim. Notu ben yazmıştım, "Bu gece gel konuşalım" diye. Gittim. Kapı açıktı. İçeri girdim. Osman... Osman yerde yatıyordu. Ama ben varmadan ölmüştü! ...Yoksa ölmemiş miydi?' } },
+        { q: 'Eczacı Selma seni kurbanın evine giderken gördü.', a: 'Selma mı?! Yanılmış olmalı! Sadece sigara içmeye çıktım! *Elleri titrer*', difficulty: 2, category: 'derinlesme', relatedClues: [] },
+        { q: 'Bu kanlı iplik makarası senin dükkânından!', a: 'Kan mı?! İmkânsız! Kumaş keserken elimi keserim, o benim kanım olabilir!', difficulty: 3, category: 'yuzlestirme', relatedClues: [13] },
+        { q: 'Bu yırtık kumaş kurbanın ceketinden kopmuş.', a: '*Yutkunur* O kumaş bende vardı evet. Ceketi dikerken artan parça. Her terzi artık kumaş saklar!', difficulty: 3, category: 'yuzlestirme', relatedClues: [14] },
+        { q: 'Gizli cepteki not "Bu gece gel, konuşalım" yazıyor. Senin el yazın!', a: '*Terler* Ben yazdım evet. Kurban benimle konuşmak istedi! Gizli bir şey anlatacaktı ama... varamadım!', difficulty: 3, category: 'yuzlestirme', relatedClues: [15], guiltyResponse: { 1: 'Kasap Hasan\'ın o satırla bir ilgisi olabilir! Benden bıçak kılıfı istedi!', 2: 'Selma\'nın zehirleri var, onu araştırın! Ben sadece not yazdım!', 3: 'Muhtar\'ın tehdit mektubu daha tehlikeli bir delil!', 4: 'Komiser bu notu biliyordu! Dosyasında yazıyor!', 5: '*Titrer* Evet, o notu ben yazdım. Kurbanla buluşacaktık. Ama gittiğimde... kapı açıktı. Girdim. Tartıştık. O belgeler yüzünden... USB\'deki bilgiler... Ben sadece korumak istiyordum ama Osman vermek istemedi. Çekiştirdik ve...' } },
+        { q: 'Neden varamadın? Yola çıktığını biliyoruz.', a: 'Çıktım evet! Ama yarı yolda döndüm! Korktum... Gölge gibi bir figür gördüm. Korkup geri döndüm!', difficulty: 3, category: 'yuzlestirme', relatedClues: [] },
+        { q: 'Gördüğün gölge kim olabilir?', a: 'Bilmiyorum! Karanlıktı, yağmur yağıyordu... Uzun bir palto giyiyordu. Belki muhtarın paltosu.', difficulty: 4, category: 'baski', relatedClues: [12] },
+        { q: 'Kasap Hasan\'a bıçak kılıfı diktin mi?', a: '*Gözleri büyür* Kim söyledi?! Evet diktim. Normal bir sipariş! Kasap bıçak kılıfı kullanır!', difficulty: 4, category: 'baski', relatedClues: [1, 3] },
+        { q: 'Kurbanın sana anlattığı gizli şey neydi?', a: 'Tam anlatmadı. "Bu kasabada herkes bir şeyler gizliyor, dikkat et Yahya" dedi. Tapulardan, belgelerden bahsetti.', difficulty: 4, category: 'baski', relatedClues: [9, 15] },
+        { q: 'Komiserin gizli dosyasında senin adın geçiyor.', a: 'BENİM ADIM MI?! Ne yazıyor?! Ben hiçbir suç işlemedim! Sadece elbise dikerim! *Panik yapar*', difficulty: 4, category: 'baski', relatedClues: [11] },
+        { q: 'Son sözün nedir Yahya?', a: 'Ben masum bir terziyim! Kurbanla görüşmeye çalıştım ama varamadım! O gece herkes sokaktaydı...', difficulty: 5, category: 'son', relatedClues: [] },
+        { q: 'Katil kim sence?', a: 'Muhtar Kemal! Arazi meselesi yüzünden... Ya da komiser. O kadın bir şeyler saklıyor, gözlerinden belli.', difficulty: 5, category: 'son', relatedClues: [7, 10] },
+        { q: 'Sakladığın son bir şey var mı?', a: '*Gözyaşları* Kurbanın ceketi... Bitmiş haliyle duvarda asılı. İçindeki gizli cepte bir USB bellek var. Kimseye vermedim.', difficulty: 5, category: 'son', relatedClues: [15] },
+        { q: 'USB bellekte ne var?', a: 'Bilmiyorum! Açmadım! Kurban "Başıma bir şey gelirse bunu doğru kişiye ver" demişti. Doğru kişi kim?', difficulty: 5, category: 'son', relatedClues: [15, 9] }
+    ]
 };
+
+// =============================================================
+// SES SİSTEMİ
+// =============================================================
+
+function playSound(audioEl, volume = 0.5) {
+    if (!audioEl || isMuted) return;
+    try {
+        audioEl.volume = Math.min(1, Math.max(0, volume));
+        audioEl.currentTime = 0;
+        audioEl.play().catch(e => console.log('Ses hatası:', e));
+    } catch(e) { console.log('Ses hatası:', e); }
+}
+
+function playLoopSound(audioEl, volume = 0.3) {
+    if (!audioEl || isMuted) return;
+    try {
+        audioEl.volume = Math.min(1, Math.max(0, volume));
+        audioEl.loop = true;
+        audioEl.play().catch(e => console.log('Ses hatası:', e));
+    } catch(e) { console.log('Ses hatası:', e); }
+}
+
+function stopSound(audioEl) {
+    if (!audioEl) return;
+    try {
+        audioEl.pause();
+        audioEl.currentTime = 0;
+    } catch(e) {}
+}
+
+function stopAllSounds() {
+    [bgMusic, rainSound, doorCreak, doorClose, npcMumble, typewriterSound].forEach(a => {
+        if (a) { a.pause(); a.currentTime = 0; }
+    });
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    localStorage.setItem('gameMuted', isMuted);
+    
+    const btn = document.getElementById('mute-toggle-btn');
+    if (!btn) return;
+    
+    if (isMuted) {
+        btn.classList.add('muted');
+        btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+        stopAllSounds();
+    } else {
+        btn.classList.remove('muted');
+        btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+        // Arka plan müziğini ve yağmuru tekrar başlat (eğer oyun başladıysa)
+        if (!splashScreen || splashScreen.classList.contains('hidden')) {
+            playLoopSound(bgMusic, 0.3);
+            playLoopSound(rainSound, 0.5);
+        }
+    }
+}
+
+// Mute butonunu başlat
+function initMuteButton() {
+    const btn = document.getElementById('mute-toggle-btn');
+    if (!btn) return;
+    
+    btn.addEventListener('click', toggleMute);
+    
+    // Kayıtlı durumu uygula
+    if (isMuted) {
+        btn.classList.add('muted');
+        btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+    }
+}
+
+initMuteButton();
 
 // =============================================================
 // GAME INITIALIZATION
@@ -239,13 +283,27 @@ function initGame() {
     visitedBuildings = new Set();
     dialogHistory = {};
     npcTalkCompleted = {};
-    currentTalkStage = 1;
     activeNpcId = null;
+    npcQuestionPools = {};
+    askedQuestionCount = {};
     
-    // Suçluyu backend API'den sıfırla (Frontend artık bilmiyor!)
+    // Her NPC için soru havuzunu sıfırla
+    for (let id = 1; id <= 5; id++) {
+        npcQuestionPools[id] = [...(NPC_ALL_QUESTIONS[id] || [])];
+        askedQuestionCount[id] = 0;
+    }
+    
+    // Suçluyu backend API'den sıfırla
     fetch('/api/game/reset', { method: 'POST' })
         .then(res => res.json())
-        .then(data => console.log('🔍 API:', data.message))
+        .then(data => {
+            console.log('\uD83D\uDD0D API:', data.message);
+            // Suçlu NPC ID'sini al
+            if (data.guiltyNpcId) {
+                guiltyNpcId = data.guiltyNpcId;
+                console.log('\uD83D\uDD0D Su\u00E7lu NPC:', guiltyNpcId);
+            }
+        })
         .catch(err => console.error('API Error:', err));
     
     // Haritadaki binaları resetle
@@ -262,10 +320,8 @@ initGame();
 
 document.getElementById('start-btn').addEventListener('click', () => {
     // Sesleri başlat
-    const bgMusic = document.getElementById('bg-music');
-    const rainSound = document.getElementById('rain-sound');
-    if (bgMusic) { bgMusic.volume = 0.3; bgMusic.play().catch(e=>console.log(e)); }
-    if (rainSound) { rainSound.volume = 0.5; rainSound.play().catch(e=>console.log(e)); }
+    playLoopSound(bgMusic, 0.3);
+    playLoopSound(rainSound, 0.5);
 
     triggerTransition(() => {
         splashScreen.classList.add('hidden');
@@ -274,13 +330,14 @@ document.getElementById('start-btn').addEventListener('click', () => {
     });
 });
 
-const STORY_TEXT = 'Yağmurlu bir sonbahar gecesi... Kasabanın meydanında bir ceset bulundu. Kurban, herkesin tanıdığı tüccar Osman Bey\'di. Parke taşların üzerinde yatan cansız beden, yağmurun altında solgun bir ışıkla aydınlanıyordu. Polis şeridinin arkasında toplanan kalabalık, birbirlerine şüpheyle bakıyordu. Kasabanın en deneyimli dedektifi olarak bu davayı çözmek için buraya çağrıldınız. Beş şüpheli, beş bina, sayısız sır... Gerçeği ortaya çıkarabilecek misiniz?';
+const STORY_TEXT = 'Ya\u011Fmurlu bir sonbahar gecesi... Kasaban\u0131n meydanında bir ceset bulundu. Kurban, herkesin tanıdığı t\u00FCccar Osman Bey\'di. Parke taşların üzerinde yatan cansız beden, yağmurun altında solgun bir ışıkla aydınlanıyordu. Polis şeridinin arkasında toplanan kalabalık, birbirlerine şüpheyle bakıyordu. Kasabanın en deneyimli dedektifi olarak bu davayı çözmek için buraya çağrıldınız. Beş şüpheli, beş bina, sayısız sır... Gerçeği ortaya çıkarabilecek misiniz?';
 
 function startTypewriter() {
     const el = document.getElementById('story-typewriter');
     const continueBtn = document.getElementById('story-continue-btn');
-    const typeSound = document.getElementById('typewriter-sound');
-    if (typeSound) { typeSound.volume = 0.4; typeSound.play().catch(e=>console.log(e)); }
+    
+    // Typewriter sesini başlat
+    playLoopSound(typewriterSound, 0.4);
 
     el.textContent = '';
     let i = 0;
@@ -292,7 +349,7 @@ function startTypewriter() {
             i++;
             setTimeout(type, speed);
         } else {
-            if (typeSound) typeSound.pause();
+            stopSound(typewriterSound);
             continueBtn.classList.remove('hidden');
         }
     }
@@ -325,7 +382,7 @@ function openBuilding(npcId) {
     if (!npc) return;
     
     interiorScreen.style.backgroundImage = `url('${npc.bg}')`;
-    document.getElementById('talk-npc-name').innerText = npc.name + ' ile Konuş';
+    document.getElementById('talk-npc-name').innerText = npc.name + ' ile Konu\u015F';
     
     // Load Hotspots
     const container = document.getElementById('hotspots-container');
@@ -353,9 +410,11 @@ function openBuilding(npcId) {
         container.appendChild(wrapper);
     });
     
-    // Kapı sesi
-    const doorCreak = document.getElementById('door-creak');
-    if (doorCreak) { doorCreak.volume = 0.7; doorCreak.currentTime = 0; doorCreak.play().catch(e=>console.log(e)); }
+    // Kapı gıcırtısı + kapanma sesi
+    playSound(doorCreak, 0.7);
+    setTimeout(() => {
+        playSound(doorClose, 0.5);
+    }, 600);
 
     triggerTransition(() => {
         townMapScreen.classList.add('hidden');
@@ -364,7 +423,7 @@ function openBuilding(npcId) {
 }
 
 // =============================================================
-// 3. CLUE INSPECTION (YENİ TASARIM)
+// 3. CLUE INSPECTION
 // =============================================================
 
 function openClueInspect(obj, npcId) {
@@ -419,7 +478,7 @@ document.getElementById('exit-confirm-btn').addEventListener('click', () => {
 });
 
 // =============================================================
-// 5. NPC TALK (5 KADEMELİ SİSTEM)
+// 5. NPC TALK — KADEMESİZ KARIŞIK SİSTEM
 // =============================================================
 
 document.getElementById('talk-npc-btn').addEventListener('click', () => {
@@ -429,89 +488,126 @@ document.getElementById('talk-npc-btn').addEventListener('click', () => {
 
 function openNpcTalk(npcId) {
     const npc = NPC_DATA[npcId];
-    currentTalkStage = 1;
     
-    // NPC görselini arka plan olarak ayarla
+    // NPC görselini arka plan olarak ayarla (COVER ile tam ekran)
     document.getElementById('npc-talk-bg').style.backgroundImage = `url('${npc.img}')`;
     
     // Chat alanını temizle
     document.getElementById('npc-talk-chat').innerHTML = '';
     
-    // Stage göstergesini güncelle
-    updateStageIndicator();
+    // NPC mırıltı sesi çal
+    if (npcMumble) {
+        npcMumble.currentTime = 0;
+        playSound(npcMumble, 0.3);
+        setTimeout(() => stopSound(npcMumble), 2000);
+    }
     
-    // Diyalog butonlarını yükle
-    loadTalkButtons(npcId, currentTalkStage);
+    // Kalan soru sayısını güncelle
+    updateQuestionIndicator(npcId);
+    
+    // Rastgele 4 soru seç ve butonlara yükle
+    loadRandomQuestions(npcId);
     
     npcTalkModal.classList.remove('hidden');
 }
 
-function updateStageIndicator() {
-    document.getElementById('npc-talk-stage').textContent = `Kademe ${currentTalkStage}/5`;
+function updateQuestionIndicator(npcId) {
+    const remaining = npcQuestionPools[npcId] ? npcQuestionPools[npcId].length : 0;
+    const asked = askedQuestionCount[npcId] || 0;
+    document.getElementById('npc-talk-stage').textContent = `Soru ${asked}/${asked + remaining}`;
 }
 
-function loadTalkButtons(npcId, stage) {
+function loadRandomQuestions(npcId) {
     const container = document.getElementById('npc-talk-buttons');
     container.innerHTML = '';
     
-    if (stage > 5) {
+    const pool = npcQuestionPools[npcId];
+    if (!pool || pool.length === 0) {
         // Konuşma bitti
         container.innerHTML = '<div class="npc-talk-end-msg"><i class="fa-solid fa-check-circle"></i> Sorgu tamamlandı. Geri dönebilirsiniz.</div>';
         npcTalkCompleted[npcId] = true;
         return;
     }
     
-    const dialogues = NPC_DIALOGUES[npcId]?.[stage];
-    if (!dialogues) return;
+    // Havuzdan rastgele 4 soru seç (veya kalan kadar)
+    const count = Math.min(4, pool.length);
+    const selected = [];
+    const tempPool = [...pool];
     
-    dialogues.forEach((d, idx) => {
+    for (let i = 0; i < count; i++) {
+        const randIdx = Math.floor(Math.random() * tempPool.length);
+        selected.push(tempPool[randIdx]);
+        tempPool.splice(randIdx, 1);
+    }
+    
+    selected.forEach((d) => {
         const btn = document.createElement('button');
         btn.className = 'npc-talk-btn';
-        btn.innerHTML = `<i class="fa-solid fa-comment-dots"></i> ${d.q}`;
-        btn.addEventListener('click', () => handleTalkChoice(npcId, stage, idx));
+        
+        // Zorluk göstergesi
+        const diffIcons = { 1: '\u2B50', 2: '\u2B50\u2B50', 3: '\u26A0\uFE0F', 4: '\uD83D\uDD25', 5: '\uD83D\uDCA3' };
+        const diffLabel = diffIcons[d.difficulty] || '';
+        
+        btn.innerHTML = `<i class="fa-solid fa-comment-dots"></i> ${diffLabel} ${d.q}`;
+        btn.addEventListener('click', () => handleRandomTalkChoice(npcId, d));
         container.appendChild(btn);
     });
 }
 
-function handleTalkChoice(npcId, stage, choiceIndex) {
+function handleRandomTalkChoice(npcId, question) {
     const npc = NPC_DATA[npcId];
-    const dialogue = NPC_DIALOGUES[npcId]?.[stage]?.[choiceIndex];
-    if (!dialogue) return;
-    
     const chatArea = document.getElementById('npc-talk-chat');
+    
+    // Soruyu havuzdan çıkar
+    const pool = npcQuestionPools[npcId];
+    const idx = pool.findIndex(q => q.q === question.q);
+    if (idx > -1) pool.splice(idx, 1);
+    askedQuestionCount[npcId] = (askedQuestionCount[npcId] || 0) + 1;
     
     // Oyuncu mesajı
     const playerMsg = document.createElement('div');
     playerMsg.className = 'npc-talk-message player';
-    playerMsg.innerHTML = `<div class="speaker">Dedektif</div><div class="msg-text">${dialogue.q}</div>`;
+    playerMsg.innerHTML = `<div class="speaker">Dedektif</div><div class="msg-text">${question.q}</div>`;
     chatArea.appendChild(playerMsg);
     
     // Butonları geçici devre dışı bırak
     document.querySelectorAll('.npc-talk-btn').forEach(b => b.disabled = true);
     
+    // NPC mırıltı sesi
+    if (npcMumble) {
+        npcMumble.currentTime = 0;
+        playSound(npcMumble, 0.25);
+        setTimeout(() => stopSound(npcMumble), 1500);
+    }
+    
+    // NPC cevabını belirle (suçlu NPC'ye göre dinamik cevap)
+    let answer = question.a;
+    if (question.guiltyResponse && guiltyNpcId && question.guiltyResponse[guiltyNpcId]) {
+        answer = question.guiltyResponse[guiltyNpcId];
+    }
+    
     // NPC cevabı (gecikmeli)
     setTimeout(() => {
         const npcMsg = document.createElement('div');
         npcMsg.className = 'npc-talk-message';
-        npcMsg.innerHTML = `<div class="speaker">${npc.name}</div><div class="msg-text">${dialogue.a}</div>`;
+        npcMsg.innerHTML = `<div class="speaker">${npc.name}</div><div class="msg-text">${answer}</div>`;
         chatArea.appendChild(npcMsg);
         chatArea.scrollTop = chatArea.scrollHeight;
         
         // Konuşma geçmişine kaydet
         if (!dialogHistory[npcId]) dialogHistory[npcId] = [];
         dialogHistory[npcId].push({
-            player: dialogue.q,
-            npc: dialogue.a,
-            stage: stage,
-            npcName: npc.name
+            player: question.q,
+            npc: answer,
+            npcName: npc.name,
+            difficulty: question.difficulty
         });
         
-        // Sonraki kademeye geç
-        currentTalkStage = stage + 1;
-        updateStageIndicator();
+        // Kalan soru sayısını güncelle
+        updateQuestionIndicator(npcId);
         
         setTimeout(() => {
-            loadTalkButtons(npcId, currentTalkStage);
+            loadRandomQuestions(npcId);
         }, 500);
         
     }, 800);
@@ -519,6 +615,7 @@ function handleTalkChoice(npcId, stage, choiceIndex) {
 
 document.getElementById('npc-talk-close').addEventListener('click', () => {
     npcTalkModal.classList.add('hidden');
+    stopSound(npcMumble);
 });
 
 // =============================================================
@@ -528,7 +625,7 @@ document.getElementById('npc-talk-close').addEventListener('click', () => {
 function openBag() {
     const bagList = document.getElementById('bag-items-list');
     if (currentBag.length === 0) {
-        bagList.innerHTML = '<p style="color: var(--text-muted); text-align:center; padding:30px;">Çanta boş. Binalardaki ipuçlarını toplayın.</p>';
+        bagList.innerHTML = '<p style="color: var(--text-muted); text-align:center; padding:30px;">\u00C7anta bo\u015F. Binalardaki ipu\u00E7lar\u0131n\u0131 toplay\u0131n.</p>';
     } else {
         bagList.innerHTML = currentBag.map(b => `
             <div class="bag-item">
@@ -557,7 +654,7 @@ document.getElementById('interior-bag-btn')?.addEventListener('click', openBag);
 document.getElementById('close-bag-btn').addEventListener('click', () => bagModal.classList.add('hidden'));
 
 // =============================================================
-// 7. BULDUM! (SUÇLAMA SİSTEMİ)
+// 7. BULDUM! (SUÇLAMA SİSTEMİ) — KART TAŞMA DÜZELTMESİ
 // =============================================================
 
 document.getElementById('found-btn').addEventListener('click', () => {
@@ -576,6 +673,7 @@ function renderFoundScreen() {
     for (let id = 1; id <= 5; id++) {
         const npc = NPC_DATA[id];
         const hasHistory = dialogHistory[id] && dialogHistory[id].length > 0;
+        const askedCount = askedQuestionCount[id] || 0;
         
         const card = document.createElement('div');
         card.className = 'found-npc-card';
@@ -583,10 +681,10 @@ function renderFoundScreen() {
             <img src="${npc.img}" alt="${npc.name}" class="found-npc-img" data-npc-id="${id}" title="Konuşma geçmişini görüntüle">
             <div class="found-npc-name">${npc.name}</div>
             <div class="found-npc-role">${npc.building}</div>
-            ${hasHistory ? `<div style="font-size:0.75rem; color:var(--accent);">${dialogHistory[id].length} konuşma kaydı</div>` : '<div style="font-size:0.75rem; color:var(--text-muted);">Henüz konuşulmadı</div>'}
-            <button class="btn btn-outline" style="font-size:0.75rem; padding: 6px 12px; width:100%;" onclick="window.showNpcHistory(${id})"><i class="fa-solid fa-comments"></i> Konuşma Geçmişi</button>
+            ${hasHistory ? `<div style="font-size:0.7rem; color:var(--accent);">${askedCount} soru soruldu</div>` : '<div style="font-size:0.7rem; color:var(--text-muted);">Hen\u00FCz konu\u015Fulmad\u0131</div>'}
+            <button class="btn btn-outline" onclick="window.showNpcHistory(${id})"><i class="fa-solid fa-comments"></i> Ge\u00E7mi\u015F</button>
             <div class="found-npc-actions">
-                <button class="btn btn-danger" onclick="accuseNpc(${id})"><i class="fa-solid fa-handcuffs"></i> Suçlu</button>
+                <button class="btn btn-danger" onclick="accuseNpc(${id})"><i class="fa-solid fa-handcuffs"></i> Su\u00E7lu</button>
                 <button class="btn btn-success" onclick="innocentNpc(${id})"><i class="fa-solid fa-shield-halved"></i> Masum</button>
             </div>
         `;
@@ -606,11 +704,11 @@ window.showNpcHistory = function(npcId) {
     const npc = NPC_DATA[npcId];
     const history = dialogHistory[npcId] || [];
     
-    document.getElementById('npc-history-title').innerHTML = `<i class="fa-solid fa-comments"></i> ${npc.name} — Konuşma Geçmişi`;
+    document.getElementById('npc-history-title').innerHTML = `<i class="fa-solid fa-comments"></i> ${npc.name} \u2014 Konu\u015Fma Ge\u00E7mi\u015Fi`;
     
     const content = document.getElementById('npc-history-content');
     if (history.length === 0) {
-        content.innerHTML = '<p style="color: var(--text-muted); text-align:center; padding:30px;">Bu NPC ile henüz konuşulmadı.</p>';
+        content.innerHTML = '<p style="color: var(--text-muted); text-align:center; padding:30px;">Bu NPC ile hen\u00FCz konu\u015Fulmad\u0131.</p>';
     } else {
         content.innerHTML = history.map(h => `
             <div class="history-msg player-msg">
@@ -631,14 +729,39 @@ document.getElementById('npc-history-close').addEventListener('click', () => {
     npcHistoryModal.classList.add('hidden');
 });
 
-// === ACCUSE NPC (BACKEND CHECK) ===
+// === ACCUSE NPC (BACKEND CHECK) — YENİ HAPİS ANİMASYONU ===
 window.accuseNpc = function(npcId) {
     const npc = NPC_DATA[npcId];
     foundModal.classList.add('hidden');
     
-    // Hapis animasyonu göster
-    document.getElementById('jail-npc-img').src = npc.img;
-    document.getElementById('jail-npc-name').textContent = npc.name;
+    // Yeni hapis animasyonu — NPC tam boy parmaklıkların arkasında
+    const jailNpcFull = document.getElementById('jail-npc-full');
+    const jailNpcName = document.getElementById('jail-npc-name');
+    const jailArrestedText = document.getElementById('jail-arrested-text');
+    
+    if (jailNpcFull) jailNpcFull.src = npc.img;
+    if (jailNpcName) jailNpcName.textContent = npc.name;
+    
+    // Animasyonu sıfırla
+    if (jailNpcFull) {
+        jailNpcFull.style.animation = 'none';
+        jailNpcFull.offsetHeight; // Force reflow
+        jailNpcFull.style.animation = '';
+    }
+    if (jailArrestedText) {
+        jailArrestedText.style.animation = 'none';
+        jailArrestedText.offsetHeight;
+        jailArrestedText.style.animation = '';
+    }
+    
+    // Jail bars animasyonu da sıfırla
+    const jailBars = document.querySelector('.jail-bars');
+    if (jailBars) {
+        jailBars.style.animation = 'none';
+        jailBars.offsetHeight;
+        jailBars.style.animation = '';
+    }
+    
     jailOverlay.classList.remove('hidden');
     
     // Animasyon sırasında API'ye sor
@@ -660,15 +783,15 @@ window.accuseNpc = function(npcId) {
             if (data.success) {
                 resultIcon.className = 'result-icon success';
                 resultIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
-                resultTitle.textContent = '🎉 TEBRİKLER! KAZANDINIZ!';
+                resultTitle.textContent = 'TEBRİKLER! KAZANDINIZ!';
                 resultTitle.style.color = 'var(--success)';
                 resultMessage.textContent = data.message + ' Gizli Bilgi: ' + (data.secret || npc.secret);
-                retryBtn.innerHTML = '<i class="fa-solid fa-house"></i> Ana Menüye Dön';
+                retryBtn.innerHTML = '<i class="fa-solid fa-house"></i> Ana Men\u00FCye D\u00F6n';
                 retryBtn.classList.remove('hidden');
             } else {
                 resultIcon.className = 'result-icon fail';
                 resultIcon.innerHTML = '<i class="fa-solid fa-skull-crossbones"></i>';
-                resultTitle.textContent = '❌ KAYBETTİNİZ!';
+                resultTitle.textContent = 'KAYBETTİNİZ!';
                 resultTitle.style.color = 'var(--danger)';
                 resultMessage.textContent = data.message;
                 retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Tekrar Oyna';
@@ -676,17 +799,16 @@ window.accuseNpc = function(npcId) {
             }
             
             resultModal.classList.remove('hidden');
-        }, 2500);
+        }, 3000);
     })
     .catch(err => {
         console.error('Accuse Error:', err);
         jailOverlay.classList.add('hidden');
-        alert("Bağlantı hatası!");
+        alert("Ba\u011Flant\u0131 hatas\u0131!");
     });
 };
 
 window.innocentNpc = function(npcId) {
-    // Masum seçilen NPC'yi karttan kaldır veya gri yap
     const card = document.querySelector(`.found-npc-card .found-npc-img[data-npc-id="${npcId}"]`)?.closest('.found-npc-card');
     if (card) {
         card.style.opacity = '0.3';
@@ -697,17 +819,15 @@ window.innocentNpc = function(npcId) {
 // === RETRY ===
 document.getElementById('result-retry-btn').addEventListener('click', () => {
     resultModal.classList.add('hidden');
-    // Oyunu sıfırla
     initGame();
     triggerTransition(() => {
-        // Tüm ekranları gizle
         townMapScreen.classList.add('hidden');
         interiorScreen.classList.add('hidden');
         npcTalkModal.classList.add('hidden');
         foundModal.classList.add('hidden');
-        // Splash'a dön
         splashScreen.classList.remove('hidden');
     });
+    stopAllSounds();
 });
 
 // =============================================================
@@ -720,6 +840,7 @@ document.getElementById('exit-game-btn').addEventListener('click', () => {
         initGame();
         splashScreen.classList.remove('hidden');
     });
+    stopAllSounds();
 });
 
 // =============================================================

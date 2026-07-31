@@ -137,8 +137,8 @@
                 <i class="fa-solid fa-arrow-left"></i> Geri Dön
             </button>
 
-            <!-- Stage indicator -->
-            <div id="npc-talk-stage" class="npc-talk-stage-indicator">Kademe 1/5</div>
+            <!-- Remaining questions indicator -->
+            <div id="npc-talk-stage" class="npc-talk-stage-indicator">Kalan: 20 soru</div>
 
             <!-- Chat area (left side) -->
             <div id="npc-talk-chat" class="npc-talk-chat-area">
@@ -198,11 +198,15 @@
         </div>
     </div>
 
-    <!-- 10. JAIL ANIMATION OVERLAY -->
+    <!-- 10. JAIL ANIMATION OVERLAY — YENİ TASARIM -->
     <div id="jail-overlay" class="jail-overlay hidden">
-        <div class="jail-bars"></div>
-        <img id="jail-npc-img" class="jail-npc-img" src="" alt="">
-        <div id="jail-npc-name" class="jail-npc-name"></div>
+        <div class="jail-scene">
+            <div class="jail-cell-bg"></div>
+            <img id="jail-npc-full" class="jail-npc-full" src="" alt="">
+            <div class="jail-bars"></div>
+            <div id="jail-npc-name" class="jail-npc-name"></div>
+            <div id="jail-arrested-text" class="jail-arrested-text">TUTUKLANDIN</div>
+        </div>
     </div>
 
     <!-- 11. GAME RESULT MODAL -->
@@ -233,15 +237,24 @@
     <!-- TRANSITION OVERLAY -->
     <div id="transition-overlay" class="transition-overlay"></div>
 
+    <!-- SES KAPATMA BUTONU (GLOBAL) -->
+    <button id="mute-toggle-btn" class="mute-toggle-btn" title="Ses Aç/Kapat">
+        <i class="fa-solid fa-volume-high"></i>
+    </button>
+
     <!-- AUDIO ELEMENTS -->
-    <!-- Noir ambiance/music (Pixabay free jazz background) -->
-    <audio id="bg-music" loop src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3"></audio>
-    <!-- Heavy Rain (Google Action Sounds) -->
-    <audio id="rain-sound" loop src="https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg"></audio>
-    <!-- Door Creak -->
-    <audio id="door-creak" src="https://actions.google.com/sounds/v1/doors/wood_door_open_creak.ogg"></audio>
-    <!-- Typewriter -->
-    <audio id="typewriter-sound" loop src="https://actions.google.com/sounds/v1/foley/typing_on_typewriter.ogg"></audio>
+    <!-- Noir ambiance/music -->
+    <audio id="bg-music" loop preload="auto" src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3"></audio>
+    <!-- Heavy Rain -->
+    <audio id="rain-sound" loop preload="auto" src="https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg"></audio>
+    <!-- Door Creak (Open) -->
+    <audio id="door-creak" preload="auto" src="https://actions.google.com/sounds/v1/doors/wood_door_open_creak.ogg"></audio>
+    <!-- Door Close -->
+    <audio id="door-close" preload="auto" src="https://actions.google.com/sounds/v1/doors/wood_door_close.ogg"></audio>
+    <!-- NPC Mumble -->
+    <audio id="npc-mumble" preload="auto" src="https://actions.google.com/sounds/v1/crowds/voices_murmuring.ogg"></audio>
+    <!-- Typewriter Key -->
+    <audio id="typewriter-sound" preload="auto" src="https://actions.google.com/sounds/v1/foley/typing_on_typewriter.ogg"></audio>
 
     <script src="js/app.js"></script>
 </body>

@@ -1,13 +1,16 @@
 -- =============================================
--- AI Destekli Dedektiflik RPG - Veritabanı Şeması (Point & Click + SQLite)
--- 5 NPC, 5 Kademe Diyalog, Rastgele Suçlu Sistemi
+-- AI Destekli Dedektiflik RPG - Veritabanı Şeması v2.0
+-- 5 NPC, Kademesiz Karışık Diyalog, Rastgele Suçlu Sistemi
 -- =============================================
 
 -- Varsa tabloları sırayla sil
+DROP TABLE IF EXISTS PlayerActions;
+DROP TABLE IF EXISTS GameSessions;
+DROP TABLE IF EXISTS ScenarioHints;
+DROP TABLE IF EXISTS NPCRelationships;
 DROP TABLE IF EXISTS DialogLogs;
 DROP TABLE IF EXISTS NPCDialogues;
 DROP TABLE IF EXISTS Clues;
-DROP TABLE IF EXISTS Dialogues;
 DROP TABLE IF EXISTS SceneObjects;
 DROP TABLE IF EXISTS NPCs;
 
@@ -44,15 +47,21 @@ CREATE TABLE SceneObjects (
 );
 
 -- =============================================
--- NPCDialogues Tablosu (5 Kademe × 4 Buton × 5 NPC)
+-- NPCDialogues Tablosu — KADEMESİZ, KARIŞIK HAVUZ
+-- Her NPC için 20 soru, difficulty ve category ile etiketli
 -- =============================================
 CREATE TABLE NPCDialogues (
     DialogueId   INTEGER PRIMARY KEY AUTOINCREMENT,
     NPCId        INTEGER NOT NULL,
-    Stage        INTEGER NOT NULL,
-    ButtonIndex  INTEGER NOT NULL,
+    Difficulty   INTEGER NOT NULL DEFAULT 1,  -- 1=Kolay, 5=Çok Zor
+    Category     TEXT NOT NULL DEFAULT 'tanisma', -- tanisma, derinlesme, yuzlestirme, baski, son
+    ButtonIndex  INTEGER NOT NULL DEFAULT 0,
     PlayerText   TEXT NOT NULL,
     NPCResponse  TEXT NOT NULL,
+    -- Suçlu NPC'ye göre alternatif cevaplar (JSON format)
+    GuiltyResponses TEXT DEFAULT NULL,
+    -- İlişkili ipucu ID'leri (virgülle ayrılmış)
+    RelatedClueIds TEXT DEFAULT NULL,
     IsAccusatory INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(NPCId) REFERENCES NPCs(NPCId) ON DELETE CASCADE
 );
@@ -65,9 +74,64 @@ CREATE TABLE DialogLogs (
     NPCId           INTEGER NOT NULL,
     PlayerQuestion  TEXT NOT NULL,
     NPCResponse     TEXT NOT NULL,
-    Stage           INTEGER NOT NULL DEFAULT 1,
+    Difficulty      INTEGER NOT NULL DEFAULT 1,
+    Category        TEXT DEFAULT 'tanisma',
     CreatedAt       TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY(NPCId) REFERENCES NPCs(NPCId) ON DELETE CASCADE
+);
+
+-- =============================================
+-- NPCRelationships Tablosu (NPC'ler arası ilişkiler)
+-- =============================================
+CREATE TABLE NPCRelationships (
+    RelationId  INTEGER PRIMARY KEY AUTOINCREMENT,
+    NPC1Id      INTEGER NOT NULL,
+    NPC2Id      INTEGER NOT NULL,
+    RelationType TEXT NOT NULL DEFAULT 'neutral', -- ally, enemy, suspicious, neutral
+    Description TEXT DEFAULT '',
+    FOREIGN KEY(NPC1Id) REFERENCES NPCs(NPCId) ON DELETE CASCADE,
+    FOREIGN KEY(NPC2Id) REFERENCES NPCs(NPCId) ON DELETE CASCADE
+);
+
+-- =============================================
+-- ScenarioHints Tablosu (Suçlu NPC'ye göre ek ipuçları)
+-- =============================================
+CREATE TABLE ScenarioHints (
+    HintId      INTEGER PRIMARY KEY AUTOINCREMENT,
+    GuiltyNPCId INTEGER NOT NULL,
+    HintText    TEXT NOT NULL,
+    HintType    TEXT NOT NULL DEFAULT 'clue', -- clue, red_herring, confession
+    RevealOrder INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY(GuiltyNPCId) REFERENCES NPCs(NPCId) ON DELETE CASCADE
+);
+
+-- =============================================
+-- GameSessions Tablosu (Oyun oturumu takibi)
+-- =============================================
+CREATE TABLE GameSessions (
+    SessionId   INTEGER PRIMARY KEY AUTOINCREMENT,
+    GuiltyNPCId INTEGER NOT NULL,
+    StartedAt   TEXT NOT NULL DEFAULT (datetime('now')),
+    EndedAt     TEXT DEFAULT NULL,
+    Result      TEXT DEFAULT NULL, -- 'won', 'lost', 'abandoned'
+    AccusedNPCId INTEGER DEFAULT NULL,
+    TotalQuestions INTEGER DEFAULT 0,
+    CluesCollected INTEGER DEFAULT 0,
+    FOREIGN KEY(GuiltyNPCId) REFERENCES NPCs(NPCId),
+    FOREIGN KEY(AccusedNPCId) REFERENCES NPCs(NPCId)
+);
+
+-- =============================================
+-- PlayerActions Tablosu (Oyuncu aksiyonları kaydı)
+-- =============================================
+CREATE TABLE PlayerActions (
+    ActionId    INTEGER PRIMARY KEY AUTOINCREMENT,
+    SessionId   INTEGER NOT NULL,
+    ActionType  TEXT NOT NULL, -- 'enter_building', 'collect_clue', 'ask_question', 'accuse'
+    TargetId    INTEGER DEFAULT NULL,
+    Details     TEXT DEFAULT NULL,
+    CreatedAt   TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY(SessionId) REFERENCES GameSessions(SessionId) ON DELETE CASCADE
 );
 
 -- =============================================
@@ -122,196 +186,66 @@ INSERT INTO SceneObjects (NPCId, ObjectName, Description, ImageFile, PosTop, Pos
     (5, 'Gizli Cep',           'Yahya''nın son diktiği ceketin astarında gizli bir cep. İçinde küçük bir not: "Bu gece gel, konuşalım."', 'images/hidden_pocket.png', '75%', '50%');
 
 -- =============================================
--- NPCDialogues - KASAP HASAN (NPC 1) - 5 Kademe × 4 Buton
+-- NPC İlişkileri
 -- =============================================
-
--- Kademe 1: Tanışma
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(1, 1, 1, 'Cinayet gecesi neredeydin Hasan?', 'Buradaydım, dükkânımda. Gece geç saate kadar et doğruyordum. Kimsecikler yoktu ortalıkta, yağmur bardaktan boşalırcasına yağıyordu.'),
-(1, 1, 2, 'Kurbanı ne kadar iyi tanıyordun?', 'Osman Bey mi? Herkes tanır onu. İyi müşterimdi, her hafta gelirdi. Ama son zamanlarda arası bazılarıyla açılmıştı...'),
-(1, 1, 3, 'Kasabada düşmanı olan var mıydı?', 'Düşman mı? Ha, bir sürü... Muhtar Kemal''le arazi meselesinden dolayı birbirlerine giriyorlardı. Eczacı Selma da ondan pek hazzetmezdi.'),
-(1, 1, 4, 'Bu dükkânda şüpheli bir şey görmüş olabilir misin?', 'Şüpheli mi? Ben sadece kasabım dedektif bey. Sabahtan akşama et doğrarım, başımı kaldırıp bakmam bile. Ama... o gece garip sesler duydum sokaktan.');
-
--- Kademe 2: Olay hakkında derinleşme
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(1, 2, 1, 'O gece duyduğun garip sesler neydi?', 'Bağrışma gibiydi... Ama yağmurdan net duyamadım. Saat gece yarısı civarıydı. Sonra bir araba kapısı çarpma sesi... Sonra sessizlik.'),
-(1, 2, 2, 'Son zamanlarda dükkânına gelen şüpheli biri oldu mu?', 'Şüpheli mi... Cinayet gecesi muhtar Kemal geldi aslında. Gece vakti et istedi. Aceleyle aldı gitti. Garip buldum ama sormadım.'),
-(1, 2, 3, 'Kurbanla son ne zaman konuştun?', 'Cinayet gününden bir gün önce geldi. Veresiye defterindeki borcunu ödeyeceğini söyledi. "Yarın büyük bir para gelecek" dedi. Bir daha göremedim...'),
-(1, 2, 4, 'Seni şüpheli olarak görüyorlar, bunu biliyor musun?', 'Ha! Beni mi? Ben niye öldüreyim müşterimi? Borcunu ödeyecekti, öldürsem para gider! Aklını kullan dedektif...');
-
--- Kademe 3: İpuçlarıyla yüzleştirme
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(1, 3, 1, 'Bu kanlı satır senin tezgahından çıktı, ne diyorsun?', 'O... o satır çalınmıştı! Bir hafta önce kayboldu, polise söyledim ama kimse ciddiye almadı! Birisi beni suçlu göstermek istiyor!'),
-(1, 3, 2, 'Kara defterdeki kurbanın üstü çizili ismini açıkla!', 'Veresiye borcunu ödeyeceğini söyledi diye çizdim! O kadar! Cinayet mi bu şimdi? Herkes veresiye defteri tutar!'),
-(1, 3, 3, 'Yırtık önlüğün cebindeki anahtar neyin anahtarı?', '*Terler* O... o anahtar arka odanın anahtarı. Soğuk hava deposu. İçinde sadece etler var, inanmazsanız bakın.'),
-(1, 3, 4, 'Muhtar Kemal cinayet gecesi sana geldiğini inkâr ediyor.', 'Yalancı! O gece buraya geldi, gözleri dönmüştü! "Et lazım, acil" dedi. Ben de verdim. Eğer inkâr ediyorsa gizleyecek bir şeyi var demektir!');
-
--- Kademe 4: Baskı altına alma
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(1, 4, 1, 'Soğuk hava deposunda sadece et mi var gerçekten?', '... İyi tamam. Orada eski belgeler de var. Kurbanın bazı evrakları... O bana emanet bırakmıştı, öleceğini biliyormuş gibi davranıyordu.'),
-(1, 4, 2, 'Kurbanın sana emanet bıraktığı şey neydi?', 'Bir zarf... İçinde arazi tapuları vardı. Muhtar''ın üzerine kayıtlı arazilerin aslında kurbana ait olduğunu gösteren belgeler. "Başıma bir şey gelirse bunları polise ver" demişti.'),
-(1, 4, 3, 'Neden bu belgeleri polise vermedin?', 'Korktum! Muhtar bu kasabada herkesin efendisi! Bilse beni de... *susar* Komiser Güneş zaten muhtarın adamı, kime güveneyim?'),
-(1, 4, 4, 'Terziden kurbanın ceketini aldığını biliyoruz.', 'Ne? Hayır! Ben terziye hiç gitmedim! ... Tamam, Yahya''dan bir bıçak kılıfı diktirdim, ama kurbanla alakası yok!');
-
--- Kademe 5: Son sorular
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(1, 5, 1, 'Son sözün nedir Hasan?', 'Ben masum bir kasabım! Evet, korkağım, belgeleri sakladım, ama kimseyi öldürmedim! Muhtara sorun, eczacıya sorun... Gerçek katili bulun!'),
-(1, 5, 2, 'Katil kim sence?', 'Muhtar Kemal! Arazi meselesi yüzünden... Ama komiser de bu işin içinde olabilir. O gece birilerini gördüm... Karanlıkta bir kadın silueti vardı sokakta.'),
-(1, 5, 3, 'Söylemediklerin var mı hâlâ?', '*Uzun bir sessizlik* Eczacı Selma... O gece dükkânını geç kapattı. Pencereden ışık gördüm. Ve elinde bir şişe vardı... Ama emin değilim.'),
-(1, 5, 4, 'Eğer masum olduğunu kanıtlayamazsan...', 'Emanet zarfı açın! İçindeki belgeler her şeyi anlatır! Ben sadece bir kasabım, korkak bir kasap... Ama katil değilim!');
+INSERT INTO NPCRelationships (NPC1Id, NPC2Id, RelationType, Description) VALUES
+    (1, 3, 'suspicious', 'Kasap Hasan, Muhtar Kemal''in cinayet gecesi et almaya geldiğini biliyor.'),
+    (2, 4, 'enemy', 'Eczacı Selma, Komiser Güneş''in defterinden sayfaları aldığından şüpheleniyor.'),
+    (3, 4, 'ally', 'Muhtar Kemal ve Komiser Güneş dosya kapatma konusunda işbirliği yapıyor.'),
+    (2, 5, 'suspicious', 'Eczacı Selma, Terzi Yahya''yı cinayet gecesi kurbanın evine giderken görmüş.'),
+    (1, 5, 'neutral', 'Kasap Hasan, Terzi Yahya''dan bıçak kılıfı diktirmiş.'),
+    (3, 1, 'enemy', 'Muhtar Kemal, Kasap Hasan''ın kendisini suçlamasından rahatsız.');
 
 -- =============================================
--- NPCDialogues - ECZACI SELMA (NPC 2) - 5 Kademe × 4 Buton
+-- Senaryo İpuçları (Her suçlu için ek ipuçları)
 -- =============================================
-
--- Kademe 1: Tanışma
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(2, 1, 1, 'Cinayet gecesi eczaneniz açık mıydı?', 'Gece yarısına kadar açıktı. Envanter sayımı yapıyordum... Dışarıda yağmur yağıyordu, içeri müşteri falan gelmedi.'),
-(2, 1, 2, 'Kurbanla ilişkiniz nasıldı?', 'Sadece müşterimdi. Düzenli ilaç alırdı, kronik bir rahatsızlığı vardı. Son zamanlarda daha sık geliyordu...'),
-(2, 1, 3, 'Kasabada zehirlenme vakaları olduğunu duydunuz mu?', 'Ne zehirlenmesi? Ben eczacıyım, ilaç satarım! Zehir değil! Böyle iftiralar atılmasına tahammülüm yok!'),
-(2, 1, 4, 'Kurbanın sağlık durumu hakkında bilginiz var mı?', 'Hasta bir adamdı. Kalp ilacı kullanıyordu. Ama son haftalarda reçetesiz bir ilaç daha istemeye başladı... Vermedim tabii.');
-
--- Kademe 2: Derinleşme
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(2, 2, 1, 'Kurban reçetesiz hangi ilacı istedi?', 'Güçlü bir uyku ilacı istedi. Uykusuzluk çektiğini söyledi ama... O dozda alırsa kalp hastası için çok tehlikeli olurdu.'),
-(2, 2, 2, 'Gece yarısına kadar neden açıktınız, gerçek sebep?', '... Birini bekliyordum tamam mı? Muhtar Kemal aradı, "Acil ilaç lazım, geç geleceğim" dedi. Ama gelmedi.'),
-(2, 2, 3, 'Komiser Güneş sizi cinayet gecesi gördüğünü söylüyor.', 'Nerede görmüş? Ben dükkânımdan çıkmadım! Eğer öyle diyorsa yalan söylüyor... Ya da başka birini benimle karıştırdı.'),
-(2, 2, 4, 'Kurbanın ölüm sebebi zehirlenme olabilir mi?', '*Yüzü solar* Zehirlenme mi? Bu... bu çok kötü. Hangi zehir? Ben hiçbir şey satmadım, yemin ederim!');
-
--- Kademe 3: İpuçlarıyla yüzleştirme
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(2, 3, 1, 'Bu boş ilaç şişesindeki zehri kime sattın?', 'O... o ilacı ben kimseye satmadım! Şişe çalınmış olmalı! Belki biri gece dükkâna girdi ve aldı...'),
-(2, 3, 2, 'Reçete defterinin son sayfasını neden yırttın?', '*Titreyerek* Orada... orada önemli bir not vardı. Kurbanın gerçek teşhisi... Eğer ortaya çıkarsa benim mesleki sorumluluğum...'),
-(2, 3, 3, 'Tezgah altındaki zehirli sarmaşık ne için?', 'Tıbbi araştırma! Geleneksel tıpta kullanılır! Ben onu ilaç yapmak için yetiştiriyorum, zehir olarak değil!'),
-(2, 3, 4, 'Kurbanın gerçek teşhisi neydi?', '*Uzun sessizlik* Osman Bey zehirleniyordu... Yavaş yavaş. Ama ben yapmadım! Birisi ona düzenli olarak küçük dozlarda zehir veriyordu. Ben bunu fark ettim ama... kanıtlayamadım.');
-
--- Kademe 4: Baskı
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(2, 4, 1, 'Neden polise söylemedin zehirlenme şüpheni?', 'Komiser Güneş''e söyledim! Ama ciddiye almadı. "Kanıtın var mı?" dedi, ben de... O defteri gösterdim. Sonra defter... bazı sayfaları kayboldu.'),
-(2, 4, 2, 'Komiser defterin sayfalarını mı aldı?', 'Bilmiyorum! Ama o gün komiserin gelişinden sonra sayfalar yoktu. Belki tesadüftür... belki değildir.'),
-(2, 4, 3, 'Muhtar neden seni arayıp ilaç istedi o gece?', 'Stres ilacı istedi. "Çok gerginim, uyuyamıyorum" dedi. Ama sesinde korku vardı... Normal bir ilaç isteği gibi değildi.'),
-(2, 4, 4, 'Terzi Yahya''yla ilişkin nedir?', 'Yahya mı? Komşuyuz, bazen çay içeriz. Ama... Yahya kurbanın son günlerinde onu çok sık ziyaret etti. Bir şeyler dikiyordu, gizli gizli.');
-
--- Kademe 5: Son
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(2, 5, 1, 'Son sözün nedir Selma?', 'Ben eczacıyım, insanları iyileştirmek için çalışıyorum! Evet, şüphemi sakladım, ama korktum! Bu kasabada kim kime güvenecek?'),
-(2, 5, 2, 'Katil kim sence?', 'Bilmiyorum... Ama muhtar ve komiser arasında bir bağ var. Cinayet gecesi muhtar et almak için kasaba gitti, komiser ise olay yerini çok geç inceledi...'),
-(2, 5, 3, 'Sakladığın başka bir şey var mı?', 'Cinayet gecesi... Pencereden Terzi Yahya''yı gördüm. Elinde bir paket vardı ve kurbanın evine doğru gidiyordu. Saat 11 civarıydı.'),
-(2, 5, 4, 'Bu zehirli bitkiyi kurban için mi kullandın?', 'HAYIR! O bitki deneysel ilaç çalışmam için! Ben birini zehirlemek istesem daha etkili yollar bilirim! ... Şey, yani teorik olarak...');
+INSERT INTO ScenarioHints (GuiltyNPCId, HintText, HintType, RevealOrder) VALUES
+    -- Kasap Hasan suçlu olduğunda
+    (1, 'Kasabın soğuk hava deposundaki kan lekeleri kurbanınkiyle eşleşiyor.', 'clue', 1),
+    (1, 'Veresiye defterindeki şifreli notlar aslında bir cinayet planı.', 'clue', 2),
+    (1, 'Hasan''ın yırtık önlüğündeki kavga izleri cinayet gecesinden.', 'confession', 3),
+    -- Eczacı Selma suçlu olduğunda
+    (2, 'Zehirli sarmaşığın dozajı tam olarak kurbanın ölüm raporuyla uyuşuyor.', 'clue', 1),
+    (2, 'Reçete defterinin yırtılan sayfalarında zehir formülü yazıyordu.', 'clue', 2),
+    (2, 'Selma kurbanı yavaş yavaş zehirliyor, son dozu cinayet gecesi verdi.', 'confession', 3),
+    -- Muhtar Kemal suçlu olduğunda
+    (3, 'Tehdit mektubu gönderilmemiş ama muhtarın niyetini açıkça gösteriyor.', 'clue', 1),
+    (3, 'Sahte arazi tapuları Kemal''in cinayet motifini ortaya koyuyor.', 'clue', 2),
+    (3, 'Kemal cinayet gecesi kurbanın evine gidip tartışmış ve onu öldürmüş.', 'confession', 3),
+    -- Komiser Güneş suçlu olduğunda
+    (4, 'Polis rozeti aslında Güneş''in kendisine ait ve "kayıp" hikayesi uydurma.', 'clue', 1),
+    (4, 'Gizli dosyada komiser''in kurbanla geçmişteki bağlantısı ortaya çıkıyor.', 'clue', 2),
+    (4, 'Güneş delilleri karartarak kendi suçunu gizlemeye çalışıyor.', 'confession', 3),
+    -- Terzi Yahya suçlu olduğunda
+    (5, 'Kanlı iplik makarasındaki kan kurbanın kanıyla eşleşiyor.', 'clue', 1),
+    (5, 'USB bellekte Yahya''nın kurbanla olan gizli anlaşması ve ihanet detayları var.', 'clue', 2),
+    (5, 'Yahya cinayet gecesi kurbanın evine gidip tartışmış ve kazara öldürmüş.', 'confession', 3);
 
 -- =============================================
--- NPCDialogues - MUHTAR KEMAL (NPC 3) - 5 Kademe × 4 Buton
+-- NPCDialogues — KARIŞIK HAVUZ SİSTEMİ (Kademe yok!)
+-- Tüm sorular difficulty ve category ile etiketli
+-- GuiltyResponses JSON formatında: {"1":"cevap","2":"cevap",...}
 -- =============================================
 
--- Kademe 1: Tanışma
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(3, 1, 1, 'Muhtar bey, cinayet gecesi neredeydiniz?', 'Evimdeydim tabii ki. Televizyon izledim, sonra uyudum. Muhtarın gece sokakta ne işi olur?'),
-(3, 1, 2, 'Kurbanla aranızdaki ilişki nasıldı?', 'Normal komşuluk ilişkisi. Bazen anlaşamadığımız konular oldu ama bu normaldir. Siyasette düşman olmak cinayet sebebi değildir.'),
-(3, 1, 3, 'Kasabada gerginliğin sebebi nedir?', 'Arazi meseleleri... Belediye yeni yol geçirecek, bazı araziler kamulaştırılacak. Herkes pay kapmaya çalışıyor. Osman da bunlardan biriydi.'),
-(3, 1, 4, 'Kurbanın ölümü sana yaradı diyorlar.', 'Kim diyor? Kimin diline düşmüşüm? Ben muhtarım, herkese eşit davranırım! Osman''ın ölümü bana hiçbir şey kazandırmadı!');
-
--- Kademe 2: Derinleşme
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(3, 2, 1, 'Arazi meselesi hakkında daha fazla bilgi ver.', 'Kurbanın arazisi yolun tam üzerinde kalıyor. Kamulaştırma bedeli çok yüksek olacaktı. Ama Osman satmak istemiyordu... İnatçı adamdı.'),
-(3, 2, 2, 'Cinayet gecesi kasaba gidip et aldığın doğru mu?', '*Duraksır* Kim söyledi bunu? Kasap Hasan mı? O... o gece sadece kısa bir yürüyüşe çıktım. Evet, kasabın önünden geçtim ama et almadım!'),
-(3, 2, 3, 'Eczacı Selma seni aradığını söylüyor o gece.', 'Hayır! Ben kimseyi aramadım! Selma yanlış hatırlıyor... Ya da bilerek yalan söylüyor. Neden bilmem ama kadına güvenilmez.'),
-(3, 2, 4, 'Kurbanla son görüşmeniz ne zamandı?', 'Cinayet gününden iki gün önce. Buraya geldi, bağırdı çağırdı. "Arazimi vermeyeceğim, mahkemeye giderim!" dedi. Ben de sakin ol dedim...');
-
--- Kademe 3: İpuçlarıyla yüzleştirme
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(3, 3, 1, 'Bu tehdit mektubunu sen yazdın, çekmecende bulduk!', '*Yüzü kızarır* Bu... bunu sinirle yazdım! Göndermeyecektim! Herkes kızgınken bir şeyler yazar, bu cinayet kanıtı değil!'),
-(3, 3, 2, 'Kurbanın kırık gözlüğü senin odanda ne işi var?', 'Kavga ettiğimizde düştü! Kırdım evet, ama sonra pişman oldum. Geri verecektim... Artık veremem tabii.'),
-(3, 3, 3, 'Kasadaki sahte belgeler neyin nesi?', '*Terler* Onlar... eski belediye evrakları. Bazen prosedürler hızlansın diye bazı belgeler... düzenlenir. Suç değil, bürokratik zorunluluk.'),
-(3, 3, 4, 'Kasap Hasan cinayet gecesi geldiğini kanıtlayabilir.', 'Tamam! Evet, kasaba gittim! Et aldım! Ama bu beni katil yapmaz! Bir adam et almak için dışarı çıkamaz mı?!');
-
--- Kademe 4: Baskı
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(3, 4, 1, 'Gece yarısı et almak için mi çıktın gerçekten?', '... Tamam, et bahaneydi. Kurbanın evinin önünden geçmek istedim. Durumu kontrol etmek... Tehdit mektubu yazdığım için vicdan azabı çekiyordum.'),
-(3, 4, 2, 'Kurbanın evinde ne gördün?', 'Işıklar yanıyordu. Bir gölge gördüm pencerede... Kurban değildi. Başka birisi vardı orada. Ama kim olduğunu göremedim, yağmur çok şiddetliydi.'),
-(3, 4, 3, 'Komiser Güneş''le ilişkin nedir?', 'Komiser devletin memuru, ben muhtarım. Resmi ilişkimiz var... *duraksır* Bazen bazı dosyaların kapanması konusunda ortak çalışırız. Hepsi bu.'),
-(3, 4, 4, 'Arazi tapuları aslında kurbanın üzerineymiş, bunu biliyor muydun?', '*Şok olur* Ne?! Tapular... Kim söyledi bunu?! O araziler yasal olarak belediyeye aittir! Osman''ın iddiaları asılsızdı!');
-
--- Kademe 5: Son
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(3, 5, 1, 'Son sözün nedir Kemal?', 'Ben bu kasabanın muhtarıyım! 20 yıldır hizmet ediyorum. Evet, hatalarım oldu ama kimseyi öldürmedim! O tapular sahte, birisi beni tuzağa düşürüyor!'),
-(3, 5, 2, 'Katil kim sence?', 'Kasap Hasan! O satırla... Ama belki de eczacı. O kadının ne zehirler bildiğini düşünün! Ya da terzi... Kurbanı en son gören o!'),
-(3, 5, 3, 'Söylemediklerin var mı?', '*İç çeker* Komiser Güneş... O gece beni aradı. "Muhtar, bir sorun var, evinde kal" dedi. Neden böyle dediğini hiç sormadım... Sormam gerekiyordu.'),
-(3, 5, 4, 'Kurbanın evindeki gölge kim olabilir?', 'Uzun boylu biriydi... Erkek mi kadın mı emin değilim. Ama terzi Yahya''nın boyu uzundur... Ve o gece herkes bir yerlere gidiyordu bu kasabada.');
-
--- =============================================
--- NPCDialogues - KOMİSER GÜNEŞ (NPC 4) - 5 Kademe × 4 Buton
--- =============================================
-
--- Kademe 1: Tanışma
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(4, 1, 1, 'Komiser, olay yerine ilk gelen siz miydiniz?', 'Evet, saat 02:30 civarında ihbar aldık. 10 dakika içinde oradaydım. Ceset meydanda yatıyordu, yağmur tüm izleri siliyordu.'),
-(4, 1, 2, 'Kurban hakkında ne biliyorsunuz?', 'Osman Bey, 58 yaşında, tüccar. Kasabada tanınan bir isim. Bazı arazi anlaşmazlıkları dışında bilinen bir düşmanı yoktu... Resmi olarak.'),
-(4, 1, 3, 'Cinayet gecesi siz neredeydiniz ihbardan önce?', 'Karakolda nöbetteydim. Evrak işleriyle uğraşıyordum. Yağmurlu gecelerde genelde sakin olur kasaba...'),
-(4, 1, 4, 'İlk bulgular neler?', 'Kafa travması. Sert bir cisimle vurulmuş. Ölüm saati gece 23:00 ile 01:00 arası. Olay yerinde az sayıda fiziksel delil vardı.');
-
--- Kademe 2: Derinleşme
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(4, 2, 1, 'Olay yerinde hangi delilleri buldunuz?', 'Bir düğme, bazı ayak izleri... Yağmur çoğunu sildi. Standart prosedür uyguladık. Daha fazla detay... dosyada yazıyor.'),
-(4, 2, 2, 'Neden bir dış dedektif çağrıldı?', '*Rahatsız olur* Üst makamın kararı. Ben gayet iyi yürütüyordum soruşturmayı ama... "Tarafsız göz lazım" dediler. Kasabada herkes birbirini tanıyor.'),
-(4, 2, 3, 'Muhtar Kemal''le ilişkiniz profesyonel mi?', 'Tabii ki profesyonel! Muhtar resmi makam, ben de polis. Raporlarımı düzenli sunarım. Başka bir ilişki yok!'),
-(4, 2, 4, 'Eczacı Selma zehirlenme şüphesini size bildirmiş miydi?', '*Duraksır* Selma mı söyledi bunu? O... bir keresinde "Osman Bey''in kan değerleri garip" gibi bir şey demişti ama somut kanıt yoktu.');
-
--- Kademe 3: İpuçlarıyla yüzleştirme
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(4, 3, 1, 'Bu polis rozeti olay yerinde bulundu, numarası kazınmış!', '*Yüzü değişir* Bu rozet... Kayıp olarak rapor edilmişti. Bir ay önce karakoldan çalındı. Kim aldıysa olay yerine bırakmış.'),
-(4, 3, 2, 'Gizli dosyadaki bilgiler neden rapor edilmedi?', 'O dosya... devam eden bir soruşturmanın parçası! Her şeyi kamuoyuyla paylaşamam. Prosedür gereği gizli kalması gereken bilgiler var!'),
-(4, 3, 3, 'Bu düğme terzi Yahya''nın diktiği bir paltoya ait.', 'İlginç... Yahya''dan bu düğmenin kime ait olduğunu sorduk ama net bir cevap vermedi. "Çok müşterim var" dedi.'),
-(4, 3, 4, 'Eczacının defterinden sayfaları siz mi aldınız?', 'NE?! Ben kimsenin defterinden sayfa almadım! Bu çok ciddi bir itham! Kanıtınız var mı?');
-
--- Kademe 4: Baskı
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(4, 4, 1, 'O gece muhtarı neden arayıp evinde kalmasını söylediniz?', '*Şaşırır* Muhtar... bunu mu söyledi? Ben onu güvenlik için uyardım! İhbar gelmişti, herkesin güvende olmasını istedim!'),
-(4, 4, 2, 'İhbar gelmeden ÖNCE muhtarı aradığınız kanıtlandı.', '*Uzun sessizlik* ... Tamam. Birisi beni aradı o gece. Tanımadığım bir numara. "Meydanda bir şey olacak, muhtar ve Kemal''i uyar" dedi. Ciddiye aldım.'),
-(4, 4, 3, 'Delilleri karartma şüpheniz var, bunu biliyorsunuz.', 'Karartma mı?! Ben 15 yıllık polisim! Evet, bazı bilgileri gizli tuttum ama bu prosedür gereği! Her şeyi dosyaya koydum!'),
-(4, 4, 4, 'Olay yerinden başka neler topladınız ama rapora yazmadınız?', '*Masaya bakar* Bir mektup... Kurbanın cebinden çıktı. "Beni takip ediyorlar, bu gece her şeyi açıklayacağım" yazıyordu. Bunu... henüz rapora eklememistim.');
-
--- Kademe 5: Son
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(4, 5, 1, 'Son sözünüz nedir Komiser?', 'Ben görevimi yaptım! Evet, prosedür hataları oldu ama kasabadaki herkes birbirini tanıyor. Tarafsız kalmak zor... Ama ben adaletin yanındayım.'),
-(4, 5, 2, 'Katil kim sizce?', 'Kanıtlar muhtarı gösteriyor... Arazi meselesi, tehdit mektubu, o gece dışarı çıkması. Ama kasap da şüpheli. O satır tesadüf olamaz.'),
-(4, 5, 3, 'Sakladığınız başka bilgi var mı?', 'Kurbanın cebindeki mektupta bir isim daha vardı... Terzi Yahya. "Yahya her şeyi biliyor" yazıyordu. Bu ne anlama geliyor bilmiyorum.'),
-(4, 5, 4, 'Sizi de şüpheli listesine ekliyorum.', '*Sertleşir* Bu sizin hakkınız. Ama ben bu kasabayı korumak için buradayım. Gerçek katili bulun, o zaman benim masumiyetimi de görürsünüz.');
-
--- =============================================
--- NPCDialogues - TERZİ YAHYA (NPC 5) - 5 Kademe × 4 Buton
--- =============================================
-
--- Kademe 1: Tanışma
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(5, 1, 1, 'Yahya usta, cinayet gecesi neredeydin?', 'Dükkânımdaydım, gece geç saate kadar dikiş dikiyordum. Sipariş yetişmesi lazımdı. Makinenin sesinden başka bir şey duymadım.'),
-(5, 1, 2, 'Kurbanı tanıyor muydun?', 'Tabii, eski müşterimdi. Son birkaç haftadır sık geliyordu. Özel bir ceket sipariş etmişti... Teslim edemedim, vaktinden önce öldü.'),
-(5, 1, 3, 'Kasabadaki gerginliklerden haberin var mı?', 'Ben terziyim, kumaşla uğraşırım. İnsanların kavgalarına karışmam. Ama... son zamanlarda herkes gergindi, o doğru.'),
-(5, 1, 4, 'Dükkânında ilginç bir şey fark ettin mi son günlerde?', 'İlginç mi? Hayır, her şey normal... Dikişler, kumaşlar, müşteriler. Sıradan günler. *Gözlerini kaçırır*');
-
--- Kademe 2: Derinleşme
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(5, 2, 1, 'Kurbanın sipariş ettiği ceket nasıl bir ceketti?', 'Özel bir ceket... Gizli cepleri olan, astarı kalın. "İçine belgeler koyacağım" demişti. Ne belgeleri olduğunu sormadım.'),
-(5, 2, 2, 'Kurban sana belge saklatmak mı istedi?', 'Hayır hayır! Sadece cekete cep dikeyim dedi. Belgeleri kendisi koyacaktı. Ben sadece terziyim, insanların işlerine karışmam!'),
-(5, 2, 3, 'Cinayet gecesi dükkânından çıktın mı?', '*Duraksır* ... Bir kez çıktım. Sigara içmeye. Ama hemen döndüm. 10 dakika bile sürmedi. Sadece taze hava aldım.'),
-(5, 2, 4, 'Eczacı Selma seni cinayet gecesi kurbanın evine giderken gördü.', 'Selma mı?! O... yanılmış olmalı! Ben sadece sigara içmeye çıktım! Kurbanın evine neden gideyim? *Elleri titrer*');
-
--- Kademe 3: İpuçlarıyla yüzleştirme
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(5, 3, 1, 'Bu kanlı iplik makarası senin dükkânından çıktı!', 'Kan mı?! İmkânsız! Ben kumaş keserken bazen elimi keserim, o benim kanım olabilir! Başka bir açıklaması yok!'),
-(5, 3, 2, 'Bu yırtık kumaş parçası kurbanın ceketinden kopmuş.', '*Yutkunur* O... o kumaş bende vardı evet. Ceketi dikerken artan parça. Ama bu delil değil, her terzi artık kumaş saklar!'),
-(5, 3, 3, 'Gizli cepteki not "Bu gece gel, konuşalım" yazıyor. Bu senin el yazın!', '*Terlemeye başlar* Ben... o notu ben yazdım evet. Kurban benimle konuşmak istedi! Gizli bir şey anlatacaktı ama... varamadım!'),
-(5, 3, 4, 'Neden varamadın? Yola çıktığını biliyoruz.', 'Çıktım evet! Ama yarı yolda döndüm! Korktum... O gece sokaklar çok karanlıktı ve birini gördüm... Gölge gibi bir figür. Korkup geri döndüm!');
-
--- Kademe 4: Baskı
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(5, 4, 1, 'Gördüğün gölge kim olabilir?', 'Bilmiyorum! Karanlıktı, yağmur yağıyordu... Ama uzun bir palto giyiyordu. Belki dedektif paltosu gibi... Ya da muhtarın paltosu.'),
-(5, 4, 2, 'Kasap Hasan''a bıçak kılıfı diktin mi?', '*Gözleri büyür* Kim söyledi bunu?! ... Evet, diktim. Ama bu normal bir sipariş! Kasap bıçak kılıfı kullanır, ne var bunda?'),
-(5, 4, 3, 'Kurbanın sana anlattığı gizli şey neydi?', 'Tam anlatmadı... Ama "Bu kasabada herkes bir şeyler gizliyor, sen de dikkat et Yahya" dedi. Tapulardan, belgelerden bahsetti. Detay vermeden öldü.'),
-(5, 4, 4, 'Komiserin gizli dosyasında senin adın geçiyor.', 'BENİM ADIM MI?! Ne... ne yazıyor o dosyada?! Ben hiçbir suç işlemedim! Sadece elbise dikerim! *Panik yapar*');
-
--- Kademe 5: Son
-INSERT INTO NPCDialogues (NPCId, Stage, ButtonIndex, PlayerText, NPCResponse) VALUES
-(5, 5, 1, 'Son sözün nedir Yahya?', 'Ben masum bir terziyim! Evet, kurbanla görüşmeye çalıştım ama varamadım! O gece herkes sokaktaydı... Kim yaptıysa, benden daha güçlü biriydi.'),
-(5, 5, 2, 'Katil kim sence?', 'Muhtar Kemal! Arazi meselesi yüzünden... Hem o gece dışarıdaydı, kasaba gitti. Ya da komiser... O kadın bir şeyler saklıyor, gözlerinden belli.'),
-(5, 5, 3, 'Sakladığın son bir şey var mı?', '*Gözyaşları* Kurbanın ceketi... Bitmiş haliyle asıldı duvarda. Teslim edemedim. İçindeki gizli cepte... bir USB bellek var. Onu kimseye vermedim. Korkuyorum.'),
-(5, 5, 4, 'USB bellekte ne var?', 'Bilmiyorum! Açmadım! Kurban "Eğer başıma bir şey gelirse bunu doğru kişiye ver" demişti. Ama doğru kişi kim? Polise güvenemiyorum, muhtara güvenemiyorum...');
+-- KASAP HASAN (NPC 1) - 20 Soru
+INSERT INTO NPCDialogues (NPCId, Difficulty, Category, PlayerText, NPCResponse, RelatedClueIds) VALUES
+(1, 1, 'tanisma', 'Cinayet gecesi neredeydin Hasan?', 'Buradaydım, dükkânımda. Gece geç saate kadar et doğruyordum. Kimsecikler yoktu ortalıkta, yağmur bardaktan boşalırcasına yağıyordu.', NULL),
+(1, 1, 'tanisma', 'Kurbanı ne kadar iyi tanıyordun?', 'Osman Bey mi? Herkes tanır onu. İyi müşterimdi, her hafta gelirdi. Ama son zamanlarda arası bazılarıyla açılmıştı...', NULL),
+(1, 1, 'tanisma', 'Kasabada düşmanı olan var mıydı?', 'Düşman mı? Ha, bir sürü... Muhtar Kemal''le arazi meselesinden dolayı birbirlerine giriyorlardı. Eczacı Selma da ondan pek hazzetmezdi.', '7,8'),
+(1, 1, 'tanisma', 'Dükkânında şüpheli bir şey gördün mü?', 'Şüpheli mi? Ben sadece kasabım dedektif bey. Ama... o gece garip sesler duydum sokaktan.', NULL),
+(1, 2, 'derinlesme', 'O gece duyduğun garip sesler neydi?', 'Bağrışma gibiydi... Ama yağmurdan net duyamadım. Saat gece yarısı civarıydı. Sonra bir araba kapısı çarpma sesi... Sonra sessizlik.', NULL),
+(1, 2, 'derinlesme', 'Dükkânına gelen şüpheli biri oldu mu?', 'Cinayet gecesi muhtar Kemal geldi aslında. Gece vakti et istedi. Aceleyle aldı gitti. Garip buldum ama sormadım.', '7'),
+(1, 2, 'derinlesme', 'Kurbanla son ne zaman konuştun?', 'Cinayet gününden bir gün önce geldi. "Yarın büyük bir para gelecek" dedi. Bir daha göremedim...', NULL),
+(1, 2, 'derinlesme', 'Seni şüpheli görüyorlar, biliyor musun?', 'Ha! Beni mi? Ben niye öldüreyim müşterimi? Borcunu ödeyecekti, öldürsem para gider! Aklını kullan dedektif...', '1,2'),
+(1, 3, 'yuzlestirme', 'Bu kanlı satır senin tezgahından çıktı!', 'O... o satır çalınmıştı! Bir hafta önce kayboldu, polise söyledim ama kimse ciddiye almadı! Birisi beni suçlu göstermek istiyor!', '1'),
+(1, 3, 'yuzlestirme', 'Kara defterdeki kurbanın ismi neden çizili?', 'Veresiye borcunu ödeyeceğini söyledi diye çizdim! O kadar! Herkes veresiye defteri tutar!', '2'),
+(1, 3, 'yuzlestirme', 'Yırtık önlüğündeki anahtar neyin anahtarı?', '*Terler* O... o anahtar arka odanın anahtarı. Soğuk hava deposu. İçinde sadece etler var...', '3'),
+(1, 3, 'yuzlestirme', 'Muhtar cinayet gecesi sana geldiğini inkâr ediyor.', 'Yalancı! O gece buraya geldi, gözleri dönmüştü! Eğer inkâr ediyorsa gizleyecek bir şeyi var demektir!', '7'),
+(1, 4, 'baski', 'Soğuk hava deposunda sadece et mi var?', '... İyi tamam. Orada eski belgeler de var. Kurbanın bazı evrakları... O bana emanet bırakmıştı.', '3,9'),
+(1, 4, 'baski', 'Kurbanın sana emanet bıraktığı şey neydi?', 'Bir zarf... İçinde arazi tapuları vardı. Muhtarın üzerine kayıtlı arazilerin aslında kurbana ait olduğunu gösteren belgeler.', '9,7'),
+(1, 4, 'baski', 'Neden bu belgeleri polise vermedin?', 'Korktum! Muhtar bu kasabada herkesin efendisi! Komiser Güneş zaten muhtarın adamı, kime güveneyim?', '10,11'),
+(1, 4, 'baski', 'Terziden kurbanın ceketini aldığını biliyoruz.', 'Hayır! Ben terziye hiç gitmedim! ... Tamam, Yahya''dan bir bıçak kılıfı diktirdim ama kurbanla alakası yok!', '13,14'),
+(1, 5, 'son', 'Son sözün nedir Hasan?', 'Ben masum bir kasabım! Evet, korkağım, belgeleri sakladım, ama kimseyi öldürmedim! Gerçek katili bulun!', NULL),
+(1, 5, 'son', 'Katil kim sence?', 'Muhtar Kemal! Arazi meselesi yüzünden... Ama komiser de bu işin içinde olabilir. O gece karanlıkta bir kadın silueti gördüm...', '7,10'),
+(1, 5, 'son', 'Söylemediklerin var mı hâlâ?', '*Uzun sessizlik* Eczacı Selma... O gece dükkânını geç kapattı. Pencereden ışık gördüm. Elinde bir şişe vardı...', '4,6'),
+(1, 5, 'son', 'Masum olduğunu kanıtlayamazsan...', 'Emanet zarfı açın! İçindeki belgeler her şeyi anlatır! Ben sadece bir kasabım, korkak bir kasap...', '9');
