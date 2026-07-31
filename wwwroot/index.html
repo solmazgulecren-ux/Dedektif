@@ -50,6 +50,11 @@
     <div id="town-map-screen" class="full-screen-map hidden">
         <button id="exit-game-btn" class="global-exit-btn"><i class="fa-solid fa-door-open"></i> Ana Menü</button>
         <button id="open-bag-btn" class="global-bag-btn"><i class="fa-solid fa-briefcase"></i> Çanta</button>
+        <!-- OTOPSİ ZAMANLAYICI -->
+        <div id="autopsy-timer-container" class="autopsy-timer-container hidden">
+            <i class="fa-solid fa-clock"></i> Otopsi Raporu Bekleniyor: <span id="autopsy-timer">00:00</span>
+        </div>
+
         <button id="found-btn" class="found-btn"><i class="fa-solid fa-gavel"></i> BULDUM!</button>
 
         <!-- Dağınık Binalar -->
@@ -268,6 +273,20 @@
     <audio id="npc-mumble" preload="auto" src="https://actions.google.com/sounds/v1/crowds/voices_murmuring.ogg"></audio>
     <!-- Typewriter Key -->
     <audio id="typewriter-sound" preload="auto" src="https://actions.google.com/sounds/v1/foley/typing_on_typewriter.ogg"></audio>
+
+    <!-- OTOPSİ MODALI -->
+    <div id="autopsy-modal" class="modal hidden">
+        <div class="autopsy-content">
+            <div class="autopsy-header">
+                <h2><i class="fa-solid fa-file-medical"></i> ADLİ TIP RAPORU</h2>
+                <button id="close-autopsy" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="autopsy-body">
+                <div class="autopsy-stamp">GİZLİ</div>
+                <div id="autopsy-text" class="autopsy-text"></div>
+            </div>
+        </div>
+    </div>
 
     <script src="js/app.js"></script>
 </body>

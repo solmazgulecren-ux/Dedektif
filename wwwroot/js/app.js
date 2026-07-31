@@ -258,6 +258,63 @@ function toggleMute() {
     }
 }
 
+// YENİ OTOPSİ ZAMANLAYICISI SİSTEMİ
+let autopsyTimer = null;
+let autopsyTimeLeft = 60; // 60 saniye süre verildi
+let isAutopsyReady = false;
+
+function startAutopsyTimer() {
+    autopsyTimeLeft = 60;
+    isAutopsyReady = false;
+    const container = document.getElementById('autopsy-timer-container');
+    const timerSpan = document.getElementById('autopsy-timer');
+    
+    container.classList.remove('hidden');
+    container.classList.remove('ready');
+    
+    if (autopsyTimer) clearInterval(autopsyTimer);
+    
+    autopsyTimer = setInterval(() => {
+        autopsyTimeLeft--;
+        
+        let m = Math.floor(autopsyTimeLeft / 60).toString().padStart(2, '0');
+        let s = (autopsyTimeLeft % 60).toString().padStart(2, '0');
+        timerSpan.textContent = `${m}:${s}`;
+        
+        if (autopsyTimeLeft <= 0) {
+            clearInterval(autopsyTimer);
+            isAutopsyReady = true;
+            
+            // UI Güncelle
+            container.classList.add('ready');
+            container.innerHTML = '<i class="fa-solid fa-file-signature"></i> Otopsi Raporu Geldi! (Tıkla)';
+            
+            // Mesaj Bildirimi
+            alert("Yeni Bilgi: Adli Tıp Merkezi'nden Otopsi Raporu geldi! Harita ekranındaki rapora tıklayarak inceleyebilirsiniz.");
+        }
+    }, 1000);
+}
+
+// Otopsi Tıklama Olayı
+document.getElementById('autopsy-timer-container').addEventListener('click', () => {
+    if (isAutopsyReady) {
+        // Backend'den otopsi raporunu çek
+        fetch('/api/game/autopsy')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('autopsy-text').textContent = data.report;
+                    document.getElementById('autopsy-modal').classList.remove('hidden');
+                }
+            })
+            .catch(err => console.error("Otopsi hatası:", err));
+    }
+});
+
+document.getElementById('close-autopsy').addEventListener('click', () => {
+    document.getElementById('autopsy-modal').classList.add('hidden');
+});
+
 // Mute butonunu başlat
 function initMuteButton() {
     const btn = document.getElementById('mute-toggle-btn');
@@ -361,6 +418,7 @@ document.getElementById('story-continue-btn').addEventListener('click', () => {
     triggerTransition(() => {
         storyIntroScreen.classList.add('hidden');
         townMapScreen.classList.remove('hidden');
+        startAutopsyTimer(); // Oyuna (Haritaya) geçildiğinde sayacı başlat
     });
 });
 
@@ -519,61 +577,45 @@ function updateQuestionIndicator(npcId) {
 
 function loadContextualQuestions(npcId) {
     const container = document.getElementById('npc-talk-buttons');
-    container.innerHTML = '';
+    container.innerHTML = '<div style="color:var(--text-muted); text-align:center;">Diyaloglar yükleniyor...</div>';
     
-    const pool = npcQuestionPools[npcId];
     const askedCount = askedQuestionCount[npcId] || 0;
-    
-    // 5 SORU LİMİTİ KONTROLÜ
-    if (askedCount >= 5 || !pool || pool.length === 0) {
-        // Konuşma bitti (5 soru limitine ulaşıldı veya soru bitti)
-        container.innerHTML = '<div class="npc-talk-end-msg"><i class="fa-solid fa-check-circle"></i> Sorgu tamamlandı. NPC artık konuşmak istemiyor. Geri dönebilirsiniz.</div>';
-        npcTalkCompleted[npcId] = true;
-        return;
-    }
-    
-    // MANTIKSAL AKIŞ KATEGORİSİNİ BELİRLE
     const categories = ['tanisma', 'derinlesme', 'yuzlestirme', 'baski', 'son'];
     const currentCategory = categories[askedCount] || 'son';
     
-    // O kategoriye ait soruları filtrele
-    const contextualPool = pool.filter(q => q.category === currentCategory);
-    
-    // Eğer o kategoride soru kalmadıysa fallback olarak havuzdan herhangi 4 soru al
-    const questionsToShow = contextualPool.length > 0 ? contextualPool : pool;
-    
-    const count = Math.min(4, questionsToShow.length);
-    const selected = [];
-    const tempPool = [...questionsToShow];
-    
-    for (let i = 0; i < count; i++) {
-        const randIdx = Math.floor(Math.random() * tempPool.length);
-        selected.push(tempPool[randIdx]);
-        tempPool.splice(randIdx, 1);
-    }
-    
-    selected.forEach((d) => {
-        const btn = document.createElement('button');
-        btn.className = 'npc-talk-btn';
-        
-        // Zorluk göstergesi
-        const diffIcons = { 1: '\u2B50', 2: '\u2B50\u2B50', 3: '\u26A0\uFE0F', 4: '\uD83D\uDD25', 5: '\uD83D\uDCA3' };
-        const diffLabel = diffIcons[d.difficulty] || '';
-        
-        btn.innerHTML = `<i class="fa-solid fa-comment-dots"></i> ${diffLabel} ${d.q}`;
-        btn.addEventListener('click', () => handleRandomTalkChoice(npcId, d));
-        container.appendChild(btn);
-    });
+    // C# API'den diyalogları çek
+    fetch(`/api/game/dialogues?npcId=${npcId}&category=${currentCategory}`)
+        .then(res => res.json())
+        .then(data => {
+            container.innerHTML = '';
+            
+            if (!data.success || data.dialogues.length === 0 || askedCount >= 5) {
+                container.innerHTML = '<div class="npc-talk-end-msg"><i class="fa-solid fa-check-circle"></i> Sorgu tamamlandı. NPC artık konuşmak istemiyor. Geri dönebilirsiniz.</div>';
+                npcTalkCompleted[npcId] = true;
+                return;
+            }
+            
+            const questionsToShow = data.dialogues;
+            questionsToShow.forEach((q, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'npc-talk-btn';
+                btn.innerHTML = `<i class="fa-regular fa-comment-dots"></i> ${q.q}`;
+                
+                btn.dataset.question = JSON.stringify(q);
+                btn.onclick = () => { askQuestionBackend(npcId, q); };
+                container.appendChild(btn);
+            });
+        })
+        .catch(err => {
+            console.error("Diyalog yükleme hatası:", err);
+            container.innerHTML = '<div style="color:red;">Diyaloglar sunucudan alınamadı!</div>';
+        });
 }
 
-function handleRandomTalkChoice(npcId, question) {
+function askQuestionBackend(npcId, question) {
     const npc = NPC_DATA[npcId];
     const chatArea = document.getElementById('npc-talk-chat');
     
-    // Soruyu havuzdan çıkar
-    const pool = npcQuestionPools[npcId];
-    const idx = pool.findIndex(q => q.q === question.q);
-    if (idx > -1) pool.splice(idx, 1);
     askedQuestionCount[npcId] = (askedQuestionCount[npcId] || 0) + 1;
     
     // Oyuncu mesajı
@@ -636,79 +678,6 @@ document.getElementById('npc-talk-close').addEventListener('click', () => {
 
 const detailedClueModal = document.getElementById('detailed-clue-modal');
 
-function getClueDetailedText(clueId) {
-    // Suçlu NPC'ye göre dinamik ipucu metinleri (Kurbanı içerecek şekilde)
-    // 1: Kasap, 2: Eczacı, 3: Muhtar, 4: Komiser, 5: Terzi
-    let text = "Bu nesne karanlık sırlar barındırıyor...";
-    const isGuilty = (npcId) => guiltyNpcId === npcId;
-
-    switch(clueId) {
-        case 1: // Kanlı Satır
-            text = "Üzerindeki kan lekeleri Osman Bey'e ait gibi görünüyor. " + 
-                   (isGuilty(1) ? "Sapındaki el izi net bir şekilde Kasap Hasan'ı işaret ediyor." : "Ancak satırın sapında kasaba ait olmayan, eldivenle tutulmuş gibi garip izler var.");
-            break;
-        case 2: // Kara Kaplı Defter
-            text = "Sayfalarda Osman Bey'in adı kırmızıyla çizilmiş. Yanında bir not: " +
-                   (isGuilty(1) ? "'Borcunu ödemedi, cezasını çekecek.'" : "'Bu borç sadece başlangıç.'");
-            break;
-        case 3: // Yırtık Önlük
-            text = "Kavga izleri taşıyan önlük... Osman Bey'in ceketinin düğmesi önlüğün cebinde bulunuyor. " +
-                   (isGuilty(1) ? "Hasan o gece kurbanla boğuşmuş olmalı." : "");
-            break;
-        case 4: // Boş İlaç Şişesi
-            text = "Zehirli bir ilacın boş şişesi. Reçetede Osman Bey'in adı var. " +
-                   (isGuilty(2) ? "Etiketin arkasında Selma'nın el yazısıyla 'Son Doz' yazıyor." : "Şişe aceleyle alınmış gibi, kapağı zorlanmış.");
-            break;
-        case 5: // Reçete Defteri
-            text = "Osman Bey'e verilen ilaçların listesi. Son sayfa yırtık. " +
-                   (isGuilty(2) ? "Yırtık sayfanın izinde 'Zehir' kelimesi okunabiliyor." : "Birisi kanıtları yok etmek için defteri zorla yırtmış.");
-            break;
-        case 6: // Zehirli Sarmaşık
-            text = "Bu bitkinin özü, Osman Bey'in kanında bulunan zehirle aynı. " +
-                   (isGuilty(2) ? "Selma bunu kasten hazırlamış." : "Birisi Selma'nın dükkanından bu otu gizlice almış olabilir.");
-            break;
-        case 7: // Tehdit Mektubu
-            text = "Mektupta 'Osman, o araziler benim, sonun yaklaşıyor' yazıyor. " +
-                   (isGuilty(3) ? "Muhtar Kemal açıkça kurbanı tehdit etmiş ve bunu gerçekleştirmiş." : "Ancak mektup asla postalanmamış, sadece bir sinir anında yazılmış.");
-            break;
-        case 8: // Kırık Gözlük
-            text = "Osman Bey'in kırık gözlüğü... " +
-                   (isGuilty(3) ? "Muhtarın odasında şiddetli bir kavga yaşanmış." : "Gözlük bir başka yerde kırılıp buraya bırakılmış olabilir.");
-            break;
-        case 9: // Gizli Kasa
-            text = "Kasada Osman Bey'in arazilerine ait sahte tapular var. " +
-                   (isGuilty(3) ? "Kemal her şeyi planlamış, cinayet sebebi bu tapular." : "Bu tapular sadece muhtarın açgözlülüğünü gösteriyor, cinayeti değil.");
-            break;
-        case 10: // Polis Rozeti
-            text = "Rozetin numarası kazınmış. Osman Bey'in cesedinin hemen yanında bulundu. " +
-                   (isGuilty(4) ? "Güneş, kurbanla olay yerinde boğuşurken rozetini düşürmüş." : "Rozet oraya özellikle bir polisi suçlamak için bırakılmış.");
-            break;
-        case 11: // Gizli Dosya
-            text = "Dosyada Osman Bey'in gizli geçmişi var. " +
-                   (isGuilty(4) ? "Komiser Güneş, bu geçmişi kullanarak kurbanı şantaj yapıyordu." : "Dosya sadece prosedür gereği tutulmuş.");
-            break;
-        case 12: // Kayıp Düğme
-            text = "Pahalı bir palto düğmesi. Osman Bey'in cebinden çıktı. " +
-                   (isGuilty(4) ? "Güneş'in paltosundan kopmuş, arbede sırasında Osman Bey onu tutmuş." : "Bu düğme terzinin bir müşterisine de ait olabilir.");
-            break;
-        case 13: // Kanlı İplik Makarası
-            text = "İplik, Osman Bey'in ceketinin dikişleriyle aynı. Üzerindeki kan... " +
-                   (isGuilty(5) ? "Kurbanın kanı. Yahya kurbanı öldürürken makara elindeydi." : "Terzinin dikiş yaparken kendi elini kestiği bir kaza olabilir.");
-            break;
-        case 14: // Yırtık Kumaş
-            text = "Osman Bey'in ceketinden kopan kumaş. " +
-                   (isGuilty(5) ? "Yahya kurbanla boğuşurken kumaş yırtıldı." : "Kumaş sadece bir terzi artığı olabilir.");
-            break;
-        case 15: // Gizli Cep
-            text = "Cepteki notta 'Osman, bu gece gel konuşalım' yazıyor. " +
-                   (isGuilty(5) ? "Yahya onu çağırdı ve tuzağa düşürdü." : "Yahya çağırdı ama gittiğinde onu ölü buldu.");
-            break;
-        default:
-            text = "Bu delil Osman Bey'in son anlarına dair karanlık sırlar taşıyor.";
-    }
-    return text;
-}
-
 function inspectClue(clueId) {
     const clue = currentBag.find(c => c.id === clueId);
     if (!clue) return;
@@ -722,9 +691,33 @@ function inspectClue(clueId) {
     // Detaylı ekranı aç
     document.getElementById('detailed-clue-title').textContent = clue.name;
     document.getElementById('detailed-clue-img').src = clue.img;
-    document.getElementById('detailed-clue-text').innerHTML = getClueDetailedText(clue.id);
+    const detailedText = document.getElementById('detailed-clue-text');
+    detailedText.innerHTML = '<span style="opacity:0.5;">Yükleniyor...</span>';
     
     detailedClueModal.classList.remove('hidden');
+
+    // Backend'den dinamik ipucu detayını çek
+    fetch(`/api/game/clue-detail/${clue.id}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Typewriter effect for detailed text
+                detailedText.innerHTML = '';
+                let i = 0;
+                let text = data.text;
+                function type() {
+                    if (i < text.length) {
+                        detailedText.innerHTML += text.charAt(i);
+                        i++;
+                        setTimeout(type, 30); // 30ms yazma hızı
+                    }
+                }
+                type();
+            }
+        })
+        .catch(err => {
+            detailedText.textContent = clue.desc; // Fallback
+        });
 }
 
 function removeClue(clueId) {

@@ -172,6 +172,103 @@ class Program
             }
         });
 
+        // =============================================
+        // YENİ EKLENEN C# BACKEND SİSTEMLERİ (OTOPSİ & DETAYLAR)
+        // =============================================
+
+        // OTOPSİ RAPORU ENDPOINT
+        app.MapGet("/api/game/autopsy", async () =>
+        {
+            try
+            {
+                var npcs = await repository.GetAllNPCsAsync();
+                var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
+                
+                if (guiltyNpc == null) return Results.NotFound("Suçlu atanmamış.");
+
+                string report = "=== OTOPSİ RAPORU ===\n";
+                report += "Kurban: Osman Bey\n";
+                report += "Ölüm Saati: Cinayet gecesi 23:45 - 00:30 arası.\n\n";
+                report += "BULGULAR:\n";
+
+                switch (guiltyNpc.NPCId)
+                {
+                    case 1: // Kasap
+                        report += "- Boyun bölgesinde derin ve tırtıklı bir kesici alet (satır) yarası tespit edilmiştir.\n";
+                        report += "- Yara açısı, failin güçlü ve kurbanın tanıdığı biri olduğunu gösteriyor.\n";
+                        report += "- Kurbanın tırnak aralarında siyah deri önlük parçaları bulundu.";
+                        break;
+                    case 2: // Eczacı
+                        report += "- Fiziksel travma veya darbe izine rastlanmamıştır.\n";
+                        report += "- Toksikoloji raporunda yüksek dozda nadir bir zehirli bitki (Sarmaşık) özü bulunmuştur.\n";
+                        report += "- Zehir, kurbanın normalde kullandığı kalp ilacına profesyonelce karıştırılmıştır.";
+                        break;
+                    case 3: // Muhtar
+                        report += "- Ölüm öncesi şiddetli boğuşma izleri ve yüz bölgesinde künt travma mevcuttur.\n";
+                        report += "- Kurbanın cebinde yırtılmış sahte tapu belgelerine ait mürekkep izleri bulundu.\n";
+                        report += "- Ölüm sebebi: Ağır darbe sonucu beyin kanaması.";
+                        break;
+                    case 4: // Komiser
+                        report += "- Vücutta savunma yaraları ve standart bir polis copuna ait olabilecek darbe izleri tespit edildi.\n";
+                        report += "- Olay yeri çok profesyonelce temizlenmeye çalışılmış.\n";
+                        report += "- Ölüm sebebi: Yakın mesafeden alınan travmatik darbe ve havasız kalma.";
+                        break;
+                    case 5: // Terzi
+                        report += "- Boyun bölgesinde ince bir tel veya çok sağlam bir iplikle boğulma izleri mevcuttur.\n";
+                        report += "- Kurbanın ceketinde sonradan eklenmiş gizli bir cep bulundu.\n";
+                        report += "- Failin, kurbanla yakın mesafede bulunacak kadar ona yaklaşabildiği açıktır.";
+                        break;
+                    default:
+                        report += "- Kesin ölüm sebebi belirlenemedi. Adli tıp incelemesi sürüyor.";
+                        break;
+                }
+
+                return Results.Ok(new { success = true, report = report });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // DİNAMİK İPUCU DETAYI ENDPOINT
+        app.MapGet("/api/game/clue-detail/{clueId}", async (int clueId) =>
+        {
+            try
+            {
+                var npcs = await repository.GetAllNPCsAsync();
+                var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
+                int guiltyId = guiltyNpc?.NPCId ?? 0;
+
+                string text = "Bu nesne karanlık sırlar barındırıyor...";
+
+                switch(clueId) 
+                {
+                    case 1: text = "Üzerindeki kan lekeleri Osman Bey'e ait gibi görünüyor. " + (guiltyId == 1 ? "Sapındaki el izi net bir şekilde Kasap Hasan'ı işaret ediyor." : "Ancak satırın sapında kasaba ait olmayan, eldivenle tutulmuş gibi garip izler var."); break;
+                    case 2: text = "Sayfalarda Osman Bey'in adı kırmızıyla çizilmiş. Yanında bir not: " + (guiltyId == 1 ? "'Borcunu ödemedi, cezasını çekecek.'" : "'Bu borç sadece başlangıç.'"); break;
+                    case 3: text = "Kavga izleri taşıyan önlük... Osman Bey'in ceketinin düğmesi önlüğün cebinde bulunuyor. " + (guiltyId == 1 ? "Hasan o gece kurbanla boğuşmuş olmalı." : ""); break;
+                    case 4: text = "Zehirli bir ilacın boş şişesi. Reçetede Osman Bey'in adı var. " + (guiltyId == 2 ? "Etiketin arkasında Selma'nın el yazısıyla 'Son Doz' yazıyor." : "Şişe aceleyle alınmış gibi, kapağı zorlanmış."); break;
+                    case 5: text = "Osman Bey'e verilen ilaçların listesi. Son sayfa yırtık. " + (guiltyId == 2 ? "Yırtık sayfanın izinde 'Zehir' kelimesi okunabiliyor." : "Birisi kanıtları yok etmek için defteri zorla yırtmış."); break;
+                    case 6: text = "Bu bitkinin özü, Osman Bey'in kanında bulunan zehirle aynı. " + (guiltyId == 2 ? "Selma bunu kasten hazırlamış." : "Birisi Selma'nın dükkanından bu otu gizlice almış olabilir."); break;
+                    case 7: text = "Mektupta 'Osman, o araziler benim, sonun yaklaşıyor' yazıyor. " + (guiltyId == 3 ? "Muhtar Kemal açıkça kurbanı tehdit etmiş ve bunu gerçekleştirmiş." : "Ancak mektup asla postalanmamış, sadece bir sinir anında yazılmış."); break;
+                    case 8: text = "Osman Bey'in kırık gözlüğü... " + (guiltyId == 3 ? "Muhtarın odasında şiddetli bir kavga yaşanmış." : "Gözlük bir başka yerde kırılıp buraya bırakılmış olabilir."); break;
+                    case 9: text = "Kasada Osman Bey'in arazilerine ait sahte tapular var. " + (guiltyId == 3 ? "Kemal her şeyi planlamış, cinayet sebebi bu tapular." : "Bu tapular sadece muhtarın açgözlülüğünü gösteriyor, cinayeti değil."); break;
+                    case 10: text = "Rozetin numarası kazınmış. Osman Bey'in cesedinin hemen yanında bulundu. " + (guiltyId == 4 ? "Güneş, kurbanla olay yerinde boğuşurken rozetini düşürmüş." : "Rozet oraya özellikle bir polisi suçlamak için bırakılmış."); break;
+                    case 11: text = "Dosyada Osman Bey'in gizli geçmişi var. " + (guiltyId == 4 ? "Komiser Güneş, bu geçmişi kullanarak kurbanı şantaj yapıyordu." : "Dosya sadece prosedür gereği tutulmuş."); break;
+                    case 12: text = "Pahalı bir palto düğmesi. Osman Bey'in cebinden çıktı. " + (guiltyId == 4 ? "Güneş'in paltosundan kopmuş, arbede sırasında Osman Bey onu tutmuş." : "Bu düğme terzinin bir müşterisine de ait olabilir."); break;
+                    case 13: text = "İplik, Osman Bey'in ceketinin dikişleriyle aynı. Üzerindeki kan... " + (guiltyId == 5 ? "Kurbanın kanı. Yahya kurbanı öldürürken makara elindeydi." : "Terzinin dikiş yaparken kendi elini kestiği bir kaza olabilir."); break;
+                    case 14: text = "Osman Bey'in ceketinden kopan kumaş. " + (guiltyId == 5 ? "Yahya kurbanla boğuşurken kumaş yırtıldı." : "Kumaş sadece bir terzi artığı olabilir."); break;
+                    case 15: text = "Cepteki notta 'Osman, bu gece gel konuşalım' yazıyor. " + (guiltyId == 5 ? "Yahya onu çağırdı ve tuzağa düşürdü." : "Yahya çağırdı ama gittiğinde onu ölü buldu."); break;
+                }
+
+                return Results.Ok(new { success = true, text = text });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
         // 6. Oyunu Sıfırla
         app.MapPost("/api/game/reset", async () =>
         {
@@ -209,6 +306,38 @@ class Program
                 // Fallback: veritabanı olmasa bile suçlu belirle
                 var fallbackGuilty = new Random().Next(1, 6);
                 return Results.Ok(new { success = true, message = "Oyun sıfırlandı (offline mod).", guiltyNpcId = fallbackGuilty });
+            }
+        });
+
+        // DİNAMİK DİYALOG ENDPOINT
+        app.MapGet("/api/game/dialogues", (int npcId, string category) =>
+        {
+            try
+            {
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "dialogues.json");
+                if (!File.Exists(filePath)) return Results.NotFound("Diyalog dosyası bulunamadı.");
+
+                var jsonStr = File.ReadAllText(filePath);
+                var allDialogues = JsonSerializer.Deserialize<Dictionary<string, List<DialogueNode>>>(jsonStr);
+
+                if (allDialogues != null && allDialogues.TryGetValue(npcId.ToString(), out var npcDialogues))
+                {
+                    var contextualPool = npcDialogues.Where(d => d.category == category).ToList();
+                    var questionsToShow = contextualPool.Count > 0 ? contextualPool : npcDialogues;
+                    
+                    // Rastgele en fazla 4 soru seç
+                    var rnd = new Random();
+                    var count = Math.Min(4, questionsToShow.Count);
+                    var selected = questionsToShow.OrderBy(x => rnd.Next()).Take(count).ToList();
+
+                    return Results.Ok(new { success = true, dialogues = selected });
+                }
+
+                return Results.NotFound("NPC diyalogları bulunamadı.");
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
             }
         });
 

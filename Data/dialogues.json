@@ -1,0 +1,990 @@
+{
+  "1": [
+    {
+      "q": "Cinayet gecesi neredeydin Hasan?",
+      "a": "Buradaydım, dükkânımda. Gece geç saate kadar et doğruyordum. Kimsecikler yoktu ortalıkta, yağmur bardaktan boşalırcasına yağıyordu.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": []
+    },
+    {
+      "q": "Kurbanı ne kadar iyi tanıyordun?",
+      "a": "Osman Bey mi? Herkes tanır onu. İyi müşterimdi, her hafta gelirdi. Ama son zamanlarda arası bazılarıyla açılmıştı...",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": []
+    },
+    {
+      "q": "Kasabada düşmanı olan var mıydı?",
+      "a": "Düşman mı? Ha, bir sürü... Muhtar Kemal'le arazi meselesinden dolayı birbirlerine giriyorlardı. Eczacı Selma da ondan pek hazzetmezdi.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        7,
+        8
+      ]
+    },
+    {
+      "q": "Dükkânında şüpheli bir şey gördün mü?",
+      "a": "Şüpheli mi? Ben sadece kasabım dedektif bey. Ama... o gece garip sesler duydum sokaktan.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": []
+    },
+    {
+      "q": "O gece duyduğun garip sesler neydi?",
+      "a": "Bağrışma gibiydi... Ama yağmurdan net duyamadım. Saat gece yarısı civarıydı. Sonra bir araba kapısı çarpma sesi... Sonra sessizlik.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": []
+    },
+    {
+      "q": "Dükkânına gelen şüpheli biri oldu mu?",
+      "a": "Cinayet gecesi muhtar Kemal geldi aslında. Gece vakti et istedi. Aceleyle aldı gitti. Garip buldum ama sormadım.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        7
+      ]
+    },
+    {
+      "q": "Kurbanla son ne zaman konuştun?",
+      "a": "Cinayet gününden bir gün önce geldi. \"Yarın büyük bir para gelecek\" dedi. Bir daha göremedim...",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": []
+    },
+    {
+      "q": "Seni şüpheli görüyorlar, biliyor musun?",
+      "a": "Ha! Beni mi? Ben niye öldüreyim müşterimi? Borcunu ödeyecekti, öldürsem para gider! Aklını kullan dedektif...",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        1,
+        2
+      ]
+    },
+    {
+      "q": "Bu kanlı satır senin tezgahından çıktı!",
+      "a": "O... o satır çalınmıştı! Bir hafta önce kayboldu, polise söyledim ama kimse ciddiye almadı! Birisi beni suçlu göstermek istiyor!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        1
+      ],
+      "guiltyResponse": {
+        "1": "*Yüzü bembeyaz olur* O... o satır... Evet, benim ama çalınmıştı! İnanın bana, birisi... birisi çerçeveliyor!",
+        "2": "Eczacıya sorun! O kadın her şeyi biliyor, zehirler, ilaçlar... Satırı çalan da o olabilir!",
+        "3": "Muhtar'ın adamları çalmış olmalı! O gece dükkâna gelen Kemal'di, belki de satırı o aldı!",
+        "4": "Komiser Güneş bunu neden araştırmadı? Kayıp bildirimi yaptım ama dosya kayboldu!",
+        "5": "Terzi Yahya bir bıçak kılıfı diktirdi benden... Acaba o kılıf bu satır için miydi?"
+      }
+    },
+    {
+      "q": "Kara defterdeki kurbanın ismi neden çizili?",
+      "a": "Veresiye borcunu ödeyeceğini söyledi diye çizdim! O kadar! Herkes veresiye defteri tutar!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        2
+      ]
+    },
+    {
+      "q": "Yırtık önlüğündeki anahtar neyin anahtarı?",
+      "a": "*Terler* O... o anahtar arka odanın anahtarı. Soğuk hava deposu. İçinde sadece etler var...",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        3
+      ]
+    },
+    {
+      "q": "Muhtar cinayet gecesi sana geldiğini inkâr ediyor.",
+      "a": "Yalancı! O gece buraya geldi, gözleri dönmüştü! Eğer inkâr ediyorsa gizleyecek bir şeyi var demektir!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        7
+      ]
+    },
+    {
+      "q": "Soğuk hava deposunda sadece et mi var?",
+      "a": "... İyi tamam. Orada eski belgeler de var. Kurbanın bazı evrakları... O bana emanet bırakmıştı.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        3,
+        9
+      ],
+      "guiltyResponse": {
+        "1": "*Çok terler* Tamam... orada... sadece belgeler değil... Kurbanla son tartışmamızda... İşler kontrolden çıktı. Ama yemin ederim kaza oldu!",
+        "2": "O belgeler Selma'nın zehir siparişlerini gösteriyor! Korktum, sakladım!",
+        "3": "Muhtar'ın sahte tapuları orada! Kurban bana emanet bıraktı!",
+        "4": "Komiser'in kapatmaya çalıştığı dosyanın kopyası orada... Delil karartıyor!",
+        "5": "Yahya'nın diktiği ceketteki USB'nin kopyası orada..."
+      }
+    },
+    {
+      "q": "Kurbanın sana emanet bıraktığı şey neydi?",
+      "a": "Bir zarf... İçinde arazi tapuları vardı. Muhtarın üzerine kayıtlı arazilerin aslında kurbana ait olduğunu gösteren belgeler.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        9,
+        7
+      ]
+    },
+    {
+      "q": "Neden bu belgeleri polise vermedin?",
+      "a": "Korktum! Muhtar bu kasabada herkesin efendisi! Komiser Güneş zaten muhtarın adamı, kime güveneyim?",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        10,
+        11
+      ]
+    },
+    {
+      "q": "Terziden kurbanın ceketini aldığını biliyoruz.",
+      "a": "Hayır! Ben terziye hiç gitmedim! ... Tamam, Yahya'dan bir bıçak kılıfı diktirdim ama kurbanla alakası yok!",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        13,
+        14
+      ]
+    },
+    {
+      "q": "Son sözün nedir Hasan?",
+      "a": "Ben masum bir kasabım! Evet, korkağım, belgeleri sakladım, ama kimseyi öldürmedim! Gerçek katili bulun!",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [],
+      "guiltyResponse": {
+        "1": "*Gözyaşları* Ben... ben sadece kızdım. O gece Osman borcunu ödemeyeceğini söyledi, tartıştık... Satır elimdeydi... Bir anlık öfke... Ama ben katil değilim, bu bir kazaydı!",
+        "2": "Selma'nın elindeki zehir şişesini sorun! Ben değilim!",
+        "3": "Muhtar'ın tapuları sahte! O öldürdü!",
+        "4": "Komiser delilleri saklıyor, gerçek katil o!",
+        "5": "Yahya'daki USB'yi açın, her şey orada!"
+      }
+    },
+    {
+      "q": "Katil kim sence?",
+      "a": "Muhtar Kemal! Arazi meselesi yüzünden... Ama komiser de bu işin içinde olabilir. O gece karanlıkta bir kadın silueti gördüm...",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        7,
+        10
+      ]
+    },
+    {
+      "q": "Söylemediklerin var mı hâlâ?",
+      "a": "*Uzun sessizlik* Eczacı Selma... O gece dükkânını geç kapattı. Pencereden ışık gördüm. Elinde bir şişe vardı...",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        4,
+        6
+      ]
+    },
+    {
+      "q": "Masum olduğunu kanıtlayamazsan...",
+      "a": "Emanet zarfı açın! İçindeki belgeler her şeyi anlatır! Ben sadece bir kasabım, korkak bir kasap...",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        9
+      ]
+    }
+  ],
+  "2": [
+    {
+      "q": "Cinayet gecesi eczaneniz açık mıydı?",
+      "a": "Gece yarısına kadar açıktı. Envanter sayımı yapıyordum... Dışarıda yağmur yağıyordu, içeri müşteri gelmedi.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": []
+    },
+    {
+      "q": "Kurbanla ilişkiniz nasıldı?",
+      "a": "Sadece müşterimdi. Düzenli ilaç alırdı, kronik bir rahatsızlığı vardı. Son zamanlarda daha sık geliyordu...",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        4
+      ]
+    },
+    {
+      "q": "Kasabada zehirlenme vakaları olduğunu duydunuz mu?",
+      "a": "Ne zehirlenmesi? Ben eczacıyım, ilaç satarım! Zehir değil! Böyle iftiralar atılmasına tahammülüm yok!",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        6
+      ]
+    },
+    {
+      "q": "Kurbanın sağlık durumu hakkında bilginiz var mı?",
+      "a": "Hasta bir adamdı. Kalp ilacı kullanıyordu. Ama son haftalarda reçetesiz bir ilaç daha istemeye başladı...",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        4,
+        5
+      ]
+    },
+    {
+      "q": "Kurban reçetesiz hangi ilacı istedi?",
+      "a": "Güçlü bir uyku ilacı. Uykusuzluk çektiğini söyledi ama... O dozda kalp hastası için çok tehlikeli olurdu.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        4
+      ]
+    },
+    {
+      "q": "Gece yarısına kadar neden açıktınız?",
+      "a": "... Birini bekliyordum tamam mı? Muhtar Kemal aradı, \"Acil ilaç lazım, geç geleceğim\" dedi. Ama gelmedi.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        7
+      ],
+      "guiltyResponse": {
+        "1": "Kasap Hasan o gece geldi, çok gergindi. Ellerinde kan lekesi vardı, \"Kesildim\" dedi ama inanmadım...",
+        "2": "*Titrer* Tamam... Muhtar'ı beklemiyordum. Ben... kurbanı bekliyordum. Son ilaç dozunu verecektim ama... dozajı yanlış hesaplamış olabilirim.",
+        "3": "Muhtar aradı evet, ama sesinde panik vardı. \"Selma, beni örtbas et\" dedi. Ne demek istediğini anlayamadım...",
+        "4": "Komiser o gece geldi dükkâna. Defterimi istedi, \"Bunu bana ver\" dedi. Sayfaları o yırttı!",
+        "5": "Yahya'nın o gece paketini gördüm... Kurbanın evine gidiyordu. İçinde ne vardı bilmiyorum ama ağırdı."
+      }
+    },
+    {
+      "q": "Komiser Güneş sizi cinayet gecesi gördüğünü söylüyor.",
+      "a": "Nerede görmüş? Ben dükkânımdan çıkmadım! Eğer öyle diyorsa yalan söylüyor...",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        10,
+        11
+      ]
+    },
+    {
+      "q": "Kurbanın ölüm sebebi zehirlenme olabilir mi?",
+      "a": "*Yüzü solar* Zehirlenme mi? Bu... bu çok kötü. Ben hiçbir şey satmadım, yemin ederim!",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        4,
+        6
+      ]
+    },
+    {
+      "q": "Bu boş ilaç şişesindeki zehri kime sattın?",
+      "a": "O... o ilacı ben kimseye satmadım! Şişe çalınmış olmalı! Belki biri gece dükkâna girdi ve aldı...",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        4
+      ],
+      "guiltyResponse": {
+        "1": "Kasap'a sorun! O gece dükkânıma girip çıkan birini gördüm, iri yarı biriydi!",
+        "2": "*Yıkılır* O şişe... benim. Kurbanın ilacına karıştırdım ama öldürmek için değil! Acısını dindirmek için! O çok acı çekiyordu, yalvardı bana!",
+        "3": "Muhtar istedi o ilacı! \"Birisi için lazım\" dedi. Kim için olduğunu sormadım...",
+        "4": "O şişeyi komiser aldı! Benden zorla aldı, \"Delil\" dedi ama rapora yazmadı!",
+        "5": "Yahya'nın gizli cepte sakladığı not... O notta bu ilaçtan bahsediliyor olabilir."
+      }
+    },
+    {
+      "q": "Reçete defterinin son sayfasını neden yırttın?",
+      "a": "*Titreyerek* Orada önemli bir not vardı. Kurbanın gerçek teşhisi... Mesleki sorumluluğum...",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        5
+      ]
+    },
+    {
+      "q": "Tezgah altındaki zehirli sarmaşık ne için?",
+      "a": "Tıbbi araştırma! Geleneksel tıpta kullanılır! Ben onu ilaç yapmak için yetiştiriyorum, zehir olarak değil!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        6
+      ]
+    },
+    {
+      "q": "Kurbanın gerçek teşhisi neydi?",
+      "a": "*Uzun sessizlik* Osman Bey zehirleniyordu... Yavaş yavaş. Ama ben yapmadım! Birisi ona düzenli olarak küçük dozlarda zehir veriyordu.",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "q": "Neden polise söylemedin zehirlenme şüpheni?",
+      "a": "Komiser Güneş'e söyledim! Ama ciddiye almadı. Defteri gösterdim. Sonra... bazı sayfaları kayboldu.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        5,
+        10,
+        11
+      ]
+    },
+    {
+      "q": "Komiser defterin sayfalarını mı aldı?",
+      "a": "Bilmiyorum! Ama o gün komiserin gelişinden sonra sayfalar yoktu. Belki tesadüftür... belki değildir.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        11
+      ]
+    },
+    {
+      "q": "Muhtar neden seni arayıp ilaç istedi o gece?",
+      "a": "Stres ilacı istedi. \"Çok gerginim, uyuyamıyorum\" dedi. Ama sesinde korku vardı... Normal değildi.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        7
+      ]
+    },
+    {
+      "q": "Terzi Yahya'yla ilişkin nedir?",
+      "a": "Yahya mı? Komşuyuz, bazen çay içeriz. Ama... Yahya kurbanın son günlerinde onu çok sık ziyaret etti.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "q": "Son sözün nedir Selma?",
+      "a": "Ben eczacıyım, insanları iyileştirmek için çalışıyorum! Evet, şüphemi sakladım ama korktum!",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": []
+    },
+    {
+      "q": "Katil kim sence?",
+      "a": "Muhtar ve komiser arasında bir bağ var. Cinayet gecesi muhtar et almaya gitti, komiser olay yerini geç inceledi...",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        7,
+        10
+      ]
+    },
+    {
+      "q": "Sakladığın başka bir şey var mı?",
+      "a": "Cinayet gecesi... Pencereden Terzi Yahya'yı gördüm. Elinde bir paket vardı ve kurbanın evine doğru gidiyordu.",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        13,
+        15
+      ]
+    },
+    {
+      "q": "Bu zehirli bitkiyi kurban için mi kullandın?",
+      "a": "HAYIR! O bitki deneysel ilaç çalışmam için! Ben birini zehirlemek istesem... şey, yani teorik olarak...",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        6
+      ]
+    }
+  ],
+  "3": [
+    {
+      "q": "Muhtar bey, cinayet gecesi neredeydiniz?",
+      "a": "Evimdeydim tabii ki. Televizyon izledim, sonra uyudum. Muhtarın gece sokakta ne işi olur?",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": []
+    },
+    {
+      "q": "Kurbanla aranızdaki ilişki nasıldı?",
+      "a": "Normal komşuluk. Bazen anlaşamadığımız konular oldu ama siyasette düşman olmak cinayet sebebi değildir.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        7
+      ]
+    },
+    {
+      "q": "Kasabada gerginliğin sebebi nedir?",
+      "a": "Arazi meseleleri... Belediye yeni yol geçirecek, bazı araziler kamulaştırılacak. Herkes pay kapmaya çalışıyor.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        9
+      ]
+    },
+    {
+      "q": "Kurbanın ölümü sana yaradı diyorlar.",
+      "a": "Kim diyor? Kimin diline düşmüşüm? Osman'ın ölümü bana hiçbir şey kazandırmadı!",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        7,
+        9
+      ]
+    },
+    {
+      "q": "Arazi meselesi hakkında detay ver.",
+      "a": "Kurbanın arazisi yolun tam üzerinde. Kamulaştırma bedeli çok yüksek olacaktı. Osman satmak istemiyordu...",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        9
+      ]
+    },
+    {
+      "q": "Cinayet gecesi kasaba gidip et aldığın doğru mu?",
+      "a": "*Duraksır* Kim söyledi? Kasap Hasan mı? Sadece kısa bir yürüyüşe çıktım. Kasabın önünden geçtim ama et almadım!",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        1,
+        2
+      ],
+      "guiltyResponse": {
+        "1": "Hasan yalancı! O gece kasabın önünden bile geçmedim! ... Tamam, geçtim ama et almak için değil.",
+        "2": "Selma'yı aradığımı itiraf ediyorum. Stres ilacı lazımdı. Ama gitmediğimi yemin ederim!",
+        "3": "*Sinirlenir* Tamam! Et aldım! Ama cinayet saatinden ÇOK önce! Saat 10'da gidip geldim. Sonra eve döndüm. Sonra... yürüyüşe çıktım tekrar. Kurbanın evinin önünden geçtim. Ama ona dokunmadım! ...En azından öyle hatırlıyorum.",
+        "4": "Komiser beni uyardı, \"Evinde kal\" dedi. Ama dinlemedim, merak ettim ne oluyor diye...",
+        "5": "Yahya'yı o gece sokakta gördüm! O da dışarıdaydı!"
+      }
+    },
+    {
+      "q": "Eczacı Selma seni aradığını söylüyor o gece.",
+      "a": "Hayır! Ben kimseyi aramadım! Selma yanlış hatırlıyor... Ya da bilerek yalan söylüyor.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        4,
+        5
+      ]
+    },
+    {
+      "q": "Kurbanla son görüşmeniz ne zamandı?",
+      "a": "Cinayet gününden iki gün önce. Bağırdı çağırdı. \"Arazimi vermeyeceğim, mahkemeye giderim!\" dedi.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        7
+      ]
+    },
+    {
+      "q": "Bu tehdit mektubunu sen yazdın, çekmecende bulduk!",
+      "a": "*Yüzü kızarır* Bunu sinirle yazdım! Göndermeyecektim! Herkes kızgınken bir şeyler yazar!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        7
+      ]
+    },
+    {
+      "q": "Kurbanın kırık gözlüğü senin odanda ne işi var?",
+      "a": "Kavga ettiğimizde düştü! Kırdım evet, ama sonra pişman oldum. Geri verecektim...",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        8
+      ]
+    },
+    {
+      "q": "Kasadaki sahte belgeler neyin nesi?",
+      "a": "*Terler* Onlar... eski belediye evrakları. Bazen prosedürler hızlansın diye bazı belgeler... düzenlenir.",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        9
+      ]
+    },
+    {
+      "q": "Kasap Hasan cinayet gecesi geldiğini kanıtlayabilir.",
+      "a": "Tamam! Evet, kasaba gittim! Et aldım! Ama bu beni katil yapmaz!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        1,
+        2
+      ]
+    },
+    {
+      "q": "Gece yarısı et almak için mi çıktın gerçekten?",
+      "a": "... Tamam, et bahaneydi. Kurbanın evinin önünden geçmek istedim. Tehdit mektubu yazdığım için vicdan azabı çekiyordum.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        7
+      ],
+      "guiltyResponse": {
+        "1": "Kasap'ın söylediklerine inanmayın! O adam yalancının teki!",
+        "2": "Selma beni çerçevelemeye çalışıyor! O zehirci kadın!",
+        "3": "*Masayı yumruklar* TAMAM! Kurbanın evine gittim! Konuşmak istedim, barışmak... Ama o beni kovdu, aşağıladı. \"Sahte tapularını biliyorum\" dedi. Tartıştık... ve ben... kontrol... *susar*",
+        "4": "Komiser Güneş her şeyi biliyor! O gece beni aradı, \"Muhtar sakin ol\" dedi. Neden böyle dedi?",
+        "5": "Yahya'nın elinde bir paket vardı o gece, onu araştırın!"
+      }
+    },
+    {
+      "q": "Kurbanın evinde ne gördün?",
+      "a": "Işıklar yanıyordu. Bir gölge gördüm pencerede... Kurban değildi. Başka birisi vardı orada.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": []
+    },
+    {
+      "q": "Komiser Güneş'le ilişkin nedir?",
+      "a": "Resmi ilişkimiz var... *duraksır* Bazen bazı dosyaların kapanması konusunda ortak çalışırız. Hepsi bu.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        10,
+        11
+      ]
+    },
+    {
+      "q": "Arazi tapuları aslında kurbanın üzerineymiş.",
+      "a": "*Şok olur* Ne?! Tapular... Kim söyledi bunu?! O araziler yasal olarak belediyeye aittir!",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        9
+      ]
+    },
+    {
+      "q": "Son sözün nedir Kemal?",
+      "a": "Ben bu kasabanın muhtarıyım! 20 yıldır hizmet ediyorum. Evet hatalarım oldu ama kimseyi öldürmedim!",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": []
+    },
+    {
+      "q": "Katil kim sence?",
+      "a": "Kasap Hasan! O satırla... Ama belki eczacı. O kadının ne zehirler bildiğini düşünün! Ya da terzi...",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        1,
+        4,
+        13
+      ]
+    },
+    {
+      "q": "Söylemediklerin var mı?",
+      "a": "*İç çeker* Komiser Güneş... O gece beni aradı. \"Muhtar, evinde kal\" dedi. Neden böyle dediğini hiç sormadım...",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        10,
+        11
+      ]
+    },
+    {
+      "q": "Kurbanın evindeki gölge kim olabilir?",
+      "a": "Uzun boylu biriydi... Terzi Yahya'nın boyu uzundur... O gece herkes bir yerlere gidiyordu bu kasabada.",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        13,
+        14,
+        15
+      ]
+    }
+  ],
+  "4": [
+    {
+      "q": "Komiser, olay yerine ilk gelen siz miydiniz?",
+      "a": "Evet, saat 02:30 civarında ihbar aldık. 10 dakika içinde oradaydım. Ceset meydanda yatıyordu, yağmur izleri siliyordu.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": []
+    },
+    {
+      "q": "Kurban hakkında ne biliyorsunuz?",
+      "a": "Osman Bey, 58 yaşında, tüccar. Kasabada tanınan bir isim. Arazi anlaşmazlıkları dışında bilinen düşmanı yoktu...",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": []
+    },
+    {
+      "q": "Cinayet gecesi siz neredeydiniz?",
+      "a": "Karakolda nöbetteydim. Evrak işleriyle uğraşıyordum. Yağmurlu gecelerde genelde sakin olur kasaba...",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        10
+      ]
+    },
+    {
+      "q": "İlk bulgular neler?",
+      "a": "Kafa travması. Sert bir cisimle vurulmuş. Ölüm saati 23:00-01:00 arası. Olay yerinde az sayıda fiziksel delil vardı.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        1,
+        12
+      ]
+    },
+    {
+      "q": "Olay yerinde hangi delilleri buldunuz?",
+      "a": "Bir düğme, bazı ayak izleri... Yağmur çoğunu sildi. Standart prosedür uyguladık.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        12
+      ]
+    },
+    {
+      "q": "Neden dış dedektif çağrıldı?",
+      "a": "*Rahatsız olur* Üst makamın kararı. \"Tarafsız göz lazım\" dediler. Kasabada herkes birbirini tanıyor.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": []
+    },
+    {
+      "q": "Muhtar Kemal'le ilişkiniz profesyonel mi?",
+      "a": "Tabii ki profesyonel! Muhtar resmi makam, ben de polis. Başka bir ilişki yok!",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        7,
+        9
+      ],
+      "guiltyResponse": {
+        "1": "Kasap Hasan'ın dükkânında şüpheli evraklar bulundu, onu soruşturuyorum!",
+        "2": "Eczacı Selma'nın zehir stoku var, bunu raporladım ama üst makam ilgilenmedi.",
+        "3": "Muhtar Kemal... *duraksır* Evet, bazen dosyaları birlikte kapattık. Ama bu normal prosedür!",
+        "4": "*Sertleşir* Ben 15 yıllık polisim! Muhtar'la profesyonel ilişkimiz var, ama cinayet gecesi... tamam, onu aradım. Uyardım. Çünkü bilgi aldım, ihbar vardı. Ama bu bilgiyi... resmi kanaldan almadım. Bir kaynak... söyleyemem.",
+        "5": "Terzinin dosyasında adı geçiyor ama bu gizli bir soruşturma!"
+      }
+    },
+    {
+      "q": "Eczacı Selma zehirlenme şüphesini bildirmiş miydi?",
+      "a": "*Duraksır* Selma mı söyledi? Bir keresinde \"kan değerleri garip\" gibi bir şey demişti ama somut kanıt yoktu.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        4,
+        5
+      ]
+    },
+    {
+      "q": "Bu polis rozeti olay yerinde bulundu!",
+      "a": "*Yüzü değişir* Kayıp olarak rapor edilmişti. Bir ay önce karakoldan çalındı. Kim aldıysa olay yerine bırakmış.",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        10
+      ]
+    },
+    {
+      "q": "Gizli dosyadaki bilgiler neden rapor edilmedi?",
+      "a": "O dosya devam eden bir soruşturmanın parçası! Her şeyi kamuoyuyla paylaşamam. Prosedür gereği gizli!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        11
+      ]
+    },
+    {
+      "q": "Bu düğme terzi Yahya'nın diktiği paltoya ait.",
+      "a": "İlginç... Yahya'dan düğmenin kime ait olduğunu sorduk ama net cevap vermedi.",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        12,
+        14
+      ]
+    },
+    {
+      "q": "Eczacının defterinden sayfaları siz mi aldınız?",
+      "a": "NE?! Ben kimsenin defterinden sayfa almadım! Bu çok ciddi bir itham! Kanıtınız var mı?",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        5
+      ]
+    },
+    {
+      "q": "O gece muhtarı neden arayıp evinde kalmasını söylediniz?",
+      "a": "*Şaşırır* Muhtar bunu mu söyledi? Ben onu güvenlik için uyardım! İhbar gelmişti!",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        7
+      ]
+    },
+    {
+      "q": "İhbar gelmeden ÖNCE muhtarı aradığınız kanıtlandı.",
+      "a": "*Uzun sessizlik* ... Birisi beni aradı. Tanımadığım numara. \"Meydanda bir şey olacak\" dedi. Ciddiye aldım.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        10,
+        11
+      ],
+      "guiltyResponse": {
+        "1": "Kasap'ın soğuk hava deposunu araştırın!",
+        "2": "Eczacının tezgah altındaki bitkileri inceleyin!",
+        "3": "Muhtar'ın kasasındaki sahte belgeleri bulun!",
+        "4": "*Masaya yumruğunu vurur* TAMAM! Evet, muhtarı ihbardan önce aradım. Çünkü BEN o ihbarı aldım... kendi kendime. Anonim aramanın kaynağını biliyordum çünkü... o ses benim tanıdığımdı. Ve ben... olay yerine gittiğimde delilleri... düzenledim. Ama öldürmedim! Birisi bana talimat verdi!",
+        "5": "Yahya'nın USB belleğinde her şey var!"
+      }
+    },
+    {
+      "q": "Delilleri karartma şüpheniz var.",
+      "a": "Karartma mı?! 15 yıllık polisim! Evet, bazı bilgileri gizli tuttum ama prosedür gereği!",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        10,
+        11
+      ]
+    },
+    {
+      "q": "Olay yerinden rapora yazmadığınız neler var?",
+      "a": "*Masaya bakar* Bir mektup... Kurbanın cebinden. \"Beni takip ediyorlar, bu gece her şeyi açıklayacağım\" yazıyordu...",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        15
+      ]
+    },
+    {
+      "q": "Son sözünüz nedir Komiser?",
+      "a": "Ben görevimi yaptım! Prosedür hataları oldu ama tarafsız kalmak zor... Adaletin yanındayım.",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": []
+    },
+    {
+      "q": "Katil kim sizce?",
+      "a": "Kanıtlar muhtarı gösteriyor... Arazi meselesi, tehdit mektubu, o gece dışarı çıkması. Ama kasap da şüpheli.",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        1,
+        7
+      ]
+    },
+    {
+      "q": "Sakladığınız başka bilgi var mı?",
+      "a": "Kurbanın cebindeki mektupta: \"Yahya her şeyi biliyor\" yazıyordu. Ne anlama geliyor bilmiyorum.",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        15
+      ]
+    },
+    {
+      "q": "Sizi de şüpheli listesine ekliyorum.",
+      "a": "*Sertleşir* Bu sizin hakkınız. Ama gerçek katili bulun, o zaman masumiyetimi görürsünüz.",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        10,
+        11
+      ]
+    }
+  ],
+  "5": [
+    {
+      "q": "Yahya usta, cinayet gecesi neredeydin?",
+      "a": "Dükkânımdaydım, gece geç saate kadar dikiş dikiyordum. Sipariş yetişmesi lazımdı. Makinenin sesinden başka bir şey duymadım.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": []
+    },
+    {
+      "q": "Kurbanı tanıyor muydun?",
+      "a": "Eski müşterimdi. Son birkaç haftadır sık geliyordu. Özel bir ceket sipariş etmişti... Teslim edemedim.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        14,
+        15
+      ]
+    },
+    {
+      "q": "Kasabadaki gerginliklerden haberin var mı?",
+      "a": "Ben terziyim, kumaşla uğraşırım. İnsanların kavgalarına karışmam. Ama... son zamanlarda herkes gergindi.",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": []
+    },
+    {
+      "q": "Dükkânında ilginç bir şey fark ettin mi?",
+      "a": "İlginç mi? Hayır, her şey normal... Dikişler, kumaşlar, müşteriler. *Gözlerini kaçırır*",
+      "difficulty": 1,
+      "category": "tanisma",
+      "relatedClues": [
+        13
+      ]
+    },
+    {
+      "q": "Kurbanın sipariş ettiği ceket nasıl bir ceketti?",
+      "a": "Özel bir ceket... Gizli cepleri olan, astarı kalın. \"İçine belgeler koyacağım\" demişti.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        14,
+        15
+      ]
+    },
+    {
+      "q": "Kurban sana belge saklatmak mı istedi?",
+      "a": "Hayır! Sadece cekete cep dikeyim dedi. Belgeleri kendisi koyacaktı. Ben sadece terziyim!",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [
+        15
+      ]
+    },
+    {
+      "q": "Cinayet gecesi dükkânından çıktın mı?",
+      "a": "*Duraksır* Bir kez çıktım. Sigara içmeye. Ama hemen döndüm. 10 dakika bile sürmedi.",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": [],
+      "guiltyResponse": {
+        "1": "Kasap'ın dükkânında ışık yanıyordu ama girmedim oraya!",
+        "2": "Eczane'nin ışığı da açıktı. Selma pencereden baktı ama beni görmemiş olmalı... *yutkunur*",
+        "3": "Muhtar'ın sokakta olduğunu gördüm, ama yüzünü seçemedim.",
+        "4": "Komiser'in devriye aracı geçti sokaktan... Beni görmüş olabilir.",
+        "5": "*Elleri titrer* Tamam... 10 dakikadan fazla dışarıdaydım. Kurbanın evine gittim. Notu ben yazmıştım, \"Bu gece gel konuşalım\" diye. Gittim. Kapı açıktı. İçeri girdim. Osman... Osman yerde yatıyordu. Ama ben varmadan ölmüştü! ...Yoksa ölmemiş miydi?"
+      }
+    },
+    {
+      "q": "Eczacı Selma seni kurbanın evine giderken gördü.",
+      "a": "Selma mı?! Yanılmış olmalı! Sadece sigara içmeye çıktım! *Elleri titrer*",
+      "difficulty": 2,
+      "category": "derinlesme",
+      "relatedClues": []
+    },
+    {
+      "q": "Bu kanlı iplik makarası senin dükkânından!",
+      "a": "Kan mı?! İmkânsız! Kumaş keserken elimi keserim, o benim kanım olabilir!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        13
+      ]
+    },
+    {
+      "q": "Bu yırtık kumaş kurbanın ceketinden kopmuş.",
+      "a": "*Yutkunur* O kumaş bende vardı evet. Ceketi dikerken artan parça. Her terzi artık kumaş saklar!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        14
+      ]
+    },
+    {
+      "q": "Gizli cepteki not \"Bu gece gel, konuşalım\" yazıyor. Senin el yazın!",
+      "a": "*Terler* Ben yazdım evet. Kurban benimle konuşmak istedi! Gizli bir şey anlatacaktı ama... varamadım!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": [
+        15
+      ],
+      "guiltyResponse": {
+        "1": "Kasap Hasan'ın o satırla bir ilgisi olabilir! Benden bıçak kılıfı istedi!",
+        "2": "Selma'nın zehirleri var, onu araştırın! Ben sadece not yazdım!",
+        "3": "Muhtar'ın tehdit mektubu daha tehlikeli bir delil!",
+        "4": "Komiser bu notu biliyordu! Dosyasında yazıyor!",
+        "5": "*Titrer* Evet, o notu ben yazdım. Kurbanla buluşacaktık. Ama gittiğimde... kapı açıktı. Girdim. Tartıştık. O belgeler yüzünden... USB'deki bilgiler... Ben sadece korumak istiyordum ama Osman vermek istemedi. Çekiştirdik ve..."
+      }
+    },
+    {
+      "q": "Neden varamadın? Yola çıktığını biliyoruz.",
+      "a": "Çıktım evet! Ama yarı yolda döndüm! Korktum... Gölge gibi bir figür gördüm. Korkup geri döndüm!",
+      "difficulty": 3,
+      "category": "yuzlestirme",
+      "relatedClues": []
+    },
+    {
+      "q": "Gördüğün gölge kim olabilir?",
+      "a": "Bilmiyorum! Karanlıktı, yağmur yağıyordu... Uzun bir palto giyiyordu. Belki muhtarın paltosu.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        12
+      ]
+    },
+    {
+      "q": "Kasap Hasan'a bıçak kılıfı diktin mi?",
+      "a": "*Gözleri büyür* Kim söyledi?! Evet diktim. Normal bir sipariş! Kasap bıçak kılıfı kullanır!",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        1,
+        3
+      ]
+    },
+    {
+      "q": "Kurbanın sana anlattığı gizli şey neydi?",
+      "a": "Tam anlatmadı. \"Bu kasabada herkes bir şeyler gizliyor, dikkat et Yahya\" dedi. Tapulardan, belgelerden bahsetti.",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        9,
+        15
+      ]
+    },
+    {
+      "q": "Komiserin gizli dosyasında senin adın geçiyor.",
+      "a": "BENİM ADIM MI?! Ne yazıyor?! Ben hiçbir suç işlemedim! Sadece elbise dikerim! *Panik yapar*",
+      "difficulty": 4,
+      "category": "baski",
+      "relatedClues": [
+        11
+      ]
+    },
+    {
+      "q": "Son sözün nedir Yahya?",
+      "a": "Ben masum bir terziyim! Kurbanla görüşmeye çalıştım ama varamadım! O gece herkes sokaktaydı...",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": []
+    },
+    {
+      "q": "Katil kim sence?",
+      "a": "Muhtar Kemal! Arazi meselesi yüzünden... Ya da komiser. O kadın bir şeyler saklıyor, gözlerinden belli.",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        7,
+        10
+      ]
+    },
+    {
+      "q": "Sakladığın son bir şey var mı?",
+      "a": "*Gözyaşları* Kurbanın ceketi... Bitmiş haliyle duvarda asılı. İçindeki gizli cepte bir USB bellek var. Kimseye vermedim.",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        15
+      ]
+    },
+    {
+      "q": "USB bellekte ne var?",
+      "a": "Bilmiyorum! Açmadım! Kurban \"Başıma bir şey gelirse bunu doğru kişiye ver\" demişti. Doğru kişi kim?",
+      "difficulty": 5,
+      "category": "son",
+      "relatedClues": [
+        15,
+        9
+      ]
+    }
+  ]
+}
