@@ -143,16 +143,21 @@ public class DatabaseRepository
         using var db = CreateConnection();
 
         var npcCount = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM NPCs");
-        if (npcCount > 0)
+        if (npcCount >= 5)
             return; // Veri zaten var, seed yapma
+
+        // Tabloları temizle
+        await db.ExecuteAsync("DELETE FROM DialogLogs; DELETE FROM Clues; DELETE FROM NPCs;");
 
         // NPC'leri ekle
         await db.ExecuteAsync(@"
             INSERT INTO NPCs (Name, Role, TrustLevel, FearLevel, IsGuilty, SecretInfo)
             VALUES
-                (N'Kasap Hasan',   N'Kasabadaki eski kasap, herkesin tanıdığı bir figür.',            50, 20, 0, N'Cinayet gecesi dükkânında gizlice birine et sattı.'),
-                (N'Eczacı Selma',  N'Eczane sahibi, ilaç ve zehir konusunda uzman.',                  50, 45, 0, N'Kurbanın kullandığı ilacın yan etkilerini biliyordu ama gizledi.'),
-                (N'Muhtar Kemal',  N'Kasabanın muhtarı, herkesin sırrını bilen bir politikacı.',       50, 60, 1, N'Kurbanla arazi anlaşmazlığı vardı ve onu tehdit etmişti.')");
+                (N'Kasap Hasan',   N'Kasabadaki eski kasap, herkesin tanıdığı sert bir figür.',            50, 20, 0, N'Cinayet gecesi dükkânında gizlice birine et sattı.'),
+                (N'Eczacı Selma',  N'Eczane sahibi, ilaç ve zehir konusunda uzman bir kadın.',             50, 45, 0, N'Kurbanın kullandığı ilacın yan etkilerini biliyordu ama gizledi.'),
+                (N'Muhtar Kemal',  N'Kasabanın muhtarı, herkesin sırrını bilen bir politikacı.',           50, 60, 0, N'Kurbanla arazi anlaşmazlığı vardı ve onu tehdit etmişti.'),
+                (N'Komiser Güneş', N'Kasabanın kadın polis komiseri, adaletin savunucusu.',                50, 30, 0, N'Olay gecesi bazı delilleri yanlışlıkla yok ettiğini gizliyor.'),
+                (N'Terzi Yahya',   N'Kasabanın yaşlı terzisi, kurbana son kıyafeti diken kişi.',           50, 35, 0, N'Kurbanın ceketine gizli bir cep dikmişti, içinde ne olduğunu kimseye söylemedi.')");
 
         // İpuçlarını ekle
         await db.ExecuteAsync(@"
@@ -161,8 +166,8 @@ public class DatabaseRepository
                 (N'Kanlı Bıçak',           N'Olay yerinde bulunan paslanmış bir kasap bıçağı.',                          1),
                 (N'Boş İlaç Şişesi',       N'Kurbanın evinde bulunan etiketsiz ilaç şişesi.',                            2),
                 (N'Tehdit Mektubu',        N'Kurbanın çekmecesinden çıkan, muhtarın el yazısına benzeyen mektup.',        3),
-                (N'Tanık İfadesi',         N'Bir komşu, cinayet gecesi muhtarın evinden bağırışlar duyduğunu söyledi.',   3),
-                (N'Güvenlik Kamerası',     N'Eczanenin önündeki kamera, gece yarısı şüpheli bir silüet yakalamış.',       2)");
+                (N'Kopan Düğme',           N'Olay yerinde bulunan, polis üniformasına ait kopmuş pirinç düğme.',          4),
+                (N'Kopuk İplik',           N'Kurbanın boğazında bulunan son derece sağlam bir terzi ipliği.',             5)");
     }
 
     // =============================================

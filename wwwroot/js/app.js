@@ -41,11 +41,26 @@ let askedQuestionCount = {}; // { npcId: count }
 
 // === GAME DATA ===
 const NPC_DATA = {
-    1: { id: 1, name: 'Kasap Hasan', building: 'Kasap', role: 'Kasabadaki eski kasap', img: 'images/hasan.png', bg: 'images/butcher_interior.png', secret: 'Cinayet gecesi dükkânında gizlice muhtara et sattı.' },
-    2: { id: 2, name: 'Eczacı Selma', building: 'Eczane', role: 'Eczane sahibi', img: 'images/selma.png', bg: 'images/apothecary_interior.png', secret: 'Kurbanın zehirlendiğini biliyordu ama gizledi.' },
-    3: { id: 3, name: 'Muhtar Kemal', building: 'Muhtarlık', role: 'Kasabanın muhtarı', img: 'images/kemal.png', bg: 'images/town_hall_interior.png', secret: 'Kurbanla arazi anlaşmazlığı vardı.' },
-    4: { id: 4, name: 'Komiser Güneş', building: 'Karakol', role: 'Kadın polis komiseri', img: 'images/gunes.png', bg: 'images/police_interior.png', secret: 'Olay yerindeki delilleri sakladı.' },
-    5: { id: 5, name: 'Terzi Yahya', building: 'Terzi', role: 'Kasabanın terzisi', img: 'images/yahya.png', bg: 'images/tailor_interior.png', secret: 'Kurbana gizli cepli ceket dikti, son gören kişi.' }
+    1: { id: 1, name: 'Kasap Hasan', building: 'Kasap', role: 'Kasabadaki eski kasap', img: 'images/hasan.png', bg: 'images/butcher_interior.png',
+        secret: 'Cinayet gecesi dükkânında gizlice muhtara et sattı.',
+        murderStory: 'Yağmurlu bir sonbahar gecesiydi. Kasap Hasan, dükkânını kapattıktan sonra doğruca Osman Bey\'in evine yürüdü. Yıllardır biriken veresiye borcu artık dayanılmaz bir hal almıştı — Osman Bey her seferinde ödemeyi erteliyordu. O gece Hasan son kez parasını istemeye gitti. Kapıyı Osman Bey açtığında, Hasan\'ın gözlerindeki öfkeyi fark edemedi. "Paran yarın gelecek" dedi alaycı bir gülümsemeyle. "Yarın mı? Yıllardır yarın diyorsun!" diye kükredi Hasan. Tartışma kızıştıkça Hasan\'ın eli yanında getirdiği satıra gitti. Bir anlık öfke krizinde, o ağır satırı kurbanın boyun bölgesine indirdi. Derin, tırtıklı yara — ancak bir kasabın elinden çıkabilecek bir darbeydi. Osman Bey son çırpınışlarında Hasan\'ın siyah deri önlüğünden parçalar kopartmaya çalıştı, tırnakları arasında kalan o küçük parçalar, son nefesinde bile savaştığının kanıtıydı. Hasan panikle satırı dükkânına götürüp tezgaha sapladı. Kanlı önlüğünü bir köşeye fırlattı, kara kaplı veresiye defterindeki Osman\'ın adını kırmızı kalemle çizdi. Ama karanlıkta ne kadar temizlerse temizlesin, kanın izi her yere sinmişti.'
+    },
+    2: { id: 2, name: 'Eczacı Selma', building: 'Eczane', role: 'Eczane sahibi', img: 'images/selma.png', bg: 'images/apothecary_interior.png',
+        secret: 'Kurbanın zehirlendiğini biliyordu ama gizledi.',
+        murderStory: 'Eczacı Selma, yıllardır kasabada sessiz sedasız çalışan, herkesin güvendiği bir kadındı. Ama bu sessizliğin ardında derin bir nefret gizliydi. Osman Bey, Selma\'nın geçmişine dair bir sır keşfetmiş ve onu aylardır bununla tehdit ediyordu — sessiz kalmasının karşılığında düzenli para talep ediyordu. O gece Selma, planını uygulamaya koydu. Eczanesinin tezgahı altında yetiştirdiği ölümcül bir sarmaşık türünün özünü, son derece dikkatli bir şekilde Osman Bey\'in her gün kullandığı kalp ilacına karıştırdı. Dozajı mükemmel hesaplamıştı — ne çok az, ne çok fazla. İlacı o gün Osman\'ın eline bizzat verdi, gülümseyerek. "Geçmiş olsun Osman Bey, bu ilacı düzenli alın" dedi. Gece yarısı, Osman Bey yatmadan önce ilacını içti. Birkaç dakika içinde kalbinde keskin bir ağrı hissetti. Kalp krizi geçiriyormuş gibi kıvrandı, nefes almaya çalıştı ama zehir çoktan damarlarına yayılmıştı. Selma, o sırada eczanesinin karanlık köşesinde, yağmurun sesini dinleyerek bekledi. Boş ilaç şişesini masanın altına sakladı, parmak izlerini titizlikle sildi. Reçete defterinin son sayfalarını — Osman\'ın gerçek teşhisini ve zehirlenme belirtilerini içeren notları — aceleyle yırtıp attı. Ama her ne kadar profesyonel davranmış olsa da, zehirli sarmaşık tezgahın altında kurumaya bırakılmış halde duruyordu.'
+    },
+    3: { id: 3, name: 'Muhtar Kemal', building: 'Muhtarlık', role: 'Kasabanın muhtarı', img: 'images/kemal.png', bg: 'images/town_hall_interior.png',
+        secret: 'Kurbanla arazi anlaşmazlığı vardı.',
+        murderStory: 'Muhtar Kemal, kasabanın en güçlü adamıydı — herkesin sırrını biliyor, her kapıyı açıyordu. Ama yaklaşan belediye seçimleri için büyük bir arazi projesine ihtiyacı vardı ve o arazinin sahibi Osman Bey\'di. Haftalardır Osman\'ı arazisini satması için ikna etmeye çalışmıştı ama Osman direndi. "Bu arazi babamdan kalma, satmam" dedi her seferinde. O gece Kemal, tüm diplomatik maskesini çıkardı. Gece yarısı Osman\'ın evine sızdı — muhtarlık kasasındaki yedek anahtarlarla kapıyı açmak çocuk oyuncağıydı. İçeri girdiğinde Osman masasında oturmuş, belgelerini inceliyordu. "Sen de mi Kemal?" dedi Osman, şaşkınlıkla. Kemal sahte tapu belgelerini masaya fırlattı. "Bunu imzalayacaksın, ya da..." Osman belgeleri yırtmaya başladı. Kemal kontrolünü kaybetti. Masadaki ağır bronz mühürü kaptığı gibi Osman\'ın yüzüne indirdi. Şiddetli bir boğuşma başladı — mobilyalar devrildi, Osman\'ın gözlüğü yere düşüp kırıldı. Kemal, son darbeyi kurbanın şakağına indirdiğinde, Osman\'ın gözleri kararıp yere yığıldı. Ölüm sebebi: ağır darbe sonucu beyin kanaması. Kemal panikle evi terk etti ama aceleyle çıkarken yırtılmış tapu belgelerini ve kırık gözlüğü olduğu yerde bıraktı. Ofisine döndüğünde, titreyerek gizli kasasını açıp sahte belgelerin kopyalarını içine kilitledi.'
+    },
+    4: { id: 4, name: 'Komiser Güneş', building: 'Karakol', role: 'Kadın polis komiseri', img: 'images/gunes.png', bg: 'images/police_interior.png',
+        secret: 'Olay yerindeki delilleri sakladı.',
+        murderStory: 'Komiser Güneş, kasabanın adalet sembolüydü — ya da öyle görünüyordu. Gerçekte yıllardır Osman Bey\'den düzenli rüşvet alıyordu. Osman, kasabadaki yasadışı arazi işlemlerini ve kaçak ticaret yollarını biliyordu; Güneş ise bu bilgilerin gün yüzüne çıkmaması için olayları kapatıyor, dosyaları kaybediyordu. Ama Osman artık bu düzenden bıkmıştı ve Güneş\'i ihbar etmekle tehdit etti. "Yarın sabah savcılığa gidiyorum" dedi telefonda, sesi kararlıydı. Güneş o gece üniformasını giydi, polis copunu beline taktı ve Osman\'ın evine gitti. Kapıyı açan Osman, komiserin yüzündeki soğuk ifadeyi gördüğünde anladı ama çok geçti. Güneş ilk darbeyi polis copuyla Osman\'ın karnına indirdi. Osman ikiye katlanırken, Güneş onu yere devirdi. Boğuşma sırasında Osman savunma yaraları aldı — kollarında, ellerinde darbe izleri oluştu. Güneş yakın mesafeden copla art arda vurdu. Son darbe şakağına geldiğinde Osman hareketsiz kaldı. Havasız kalma ve travmatik darbeler — bir polisin eğitimli şiddetiyle uyumlu izler. Güneş, bir polis olarak olay yerini profesyonelce temizlemeye çalıştı — parmak izlerini sildi, kan lekelerini temizledi. Ama boğuşma sırasında paltosunun pirinç düğmesi kopmuş, rozeti yere düşmüştü. Karanlıkta bunları fark edemedi. Karakola döndüğünde, "GİZLİ" damgalı dosyaya Osman\'ın ihbar dilekçesini kilitledi ve anahtarı çekmecesinin derinliklerine gömdü.'
+    },
+    5: { id: 5, name: 'Terzi Yahya', building: 'Terzi', role: 'Kasabanın terzisi', img: 'images/yahya.png', bg: 'images/tailor_interior.png',
+        secret: 'Kurbana gizli cepli ceket dikti, son gören kişi.',
+        murderStory: 'Terzi Yahya, kasabanın en yaşlı ve en saygın ustasıydı. Ama bu saygın cephenin arkasında karanlık bir ortaklık vardı — Yahya, yıllardır Osman Bey\'in gizli işlerinin sessiz ortağıydı. Para aklama, belge saklama, hatta kaçak mal transferi... Osman\'ın son diktirdiği ceketin astarına gizli bir cep dikmişti ve bu cepte, tüm yasadışı işlemlerin kaydını içeren bir USB bellek saklanıyordu. Ama Osman, ortaklığı bitirmeye ve Yahya\'yı saf dışı bırakmaya karar vermişti. O gece Yahya, payını almak için Osman\'ın evine gitti. "Param nerede Osman?" diye sordu titreyen bir sesle. Osman güldü. "Senin paran mı? Bu işte sen artık yoksun yaşlı adam. O USB\'yi de sana vermeyeceğim." Yılların birikimi bir anda patladı. Yahya, meslek hayatının en sadık aleti olan iplik makarasını cebinden çıkardı. Kalın, dayanıklı, kopması imkansız terzi ipliğini Osman\'ın boynuna doladı ve tüm gücüyle sıktı. Osman çırpındı, direndi — bu sırada Yahya\'nın diktiği ceketinden kumaş parçaları yırtıldı. Ama Yahya bırakmadı. İplik boyun bölgesinde derin izler bırakarak, Osman\'ın son nefesini de aldı. Yahya titreyerek ayağa kalktı. Kanlı iplik makarasını cebine koydu, yırtılan kumaş parçalarını toplamaya çalıştı ama hepsini bulamadı. Dükkânına döndüğünde, o gece diktiği son ceketin gizli cebindeki not hâlâ duruyordu: "Bu gece gel, konuşalım."'
+    }
 };
 
 const SCENE_OBJECTS = {
@@ -308,14 +323,24 @@ document.getElementById('autopsy-timer-container').addEventListener('click', () 
     if (isAutopsyReady) {
         // Backend'den otopsi raporunu çek
         fetch('/api/game/autopsy')
-            .then(res => res.json())
+            .then(async res => {
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(errText);
+                }
+                return res.json();
+            })
             .then(data => {
                 if (data.success) {
                     document.getElementById('autopsy-text').textContent = data.report;
                     document.getElementById('autopsy-modal').classList.remove('hidden');
                 }
             })
-            .catch(err => console.error("Otopsi hatası:", err));
+            .catch(err => {
+                console.error("Otopsi hatası:", err);
+                document.getElementById('autopsy-text').textContent = "Otopsi raporu alınamadı: " + err.message;
+                document.getElementById('autopsy-modal').classList.remove('hidden');
+            });
     }
 });
 
@@ -921,16 +946,25 @@ window.accuseNpc = function(accusedId) {
             const resultMessage = document.getElementById('result-message');
             const retryBtn = document.getElementById('result-retry-btn');
             
-            // Gerçek hikaye kurgusu
+            // Gerçek katil ve seçilen kişi bilgileri
             const realKiller = NPC_DATA[guiltyNpcId];
-            const storyText = `<br><br><strong>O Gecenin Aslı:</strong> ${realKiller.secret}`;
+            const accusedNpc = NPC_DATA[accusedId];
             
             if (data.success) {
                 resultIcon.className = 'result-icon success';
                 resultIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
                 resultTitle.textContent = 'TEBRİKLER! KAZANDINIZ!';
                 resultTitle.style.color = 'var(--success)';
-                resultMessage.innerHTML = `${data.message} <br> Gerçekten de katil ${npc.name} idi. ${storyText}`;
+                resultMessage.innerHTML = `
+                    <div class="result-verdict">
+                        <div class="result-verdict-line"><i class="fa-solid fa-user-check" style="color:var(--success)"></i> Sizin Seçiminiz: <strong>${accusedNpc.name}</strong></div>
+                        <div class="result-verdict-line"><i class="fa-solid fa-handcuffs" style="color:var(--accent)"></i> Gerçek Katil: <strong>${realKiller.name}</strong></div>
+                        <div class="result-verdict-correct"><i class="fa-solid fa-circle-check"></i> DOĞRU TAHMİN!</div>
+                    </div>
+                    <div class="result-story">
+                        <div class="result-story-header"><i class="fa-solid fa-book-skull"></i> O Gecenin Hikayesi</div>
+                        <div class="result-story-text">${realKiller.murderStory}</div>
+                    </div>`;
                 retryBtn.innerHTML = '<i class="fa-solid fa-house"></i> Ana Menüye Dön';
                 retryBtn.classList.remove('hidden');
             } else {
@@ -938,7 +972,16 @@ window.accuseNpc = function(accusedId) {
                 resultIcon.innerHTML = '<i class="fa-solid fa-skull-crossbones"></i>';
                 resultTitle.textContent = 'KAYBETTİNİZ!';
                 resultTitle.style.color = 'var(--danger)';
-                resultMessage.innerHTML = `${data.message} <br> Yanlış kişiyi hapse attınız! Gerçek katil <strong>${realKiller.name}</strong> idi. ${storyText}`;
+                resultMessage.innerHTML = `
+                    <div class="result-verdict">
+                        <div class="result-verdict-line"><i class="fa-solid fa-user-xmark" style="color:var(--danger)"></i> Sizin Seçiminiz: <strong>${accusedNpc.name}</strong> <span style="color:var(--danger)">(MASUM)</span></div>
+                        <div class="result-verdict-line"><i class="fa-solid fa-handcuffs" style="color:var(--accent)"></i> Gerçek Katil: <strong>${realKiller.name}</strong></div>
+                        <div class="result-verdict-wrong"><i class="fa-solid fa-circle-xmark"></i> YANLIŞ TAHMİN!</div>
+                    </div>
+                    <div class="result-story">
+                        <div class="result-story-header"><i class="fa-solid fa-book-skull"></i> O Gecenin Hikayesi</div>
+                        <div class="result-story-text">${realKiller.murderStory}</div>
+                    </div>`;
                 retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Tekrar Oyna';
                 retryBtn.classList.remove('hidden');
             }

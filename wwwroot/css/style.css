@@ -1159,10 +1159,12 @@ body {
     background: var(--bg-glass);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 50px;
+    padding: 40px;
     text-align: center;
-    max-width: 500px;
-    width: 90%;
+    max-width: 700px;
+    width: 92%;
+    max-height: 85vh;
+    overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
     display: flex;
     flex-direction: column;
@@ -1192,6 +1194,86 @@ body {
     word-break: break-word;
     overflow-wrap: break-word;
     white-space: normal;
+    width: 100%;
+    text-align: left;
+}
+
+/* Sonuç Karşılaştırma Paneli */
+.result-verdict {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px 25px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.result-verdict-line {
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.result-verdict-line i {
+    font-size: 1.3rem;
+    width: 24px;
+    text-align: center;
+}
+
+.result-verdict-line strong {
+    color: var(--text-bright);
+    font-size: 1.15rem;
+}
+
+.result-verdict-correct {
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    color: var(--success);
+    letter-spacing: 3px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.result-verdict-wrong {
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    color: var(--danger);
+    letter-spacing: 3px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Hikaye Paneli */
+.result-story {
+    background: rgba(0, 0, 0, 0.2);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 25px;
+}
+
+.result-story-header {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.result-story-header i {
+    margin-right: 8px;
+}
+
+.result-story-text {
+    font-size: 1rem;
+    line-height: 1.85;
+    color: var(--text-secondary);
+    text-align: justify;
 }
 
 /* ==========================================================================

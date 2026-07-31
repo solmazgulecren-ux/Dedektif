@@ -157,13 +157,19 @@ class Program
                 var npc = await repository.GetNPCByIdAsync(request.NpcId);
                 if (npc == null) return Results.NotFound("Şüpheli bulunamadı.");
 
+                // Gerçek suçluyu bul
+                var npcs = await repository.GetAllNPCsAsync();
+                var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
+                var guiltyName = guiltyNpc?.Name ?? "Bilinmiyor";
+                var guiltyId = guiltyNpc?.NPCId ?? 0;
+
                 if (npc.IsGuilty)
                 {
-                    return Results.Ok(new { success = true, message = $"Tebrikler! Suçlunun {npc.Name} olduğunu doğru tahmin ettiniz.", secret = npc.SecretInfo });
+                    return Results.Ok(new { success = true, message = $"Tebrikler! Suçlunun {npc.Name} olduğunu doğru tahmin ettiniz.", accusedName = npc.Name, guiltyNpcName = guiltyName, guiltyNpcId = guiltyId });
                 }
                 else
                 {
-                    return Results.Ok(new { success = false, message = $"{npc.Name} masum çıktı! Soruşturma başarısız oldu." });
+                    return Results.Ok(new { success = false, message = $"{npc.Name} masum çıktı! Gerçek katil {guiltyName} idi.", accusedName = npc.Name, guiltyNpcName = guiltyName, guiltyNpcId = guiltyId });
                 }
             }
             catch (Exception ex)
