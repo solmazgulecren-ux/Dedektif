@@ -33,6 +33,16 @@ class Program
             {
                 await repository.SeedDataAsync();
             }
+            // Yardımcı tabloları oluştur ve seed et
+            try
+            {
+                await repository.EnsureHelperTablesAsync();
+                await repository.SeedHelperMessagesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ⚠️ Yardımcı tablo oluşturma hatası (ihmal edildi): {ex.Message}");
+            }
         }
 
         // Eğer console modunda çalıştırılmak istenirse
@@ -347,6 +357,158 @@ class Program
             }
         });
 
+        // =============================================
+        // YENİ: OTURUM YÖNETİMİ
+        // =============================================
+
+        // Yeni oyun oturumu başlat
+        app.MapPost("/api/game/session/start", async (SessionStartRequest request) =>
+        {
+            try
+            {
+                var sessionId = await repository.CreateGameSessionAsync(request.GuiltyNpcId);
+                return Results.Ok(new { success = true, sessionId = sessionId });
+            }
+            catch (Exception ex)
+            {
+                return Results.Ok(new { success = false, sessionId = 0, error = ex.Message });
+            }
+        });
+
+        // Oturumu sonlandır
+        app.MapPost("/api/game/session/end", async (SessionEndRequest request) =>
+        {
+            try
+            {
+                await repository.EndGameSessionAsync(request.SessionId, request.Result, request.AccusedNpcId, request.TotalQuestions, request.CluesCollected);
+                return Results.Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Results.Ok(new { success = false, error = ex.Message });
+            }
+        });
+
+        // =============================================
+        // YENİ: OYUNCU AKSİYON KAYDI
+        // =============================================
+
+        app.MapPost("/api/game/action/log", async (ActionLogRequest request) =>
+        {
+            try
+            {
+                await repository.LogPlayerActionAsync(request.SessionId, request.ActionType, request.TargetId, request.Details);
+                return Results.Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Results.Ok(new { success = false, error = ex.Message });
+            }
+        });
+
+        // =============================================
+        // YENİ: YARDIMCI DEDEKTİF ÇETİN SİSTEMİ
+        // =============================================
+
+        // Bağlama göre Çetin mesajı getir
+        app.MapGet("/api/game/helper/tip", async (string context, string? building) =>
+        {
+            try
+            {
+                var messages = await repository.GetHelperMessagesAsync(context, building);
+                var topMessage = messages.FirstOrDefault();
+                if (topMessage != null)
+                {
+                    return Results.Ok(new { success = true, message = topMessage.Message, context = topMessage.Context, priority = topMessage.Priority });
+                }
+                return Results.Ok(new { success = false, message = "", context = context, priority = 0 });
+            }
+            catch (Exception ex)
+            {
+                // Fallback: Veritabanı yoksa da çalışsın
+                var fallbackMessages = new Dictionary<string, string>
+                {
+                    ["splash"] = "Hoş geldin Amirims! Ben Yardımcı Dedektif Çetin. Bu karanlık davada sana yardımcı olacağım!",
+                    ["story_end"] = "Kasabada 5 bina ve 5 şüpheli var. Delilleri dikkatle incele ve çantana al. Ama dikkat et, çantanda yalnızca 5 delil bulunabilir!",
+                    ["map_enter"] = "Haritadaki binalara tıklayarak soruşturmana başlayabilirsin. Her binaya sadece bir kez girebilirsin!",
+                    ["building_enter"] = "Olay yerindeki delilleri inceleyebilir, çantana atabilirsin. Ama dikkat et, çantanda yalnızca 5 delil bulunabilir!",
+                    ["bag_open"] = "Çantandaki delilleri 'İncele' butonuyla detaylı inceleyebilirsin. Suçluyu bulmak için ipuçlarını birleştir!",
+                    ["npc_talk"] = "Dikkatli soru sor Amirims, sadece 5 soru hakkın var!",
+                    ["accuse"] = "Son kararını vermeden önce tüm delilleri gözden geçir Amirims. Yanlış suçlama kasaba için felaket olur!"
+                };
+                var msg = fallbackMessages.GetValueOrDefault(context, "Amirims, soruşturmaya devam edin!");
+                return Results.Ok(new { success = true, message = msg, context = context, priority = 1 });
+            }
+        });
+
+        // Çetin'in delil analizi
+        app.MapPost("/api/game/helper/analyze-clues", async (AnalyzeCluesRequest request) =>
+        {
+            try
+            {
+                var npcs = await repository.GetAllNPCsAsync();
+                var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
+                int guiltyId = guiltyNpc?.NPCId ?? 0;
+                
+                var analysis = await repository.AnalyzeCluesForHelperAsync(request.ClueIds ?? new List<int>(), guiltyId);
+                return Results.Ok(new { success = true, analysis = analysis });
+            }
+            catch (Exception ex)
+            {
+                string fallback = request.ClueIds?.Count > 0 
+                    ? $"Amirims, {request.ClueIds.Count} delil toplamışsınız. Delilleri dikkatlice inceleyin!"
+                    : "Amirims, çantanızda henüz delil yok! Binalara girip delilleri toplamalısınız.";
+                return Results.Ok(new { success = true, analysis = fallback });
+            }
+        });
+
+        // =============================================
+        // YENİ: OYUN DURUMU KAYIT/YÜKLEME
+        // =============================================
+
+        app.MapPost("/api/game/state/save", async (GameStateSaveRequest request) =>
+        {
+            try
+            {
+                await repository.SaveGameStateAsync(request.SessionId, request.StateData);
+                return Results.Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Results.Ok(new { success = false, error = ex.Message });
+            }
+        });
+
+        app.MapGet("/api/game/state/load", async (int sessionId) =>
+        {
+            try
+            {
+                var stateData = await repository.LoadGameStateAsync(sessionId);
+                return Results.Ok(new { success = stateData != null, stateData = stateData ?? "" });
+            }
+            catch (Exception ex)
+            {
+                return Results.Ok(new { success = false, stateData = "", error = ex.Message });
+            }
+        });
+
+        // =============================================
+        // YENİ: DİYALOG KAYDI (KATEGORİ İLE)
+        // =============================================
+
+        app.MapPost("/api/game/dialog/log", async (DialogLogRequest request) =>
+        {
+            try
+            {
+                await repository.LogDialogWithCategoryAsync(request.NpcId, request.PlayerQuestion, request.NpcResponse, request.Difficulty, request.Category);
+                return Results.Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Results.Ok(new { success = false, error = ex.Message });
+            }
+        });
+
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("\n  🌍 Akıllı Dedektiflik RPG Web Sunucusu Başlatıldı!");
         Console.WriteLine("  👉 Tarayıcıda Açın: http://localhost:5000 \n");
@@ -407,3 +569,46 @@ public class AppConfig
     public string GeminiApiKey { get; set; } = "";
     public string GeminiModel { get; set; } = "gemini-2.0-flash";
 }
+
+public class SessionStartRequest
+{
+    public int GuiltyNpcId { get; set; }
+}
+
+public class SessionEndRequest
+{
+    public int SessionId { get; set; }
+    public string Result { get; set; } = string.Empty;
+    public int? AccusedNpcId { get; set; }
+    public int TotalQuestions { get; set; }
+    public int CluesCollected { get; set; }
+}
+
+public class ActionLogRequest
+{
+    public int SessionId { get; set; }
+    public string ActionType { get; set; } = string.Empty;
+    public int? TargetId { get; set; }
+    public string? Details { get; set; }
+}
+
+public class AnalyzeCluesRequest
+{
+    public List<int>? ClueIds { get; set; }
+}
+
+public class GameStateSaveRequest
+{
+    public int SessionId { get; set; }
+    public string StateData { get; set; } = string.Empty;
+}
+
+public class DialogLogRequest
+{
+    public int NpcId { get; set; }
+    public string PlayerQuestion { get; set; } = string.Empty;
+    public string NpcResponse { get; set; } = string.Empty;
+    public int Difficulty { get; set; }
+    public string Category { get; set; } = string.Empty;
+}
+

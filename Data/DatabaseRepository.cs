@@ -213,4 +213,248 @@ public class DatabaseRepository
             return false;
         }
     }
+
+    // =============================================
+    // Oyun Oturumu İşlemleri (GameSessions)
+    // =============================================
+
+    /// <summary>
+    /// Yeni bir oyun oturumu oluşturur ve ID'sini döner.
+    /// </summary>
+    public async Task<int> CreateGameSessionAsync(int guiltyNpcId)
+    {
+        using var db = CreateConnection();
+        var sessionId = await db.ExecuteScalarAsync<int>(@"
+            INSERT INTO GameSessions (GuiltyNPCId, StartedAt)
+            VALUES (@GuiltyNPCId, GETDATE());
+            SELECT CAST(SCOPE_IDENTITY() AS INT);",
+            new { GuiltyNPCId = guiltyNpcId });
+        return sessionId;
+    }
+
+    /// <summary>
+    /// Oyun oturumunu sonlandırır.
+    /// </summary>
+    public async Task EndGameSessionAsync(int sessionId, string result, int? accusedNpcId, int totalQuestions, int cluesCollected)
+    {
+        using var db = CreateConnection();
+        await db.ExecuteAsync(@"
+            UPDATE GameSessions 
+            SET EndedAt = GETDATE(), Result = @Result, AccusedNPCId = @AccusedNPCId,
+                TotalQuestions = @TotalQuestions, CluesCollected = @CluesCollected
+            WHERE SessionId = @SessionId",
+            new { SessionId = sessionId, Result = result, AccusedNPCId = accusedNpcId, TotalQuestions = totalQuestions, CluesCollected = cluesCollected });
+    }
+
+    // =============================================
+    // Oyuncu Aksiyon Kayıt İşlemleri (PlayerActions)
+    // =============================================
+
+    /// <summary>
+    /// Oyuncunun bir aksiyonunu kaydeder.
+    /// </summary>
+    public async Task LogPlayerActionAsync(int sessionId, string actionType, int? targetId, string? details)
+    {
+        using var db = CreateConnection();
+        await db.ExecuteAsync(@"
+            INSERT INTO PlayerActions (SessionId, ActionType, TargetId, Details, CreatedAt)
+            VALUES (@SessionId, @ActionType, @TargetId, @Details, GETDATE())",
+            new { SessionId = sessionId, ActionType = actionType, TargetId = targetId, Details = details });
+    }
+
+    // =============================================
+    // Oyun Durumu Kayıt/Yükleme (GameStates)
+    // =============================================
+
+    /// <summary>
+    /// Oyun durumunu JSON olarak kaydeder.
+    /// </summary>
+    public async Task SaveGameStateAsync(int sessionId, string stateDataJson)
+    {
+        using var db = CreateConnection();
+        // Mevcut state varsa güncelle, yoksa ekle
+        var exists = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM GameStates WHERE SessionId = @SessionId",
+            new { SessionId = sessionId });
+        
+        if (exists > 0)
+        {
+            await db.ExecuteAsync(@"
+                UPDATE GameStates SET StateData = @StateData, SavedAt = GETDATE()
+                WHERE SessionId = @SessionId",
+                new { SessionId = sessionId, StateData = stateDataJson });
+        }
+        else
+        {
+            await db.ExecuteAsync(@"
+                INSERT INTO GameStates (SessionId, StateData, SavedAt)
+                VALUES (@SessionId, @StateData, GETDATE())",
+                new { SessionId = sessionId, StateData = stateDataJson });
+        }
+    }
+
+    /// <summary>
+    /// Kayıtlı oyun durumunu yükler.
+    /// </summary>
+    public async Task<string?> LoadGameStateAsync(int sessionId)
+    {
+        using var db = CreateConnection();
+        return await db.ExecuteScalarAsync<string?>(
+            "SELECT TOP 1 StateData FROM GameStates WHERE SessionId = @SessionId ORDER BY SavedAt DESC",
+            new { SessionId = sessionId });
+    }
+
+    // =============================================
+    // Yardımcı Dedektif Mesaj İşlemleri (HelperMessages)
+    // =============================================
+
+    /// <summary>
+    /// Belirli bağlama göre Çetin'in mesajlarını getirir.
+    /// </summary>
+    public async Task<IEnumerable<HelperMessage>> GetHelperMessagesAsync(string context, string? buildingName = null)
+    {
+        using var db = CreateConnection();
+        if (!string.IsNullOrEmpty(buildingName))
+        {
+            return await db.QueryAsync<HelperMessage>(@"
+                SELECT * FROM HelperMessages 
+                WHERE Context = @Context AND (BuildingName = @BuildingName OR BuildingName IS NULL)
+                ORDER BY Priority DESC",
+                new { Context = context, BuildingName = buildingName });
+        }
+        return await db.QueryAsync<HelperMessage>(@"
+            SELECT * FROM HelperMessages WHERE Context = @Context ORDER BY Priority DESC",
+            new { Context = context });
+    }
+
+    /// <summary>
+    /// Çetin'in delil analiz mesajını döner (çantadaki delil ID'lerine göre).
+    /// </summary>
+    public async Task<string> AnalyzeCluesForHelperAsync(List<int> clueIds, int guiltyNpcId)
+    {
+        if (clueIds == null || clueIds.Count == 0)
+            return "Amirims, çantanızda henüz delil yok! Binalara girip delilleri toplamalısınız.";
+
+        using var db = CreateConnection();
+        var clues = await db.QueryAsync<Clue>(
+            "SELECT * FROM Clues WHERE ClueId IN @Ids",
+            new { Ids = clueIds });
+
+        var clueList = clues.ToList();
+        var relatedToGuilty = clueList.Where(c => c.RelatedNPCId == guiltyNpcId).ToList();
+
+        if (relatedToGuilty.Count >= 2)
+            return $"Amirims, çantanızdaki {clueList.Count} delilden bazıları aynı şüpheliyi işaret ediyor gibi görünüyor. Bu izleri dikkatle takip edin!";
+        else if (clueList.Count >= 3)
+            return $"Amirims, {clueList.Count} delil toplamışsınız. Farklı binalardaki delilleri karşılaştırın, bazıları birbiriyle bağlantılı olabilir!";
+        else
+            return $"Amirims, henüz {clueList.Count} delil topladınız. Daha fazla bina incelemenizi öneririm. Her binada 3 delil var!";
+    }
+
+    // =============================================
+    // Gelişmiş Diyalog Kayıt İşlemleri
+    // =============================================
+
+    /// <summary>
+    /// NPC konuşma kaydını veritabanına yazar (difficulty ve category ile).
+    /// </summary>
+    public async Task LogDialogWithCategoryAsync(int npcId, string playerQuestion, string npcResponse, int difficulty, string category)
+    {
+        using var db = CreateConnection();
+        await db.ExecuteAsync(@"
+            INSERT INTO DialogLogs (NPCId, PlayerQuestion, NPCResponse, Difficulty, Category, CreatedAt)
+            VALUES (@NPCId, @PlayerQuestion, @NPCResponse, @Difficulty, @Category, GETDATE())",
+            new { NPCId = npcId, PlayerQuestion = playerQuestion, NPCResponse = npcResponse, Difficulty = difficulty, Category = category });
+    }
+
+    // =============================================
+    // Yardımcı Tablo Oluşturma (Migrate)
+    // =============================================
+
+    /// <summary>
+    /// Eksik tabloları oluşturur (GameSessions, PlayerActions, GameStates, HelperMessages).
+    /// </summary>
+    public async Task EnsureHelperTablesAsync()
+    {
+        using var db = CreateConnection();
+        await db.ExecuteAsync(@"
+            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'GameSessions')
+            CREATE TABLE GameSessions (
+                SessionId INT IDENTITY(1,1) PRIMARY KEY,
+                GuiltyNPCId INT NOT NULL,
+                StartedAt DATETIME NOT NULL DEFAULT GETDATE(),
+                EndedAt DATETIME NULL,
+                Result NVARCHAR(50) NULL,
+                AccusedNPCId INT NULL,
+                TotalQuestions INT DEFAULT 0,
+                CluesCollected INT DEFAULT 0
+            );
+
+            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PlayerActions')
+            CREATE TABLE PlayerActions (
+                ActionId INT IDENTITY(1,1) PRIMARY KEY,
+                SessionId INT NOT NULL,
+                ActionType NVARCHAR(100) NOT NULL,
+                TargetId INT NULL,
+                Details NVARCHAR(MAX) NULL,
+                CreatedAt DATETIME NOT NULL DEFAULT GETDATE()
+            );
+
+            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'GameStates')
+            CREATE TABLE GameStates (
+                StateId INT IDENTITY(1,1) PRIMARY KEY,
+                SessionId INT NOT NULL,
+                StateData NVARCHAR(MAX) NOT NULL,
+                SavedAt DATETIME NOT NULL DEFAULT GETDATE()
+            );
+
+            IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'HelperMessages')
+            CREATE TABLE HelperMessages (
+                MessageId INT IDENTITY(1,1) PRIMARY KEY,
+                Context NVARCHAR(100) NOT NULL,
+                BuildingName NVARCHAR(100) NULL,
+                Message NVARCHAR(MAX) NOT NULL,
+                Priority INT DEFAULT 1,
+                IsOneTime BIT DEFAULT 1
+            );
+        ");
+    }
+
+    /// <summary>
+    /// HelperMessages tablosuna varsayılan mesajları ekler.
+    /// </summary>
+    public async Task SeedHelperMessagesAsync()
+    {
+        using var db = CreateConnection();
+        var count = await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM HelperMessages");
+        if (count > 0) return;
+
+        await db.ExecuteAsync(@"
+            INSERT INTO HelperMessages (Context, BuildingName, Message, Priority, IsOneTime) VALUES
+            -- Giriş Ekranı
+            (N'splash', NULL, N'Hoş geldin Amirims! Ben Yardımcı Dedektif Çetin. Bu karanlık davada sana yardımcı olacağım. Hazır olduğunda dosyayı aç ve soruşturmaya başlayalım!', 1, 1),
+            -- Hikaye Sonrası
+            (N'story_end', NULL, N'Soruşturmaya başlamadan önce şunu bil Amirims: Kasabada 5 bina ve 5 şüpheli var. Her binada 3 delil bulabilirsin. Delilleri dikkatle incele ve çantana al. Ama dikkat et, çantanda yalnızca 5 delil bulunabilir!', 1, 1),
+            -- Kasaba Haritasına İlk Giriş
+            (N'map_enter', NULL, N'İşte kasaba haritası Amirims! Haritadaki binalara tıklayarak soruşturmana başlayabilirsin. Her binada deliller ve şüpheliler seni bekliyor. Dikkatli ol, her binaya sadece bir kez girebilirsin!', 1, 1),
+            -- Binaya Girişler (Genel)
+            (N'building_enter', NULL, N'Olay yerindeki delilleri inceleyebilir, çantana atabilirsin. Ama dikkat et, çantanda yalnızca 5 delil bulunabilir! Ayrıca buradaki şüpheliyle konuşmayı unutma.', 2, 0),
+            -- Binaya Girişler (Bina-Bazlı)
+            (N'building_enter', N'Kasap', N'Burası Kasap Hasan''ın dükkânı Amirims. Tezgahtaki satıra, deftere ve yırtık önlüğe dikkat et. Hasan sert bir adam, ama gözlerinde korku var...', 3, 1),
+            (N'building_enter', N'Eczane', N'Eczacı Selma''nın dükkânındayız Amirims. Tezgah altına, reçete defterine ve ilaç şişelerine dikkat et. Bu kadın zehirler konusunda uzman...', 3, 1),
+            (N'building_enter', N'Muhtarlık', N'Muhtar Kemal''in ofisindeyiz Amirims. Çekmecesindeki mektuplara, kırık gözlüğe ve kasasına dikkat et. Bu adam her şeyi kontrol etmek istiyor...', 3, 1),
+            (N'building_enter', N'Karakol', N'Komiser Güneş''in karakolundayız Amirims. Polis rozetine, gizli dosyaya ve kayıp düğmeye dikkat et. Bir polis neden delilleri saklasın ki?', 3, 1),
+            (N'building_enter', N'Terzi', N'Terzi Yahya''nın atölyesindeyiz Amirims. İplik makarasına, yırtık kumaşa ve gizli cebe dikkat et. Bu yaşlı adam bildiklerinden fazlasını saklıyor...', 3, 1),
+            -- Çanta Açıldığında
+            (N'bag_open', NULL, N'Çantandaki delilleri İncele butonuyla detaylı inceleyebilirsin Amirims. Suçluyu bulmak için ipuçlarını birleştir! Unutma, incelediğin deliller çantadan çıkarılamaz.', 1, 1),
+            -- Delil İnceleme
+            (N'clue_inspect', NULL, N'Bu delili dikkatle incele Amirims. Suçluya ait olabilecek izler görebilirsin. Her detay önemli!', 1, 0),
+            -- NPC Konuşma Başlangıcı
+            (N'npc_talk', NULL, N'Dikkatli soru sor Amirims, sadece 5 soru hakkın var! Sorularını iyi seç ve NPC''nin tepkilerini iyi gözlemle.', 1, 0),
+            -- Otopsi Raporu
+            (N'autopsy_ready', NULL, N'Amirims! Adli Tıp Merkezi''nden otopsi raporu geldi! Harita ekranındaki rapora tıklayarak hemen inceleyin, çok önemli bulgular var!', 1, 1),
+            -- Suçlama Ekranı
+            (N'accuse', NULL, N'Son kararını vermeden önce tüm delilleri gözden geçir Amirims. Yanlış suçlama kasaba için felaket olur! Emin olmadan düğmeye basma!', 1, 1);
+        ");
+    }
 }
