@@ -73,30 +73,30 @@ const NPC_DATA = {
 };
 
 const SCENE_OBJECTS = {
-    1: [
-        { id: 1, name: 'Kanlı Satır', desc: 'Tezgaha sertçe saplanmış, üzerinde taze kan lekeleri olan paslı bir satır. Kan kurbanın kanıyla eşleşiyor olabilir.', top: '65%', left: '72%', img: 'images/bloody_cleaver.png' },
-        { id: 2, name: 'Kara Kaplı Defter', desc: 'Veresiye listesinde kurbanın isminin üzeri kırmızı kalemle çizilmiş. Son sayfada şifreli notlar var.', top: '56%', left: '26%', img: 'images/black_notebook.png' },
-        { id: 3, name: 'Yırtık Önlük', desc: 'Kavga izleri taşıyan, yakası kopmuş bir kasap önlüğü. Cebinde küçük bir anahtar var.', top: '52%', left: '10%', img: 'images/torn_apron.png' }
+    1: [ // Kasap
+        { id: 1, name: 'Kanlı Satır', desc: 'Tezgaha sertçe saplanmış, üzerinde taze kan lekeleri olan paslı bir satır. Kan kurbanın kanıyla eşleşiyor olabilir.', top: '58%', left: '64%', img: 'images/bloody_cleaver.png' },
+        { id: 2, name: 'Kara Kaplı Defter', desc: 'Veresiye listesinde kurbanın isminin üzeri kırmızı kalemle çizilmiş. Son sayfada şifreli notlar var.', top: '64%', left: '32%', img: 'images/black_notebook.png' },
+        { id: 3, name: 'Yırtık Önlük', desc: 'Kavga izleri taşıyan, yakası kopmuş bir kasap önlüğü. Cebinde küçük bir anahtar var.', top: '50%', left: '18%', img: 'images/torn_apron.png' }
     ],
-    2: [
-        { id: 4, name: 'Boş İlaç Şişesi', desc: 'Zehirli olduğu bilinen, reçetesiz satılmayan ağır bir ilacın boş şişesi. Parmak izleri silinmiş.', top: '50%', left: '20%', img: 'images/empty_medicine_bottle.png' },
-        { id: 5, name: 'Reçete Defteri', desc: 'Kurbanın adının geçtiği, son sayfaları aceleyle yırtılmış defter.', top: '68%', left: '75%', img: 'images/prescription_notebook.png' },
-        { id: 6, name: 'Zehirli Sarmaşık', desc: 'Tezgah altında kurumaya bırakılmış zehirli bir bitki türü. Ölümcül dozda kullanılabilir.', top: '30%', left: '60%', img: 'images/poison_ivy.png' }
+    2: [ // Eczane
+        { id: 4, name: 'Boş İlaç Şişesi', desc: 'Zehirli olduğu bilinen, reçetesiz satılmayan ağır bir ilacın boş şişesi. Parmak izleri silinmiş.', top: '58%', left: '28%', img: 'images/empty_medicine_bottle.png' },
+        { id: 5, name: 'Reçete Defteri', desc: 'Kurbanın adının geçtiği, son sayfaları aceleyle yırtılmış defter.', top: '62%', left: '72%', img: 'images/prescription_notebook.png' },
+        { id: 6, name: 'Zehirli Sarmaşık', desc: 'Tezgah altında kurumaya bırakılmış zehirli bir bitki türü. Ölümcül dozda kullanılabilir.', top: '32%', left: '54%', img: 'images/poison_ivy.png' }
     ],
-    3: [
-        { id: 7, name: 'Tehdit Mektubu', desc: 'Muhtarın çekmecesinde kurbana yazılmış, henüz gönderilmemiş bir tehdit mektubu. El yazısı titrek.', top: '58%', left: '38%', img: 'images/threat_letter.png' },
-        { id: 8, name: 'Kırık Gözlük', desc: 'Kurbana ait olduğu düşünülen, camı kırık bir okuma gözlüğü.', top: '32%', left: '68%', img: 'images/broken_glasses.png' },
-        { id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa. İçinde sahte belgeler de var.', top: '78%', left: '28%', img: 'images/hidden_safe.png' }
+    3: [ // Muhtarlık
+        { id: 7, name: 'Tehdit Mektubu', desc: 'Muhtarın çekmecesinde kurbana yazılmış, henüz gönderilmemiş bir tehdit mektubu. El yazısı titrek.', top: '62%', left: '44%', img: 'images/threat_letter.png' },
+        { id: 8, name: 'Kırık Gözlük', desc: 'Kurbana ait olduğu düşünülen, camı kırık bir okuma gözlüğü.', top: '56%', left: '56%', img: 'images/broken_glasses.png' },
+        { id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa. İçinde sahte belgeler de var.', top: '42%', left: '24%', img: 'images/hidden_safe.png' }
     ],
-    4: [
-        { id: 10, name: 'Polis Rozeti', desc: 'Olay yerinde bulunan, numarası kazınmış bir polis rozeti. Kime ait olduğu belirsiz.', top: '45%', left: '25%', img: 'images/police_badge.png' },
-        { id: 11, name: 'Gizli Dosya', desc: '"GİZLİ" damgalı bir dosya. İçinde kurbanın geçmişiyle ilgili bilgiler var.', top: '35%', left: '65%', img: 'images/evidence_file.png' },
-        { id: 12, name: 'Kayıp Düğme', desc: 'Pahalı bir paltonun kopmuş düğmesi. Terzi Yahya\'nın diktiği kumaşa benziyor.', top: '70%', left: '45%', img: 'images/missing_button.png' }
+    4: [ // Karakol
+        { id: 10, name: 'Polis Rozeti', desc: 'Olay yerinde bulunan, numarası kazınmış bir polis rozeti. Kime ait olduğu belirsiz.', top: '58%', left: '36%', img: 'images/police_badge.png' },
+        { id: 11, name: 'Gizli Dosya', desc: '"GİZLİ" damgalı bir dosya. İçinde kurbanın geçmişiyle ilgili bilgiler var.', top: '52%', left: '62%', img: 'images/evidence_file.png' },
+        { id: 12, name: 'Kayıp Düğme', desc: 'Pahalı bir paltonun kopmuş düğmesi. Terzi Yahya\'nın diktiği kumaşa benziyor.', top: '72%', left: '48%', img: 'images/missing_button.png' }
     ],
-    5: [
-        { id: 13, name: 'Kanlı İplik Makarası', desc: 'Üzerinde kurumuş kan lekeleri olan iplik makarası. İplik rengi kurbanın ceketindekiyle aynı.', top: '55%', left: '72%', img: 'images/thread_spool.png' },
-        { id: 14, name: 'Yırtık Kumaş', desc: 'Kurbanın ceketinden kopmuş olabilecek kumaş parçası.', top: '65%', left: '32%', img: 'images/torn_fabric.png' },
-        { id: 15, name: 'Gizli Cep', desc: 'Yahya\'nın diktiği ceketin astarında gizli bir cep. İçinde: "Bu gece gel, konuşalım."', top: '42%', left: '62%', img: 'images/hidden_pocket.png' }
+    5: [ // Terzi
+        { id: 13, name: 'Kanlı İplik Makarası', desc: 'Üzerinde kurumuş kan lekeleri olan iplik makarası. İplik rengi kurbanın ceketindekiyle aynı.', top: '58%', left: '68%', img: 'images/thread_spool.png' },
+        { id: 14, name: 'Yırtık Kumaş', desc: 'Kurbanın ceketinden kopmuş olabilecek kumaş parçası.', top: '62%', left: '30%', img: 'images/torn_fabric.png' },
+        { id: 15, name: 'Gizli Cep', desc: 'Yahya\'nın diktiği ceketin astarında gizli bir cep. İçinde: "Bu gece gel, konuşalım."', top: '44%', left: '48%', img: 'images/hidden_pocket.png' }
     ]
 };
 
@@ -677,6 +677,10 @@ function startVideoPlayback() {
     if (doorHandlePrompt) doorHandlePrompt.style.opacity = '0';
     playSound(doorCreak, 0.85);
 
+    // Ana müzik ve yağmur sesini kıs (Ducking)
+    if (bgMusic && !bgMusic.paused) bgMusic.volume = 0.05;
+    if (rainSound && !rainSound.paused) rainSound.volume = 0.1;
+
     if (buildingTransitionVideo && theme) {
         buildingTransitionVideo.style.display = 'block';
         buildingTransitionVideo.style.opacity = '1';
@@ -738,6 +742,13 @@ function finishVideoTransition() {
     if (currentVideoCheckTimer) clearInterval(currentVideoCheckTimer);
     isVideoPlaying = false;
     playSound(doorClose, 0.6);
+
+    // Ana müzik ve yağmur sesini orijinal seviyelerine geri yükle
+    if (!isMuted) {
+        if (bgMusic && !bgMusic.paused) bgMusic.volume = 0.3;
+        if (rainSound && !rainSound.paused) rainSound.volume = 0.5;
+    }
+
     buildingEntryModal.classList.add('hidden');
     openBuilding(pendingBuildingNpcId);
 }
@@ -747,6 +758,13 @@ cancelEntryBtn?.addEventListener('click', (e) => {
     if (currentVideoCheckTimer) clearInterval(currentVideoCheckTimer);
     if (buildingTransitionVideo) buildingTransitionVideo.pause();
     buildingEntryModal.classList.add('hidden');
+
+    // Ana müziği geri yükle
+    if (!isMuted) {
+        if (bgMusic && !bgMusic.paused) bgMusic.volume = 0.3;
+        if (rainSound && !rainSound.paused) rainSound.volume = 0.5;
+    }
+
     pendingBuildingNpcId = null;
     isVideoPlaying = false;
 });
@@ -756,16 +774,34 @@ function openBuilding(npcId) {
     const npc = NPC_DATA[npcId];
     if (!npc) return;
     
-    // Bina iç mekan görseli (eczane_final.png, butcher_interior.png, karakol_final.png, muhtarlik_final.png, terzi_final.png)
+    // Bina iç mekan görseli
     const interiorBgImage = npc.bg;
     const bgUrl = `url('${interiorBgImage}?v=${Date.now()}')`;
     const stageCanvas = document.getElementById('interior-stage-canvas');
+    
+    // Geniş panoramik devam görselleri (arka plan cover katmanı için)
+    const WIDE_PANORAMAS = {
+        1: 'images/kasap_wide.png',
+        2: 'images/eczane_wide.png',
+        3: 'images/muhtarlik_wide.png',
+        4: 'images/karakol_wide.png',
+        5: 'images/terzi_wide.png'
+    };
+
+    // Katman 1: interiorScreen → cover (geniş panoramik görsel ile ekranı tamamen kaplar)
+    if (interiorScreen) {
+        const wideImg = WIDE_PANORAMAS[npcId];
+        if (wideImg) {
+            interiorScreen.style.backgroundImage = `url('${wideImg}?v=${Date.now()}')`;
+        } else {
+            interiorScreen.style.backgroundImage = bgUrl;
+        }
+    }
+    // Katman 2: stageCanvas → contain (orijinal kare görsel ortada net ve bozulmadan)
     if (stageCanvas) {
         stageCanvas.style.backgroundImage = bgUrl;
     }
-    if (interiorScreen) {
-        interiorScreen.style.backgroundImage = bgUrl;
-    }
+
     document.getElementById('talk-npc-name').innerText = npc.name + ' ile Konuş';
     
     // Load Hotspots
