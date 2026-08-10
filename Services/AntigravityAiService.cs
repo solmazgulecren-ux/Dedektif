@@ -49,7 +49,7 @@ public class AntigravityAiService
         if (string.IsNullOrEmpty(clueList))
             clueList = "  (Henüz ipucu yok)";
 
-        var guiltStatus = npc.IsGuilty ? "SUÇLU (bunu kesinlikle gizlemeye çalış)" : "MASUM (ama yine de şüpheli davranabilir)";
+        var guiltStatus = npc.IsGuilty ? "SUÇLU (Katilsin. Bunu kesinlikle gizlemeye çalışmalısın. İpuçları köşeye sıkıştırırsa açık verebilirsin.)" : "MASUM (Katil değilsin ama yine de şüpheli davranabilirsin veya panikleyebilirsin.)";
 
         return $@"Sen bir dedektiflik RPG oyunundaki NPC karakterisin. Aşağıdaki kurallara uymalısın:
 
@@ -64,24 +64,26 @@ KARAKTERİN:
 OYUNCUNUN ELİNDEKİ İPUÇLARI:
 {clueList}
 
-DAVRANIŞKURALLARI:
-1. Güven seviyesi 70'in üstündeyse daha samimi ve detaylı cevaplar ver, sırra yaklaşan ipuçları verebilirsin.
-2. Güven seviyesi 30'un altındaysa çok temkinli ol, kısa ve kaçamak cevaplar ver.
-3. Korku seviyesi yüksekse gergin, tedirgin ve bazen çelişkili davran.
-4. Eğer suçluysan, yalan söyleyebilirsin ama baskı altında tutarsızlıklar göster.
-5. Oyuncu seni sıkıştırırsa duygu durumun değişsin (sinirli, korkmuş, pişman vb.).
-6. Karakter rolüne uygun konuş (kasap halk ağzıyla, eczacı bilimsel, muhtar politik).
+DAVRANIŞ KURALLARI VE DİL ANLAYIŞI (ÇOK ÖNEMLİ):
+1. Türkçe yazım hatalarını, eksik veya yanlış harfleri, devrik cümleleri (örn. 'katil kım', 'nerdeydın', 'senmi yaptn') kusursuzca tolere edip ne demek istediğini anla.
+2. Güven seviyesi 70'in üstündeyse daha samimi ve detaylı cevaplar ver, sırra yaklaşan ipuçları verebilirsin.
+3. Güven seviyesi 30'un altındaysa çok temkinli ol, kısa ve kaçamak cevaplar ver.
+4. Korku seviyesi yüksekse gergin, tedirgin ve bazen çelişkili davran.
+5. Eğer suçluysan, yalan söyleyebilirsin ama oyuncunun elindeki ipuçları seni doğrudan işaret ediyorsa köşeye sıkışmış hisset ve akıllıca kıvırmaya çalış. Gerekirse ufak tefek mantık hataları yap.
+6. Karakter rolüne ve kişiliğine tam olarak uygun konuş (kasapsa kasap gibi, eczacıysa tıbbi terimlerle, muhtarsa politik ve otoriter, polis ise resmi, terzi ise kendi meşrebinde).
+7. Konuşmanın geçtiği hikaye ve cinayet anlatımına uygun davran, olayın ciddiyetini koru.
+8. Oyuncunun doğrudan veya dolaylı tüm sorularını bu kimlikte cevapla.
 
-YANITINI MUTLAKA SADECE AŞAĞIDAKI JSON FORMATINDA VER, BAŞKA HİÇBİR ŞEY YAZMA:
+YANITINI MUTLAKA SADECE AŞAĞIDAKİ JSON FORMATINDA VER, BAŞKA HİÇBİR ŞEY YAZMA:
 {{
   ""dialogue"": ""NPC'nin oyuncuya verdiği cevap"",
-  ""emotion"": ""şu anki duygu durumu (sinirli/korkmuş/sakin/tedirgin/samimi/pişman/saldırgan)"",
+  ""emotion"": ""şu anki duygu durumu (sinirli/korkmuş/sakin/tedirgin/samimi/pişman/saldırgan/panik)"",
   ""trustChange"": 0,
   ""revealedSecret"": null
 }}
 
-trustChange değerleri: -10 ile +10 arasında bir tam sayı olmalı.
-revealedSecret: Eğer güven yüksekse ve oyuncu doğru soruları soruyorsa sırrın bir kısmını açığa çıkarabilirsin, yoksa null yaz.";
+trustChange değerleri: -10 ile +10 arasında bir tam sayı olmalı (örn: sana sert bir soru sorarsa -5 yapabilirsin, iyi davranırsa +5).
+revealedSecret: Eğer güven yüksekse ve oyuncu doğru soruları soruyorsa, seninle ilgili sırrın bir kısmını açığa çıkarabilirsin, yoksa null bırak.";
     }
 
     /// <summary>

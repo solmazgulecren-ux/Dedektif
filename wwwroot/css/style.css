@@ -1001,30 +1001,34 @@ canvas {
     background-position: center !important;
     background-repeat: no-repeat !important;
     overflow: hidden;
+    transition: filter 0.5s ease, transform 0.2s ease;
 }
 
-/* NPC Portre Görseli — <img> etiketi ile orijinal oran korunur */
-.npc-talk-portrait-wrap {
+/* Karakter Clip-Path Katmanı */
+.npc-talk-character-layer {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 0;
-    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    z-index: 2; /* Overlay'in ÜSTÜNDE kalsın ki efekti net görebilelim */
+    transition: filter 0.5s ease, transform 0.2s ease;
 }
 
-.npc-talk-portrait-img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    object-position: center;
-    pointer-events: none;
+/* Sadece Karakter Katmanına Uygulanacak Duygu Efektleri */
+.npc-talk-character-layer.emotion-angry {
+    filter: brightness(1.3) contrast(1.3) saturate(1.5) sepia(0.3) hue-rotate(-20deg) drop-shadow(0 0 20px rgba(255, 0, 0, 0.5)) !important;
+    animation: slightShake 0.2s infinite;
+    transform: scale(1.02); /* Hafifçe büyüsün */
+}
+
+.npc-talk-character-layer.emotion-nervous {
+    filter: brightness(0.6) contrast(1.2) saturate(0.4) sepia(0.2) hue-rotate(180deg) blur(1px) !important;
+    animation: nervousShake 0.1s infinite;
+    transform: scale(0.98); /* Hafifçe küçülsün */
 }
 
 .npc-talk-overlay {
@@ -1119,6 +1123,17 @@ canvas {
     overflow-wrap: break-word;
 }
 
+.typewriter-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1rem;
+    background-color: var(--text-secondary);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
 .npc-talk-buttons-area {
     position: absolute;
     bottom: 20px;
@@ -1140,6 +1155,60 @@ canvas {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     width: 100%;
+}
+
+/* YEREL AI SERBEST SORU SORMA ALANI */
+.npc-ai-input-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    width: 100%;
+    align-items: center;
+}
+
+.npc-ai-input {
+    flex: 1;
+    background: rgba(15, 20, 28, 0.95);
+    border: 1.5px solid rgba(255, 215, 0, 0.4);
+    border-radius: 8px;
+    padding: 10px 15px;
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.npc-ai-input:focus {
+    border-color: #ffd700;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4), inset 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.npc-ai-input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+.npc-ai-send-btn {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-radius: 8px;
+    white-space: nowrap;
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    border: 1px solid #f39c12;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.npc-ai-send-btn:hover {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(243, 156, 18, 0.4);
 }
 
 .npc-talk-btn {
@@ -1181,9 +1250,56 @@ canvas {
     font-size: 1rem;
 }
 
+/* Duygu Durumu Efektleri yukarıya (.npc-talk-character-layer içine) taşındı */
+
 /* ==========================================================================
-   7. ÇANTA MODALI
+   7. ÇANTA MODALI VE BUTONLARI
    ========================================================================== */
+
+.floating-bag-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(11, 12, 16, 0.9);
+    border: 2px solid var(--accent);
+    color: var(--text-primary);
+    padding: 15px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(69, 243, 255, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.floating-bag-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 25px rgba(69, 243, 255, 0.6);
+    background: var(--accent);
+    color: #000;
+}
+.clue-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--danger, #ff4c4c);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: popBounce 1s infinite;
+}
+@keyframes popBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
 
 .bag-card {
     background: var(--bg-glass);
@@ -1424,6 +1540,21 @@ canvas {
     font-weight: bold;
     text-transform: uppercase;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* FIX: Buldum ekranındaki Notlar butonu — beyaz kart üzerinde görünür koyu renkler */
+.found-npc-actions .btn.btn-outline {
+    background-color: rgba(30, 30, 60, 0.85);
+    border: 2px solid rgba(50, 50, 100, 0.8);
+    color: #e8e8ff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.found-npc-actions .btn.btn-outline:hover {
+    background: rgba(50, 50, 120, 0.95);
+    border-color: #6c6cff;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(100, 100, 255, 0.4);
 }
 
 .btn.btn-outline {
@@ -2625,7 +2756,128 @@ canvas {
     color: var(--text-primary);
     position: relative;
     backdrop-filter: blur(15px);
-    animation: slideDownFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: helperPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ========================================================= */
+/* ADLİ TIP (FORENSIC) LABORATUVARI CSS                      */
+/* ========================================================= */
+
+.detailed-clue-img-wrapper {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+}
+
+.detailed-clue-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    background-size: cover;
+    background-position: center;
+    mix-blend-mode: multiply;
+}
+
+.detailed-clue-overlay.show-fingerprint {
+    opacity: 1;
+    /* Bizim resmimiz yerine CSS ile sahte bir parmak izi deseni veya karanlık leke */
+    background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.8) 0%, transparent 60%);
+    /* Parmak izi texture'ı varmış gibi bir filter */
+    filter: contrast(1.5) grayscale(1);
+}
+
+.detailed-clue-overlay.show-uv {
+    opacity: 1;
+    background: radial-gradient(circle at 40% 60%, rgba(200, 0, 0, 0.6) 0%, transparent 40%);
+    mix-blend-mode: screen;
+    box-shadow: inset 0 0 50px rgba(100, 0, 255, 0.3);
+}
+
+.detailed-clue-letter-text {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    color: #111;
+    font-family: 'Cinzel', serif; /* El yazısı hissi için */
+    font-size: 1.2rem;
+    line-height: 1.6;
+    background: rgba(255,255,255,0.8);
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    transform: scale(0.9);
+    opacity: 0;
+    transition: all 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.detailed-clue-letter-text.show-text {
+    opacity: 1;
+    transform: scale(1);
+    z-index: 5;
+}
+
+.detailed-clue-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.detailed-clue-actions button {
+    background: #222;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.detailed-clue-actions button:hover {
+    background: var(--accent);
+    color: #000;
+}
+
+.detailed-clue-result {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(0,255,0,0.1);
+    border-left: 3px solid #00ff00;
+    color: #00ff00;
+    font-size: 0.9rem;
+    font-family: monospace;
+    animation: fadeIn 0.5s ease;
+}
+
+/* Pudra dökme efekti */
+.powder-dust {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><circle cx="50" cy="50" r="1" fill="white"/></svg>');
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+.powder-dust.active {
+    animation: dusting 2s forwards;
+}
+
+@keyframes dusting {
+    0% { opacity: 0; transform: translateY(-20px); }
+    30% { opacity: 0.8; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(20px); }
 }
 
 .notification-icon {

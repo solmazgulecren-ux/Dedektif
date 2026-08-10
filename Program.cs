@@ -135,7 +135,7 @@ class Program
             }
         });
 
-        // 4. Sorgulama Yap (Veritabanı Sabit Cevap)
+        // 4. Sorgulama Yap (Geliştirilmiş Yerel Yapay Zeka Motoru - LocalAiEngine)
         app.MapPost("/api/game/interrogate", async (InterrogationRequest request) =>
         {
             try
@@ -143,14 +143,38 @@ class Program
                 var npc = await repository.GetNPCByIdAsync(request.NpcId);
                 if (npc == null) return Results.NotFound("Şüpheli bulunamadı.");
 
-                // Hardcoded mock for now to bypass AI
+                var npcs = await repository.GetAllNPCsAsync();
+                var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
+
+                // Frontend'den gelen veya DB'deki dinamik suçlu ID'sini al
+                int guiltyId = (request.GuiltyNpcId.HasValue && request.GuiltyNpcId.Value > 0)
+                    ? request.GuiltyNpcId.Value
+                    : (guiltyNpc?.NPCId ?? 1);
+
+                var cluesInBag = await repository.GetCluesInBagAsync();
+                var recentDialogs = await repository.GetRecentDialogLogsAsync(npc.NPCId, 5);
+                
+                // Tamamen yerel, kural tabanlı, hafızalı ve fuzzy-logic destekli AI kullanımı
+                var localAiEngine = new LocalAiEngine(repository); // Repository'yi iletiyoruz ki db'ye gidebilsin
+                var response = await localAiEngine.GenerateResponseAsync(npc, guiltyId, request.Question, cluesInBag, recentDialogs);
+
+                if (response.TrustChange != 0)
+                {
+                    await repository.UpdateNPCTrustAsync(npc.NPCId, response.TrustChange);
+                }
+
+                // Yapay zeka ile kurulan tüm cümleleri veritabanına kaydet (local_ai etiketi ile)
+                await repository.LogDialogWithCategoryAsync(npc.NPCId, request.Question, response.Dialogue, 1, "local_ai");
+
                 return Results.Ok(new
                 {
-                    dialogue = "Bu konuda konuşmak istemiyorum. Zaten bildiğim her şeyi anlattım.",
-                    emotion = "Sinirli",
-                    trustChange = -10,
-                    revealedSecret = "",
-                    updatedNpc = npc
+                    success = true,
+                    dialogue = response.Dialogue,
+                    emotion = response.Emotion,
+                    trustChange = response.TrustChange,
+                    revealedSecret = response.RevealedSecret ?? "",
+                    updatedNpc = npc,
+                    guiltyIdUsed = guiltyId
                 });
             }
             catch (Exception ex)
@@ -290,36 +314,25 @@ class Program
         {
             try
             {
-                // Rastgele suçlu seç (1-5 arası)
                 var random = new Random();
                 int guiltyId = random.Next(1, 6);
                 
                 try
                 {
-                    // Veritabanı varsa güncelle
-                    using var db = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
-                    await db.OpenAsync();
-                    using var cmd = db.CreateCommand();
-                    cmd.CommandText = @"
-                        IF OBJECT_ID('Clues', 'U') IS NOT NULL UPDATE Clues SET Status = 'Pending';
-                        UPDATE NPCs SET TrustLevel = 50, FearLevel = 30;
-                        DELETE FROM DialogLogs;
-                        UPDATE NPCs SET IsGuilty = 0;
-                        UPDATE NPCs SET IsGuilty = 1 WHERE NPCId = @GuiltyId;
-                    ";
-                    cmd.Parameters.AddWithValue("@GuiltyId", guiltyId);
-                    await cmd.ExecuteNonQueryAsync();
+                    var npcs = await repository.GetAllNPCsAsync();
+                    foreach (var npc in npcs)
+                    {
+                        npc.IsGuilty = (npc.NPCId == guiltyId);
+                        npc.TrustLevel = 50;
+                        npc.FearLevel = 30;
+                    }
                 }
-                catch
-                {
-                    // DB bağlantısı yoksa sadece client-side suçlu belirle
-                }
+                catch { }
 
                 return Results.Ok(new { success = true, message = "Oyun durumu sıfırlandı ve yeni suçlu belirlendi.", guiltyNpcId = guiltyId });
             }
             catch (Exception ex)
             {
-                // Fallback: veritabanı olmasa bile suçlu belirle
                 var fallbackGuilty = new Random().Next(1, 6);
                 return Results.Ok(new { success = true, message = "Oyun sıfırlandı (offline mod).", guiltyNpcId = fallbackGuilty });
             }
@@ -556,6 +569,7 @@ public class InterrogationRequest
 {
     public int NpcId { get; set; }
     public string Question { get; set; } = string.Empty;
+    public int? GuiltyNpcId { get; set; }
 }
 
 public class AccuseRequest

@@ -50,23 +50,23 @@ var currentHelperMessageText = '';
 
 // === GAME DATA ===
 const NPC_DATA = {
-    1: { id: 1, name: 'Kasap Hasan', building: 'Kasap', role: 'Kasabadaki eski kasap', img: 'images/hasan.png', bg: 'images/butcher_interior.png', talkBg: 'images/hasan.png',
+    1: { id: 1, name: 'Kasap Hasan', building: 'Kasap', role: 'Kasabadaki eski kasap', img: 'images/hasan.png', bg: 'images/butcher_interior.png', talkBg: 'images/hasan.png', clipPath: 'ellipse(22% 35% at 50% 55%)',
         secret: 'Cinayet gecesi dükkânında gizlice muhtara et sattı.',
         murderStory: 'Yağmurlu bir sonbahar gecesiydi. Kasap Hasan, dükkânını kapattıktan sonra doğruca Osman Bey\'in evine yürüdü. Yıllardır biriken veresiye borcu artık dayanılmaz bir hal almıştı — Osman Bey her seferinde ödemeyi erteliyordu. O gece Hasan son kez parasını istemeye gitti. Kapıyı Osman Bey açtığında, Hasan\'ın gözlerindeki öfkeyi fark edemedi. "Paran yarın gelecek" dedi alaycı bir gülümsemeyle. "Yarın mı? Yıllardır yarın diyorsun!" diye kükredi Hasan. Tartışma kızıştıkça Hasan\'ın eli yanında getirdiği satıra gitti. Bir anlık öfke krizinde, o ağır satırı kurbanın boyun bölgesine indirdi. Derin, tırtıklı yara — ancak bir kasabın elinden çıkabilecek bir darbeydi. Osman Bey son çırpınışlarında Hasan\'ın siyah deri önlüğünden parçalar kopartmaya çalıştı, tırnakları arasında kalan o küçük parçalar, son nefesinde bile savaştığının kanıtıydı. Hasan panikle satırı dükkânına götürüp tezgaha sapladı. Kanlı önlüğünü bir köşeye fırlattı, kara kaplı veresiye defterindeki Osman\'ın adını kırmızı kalemle çizdi. Ama karanlıkta ne kadar temizlerse temizlesin, kanın izi her yere sinmişti.'
     },
-    2: { id: 2, name: 'Eczacı Selma', building: 'Eczane', role: 'Eczane sahibi', img: 'images/selma.png', bg: 'images/eczane_final.png', talkBg: 'images/eczane_ic_mekan.png',
+    2: { id: 2, name: 'Eczacı Selma', building: 'Eczane', role: 'Eczane sahibi', img: 'images/selma.png', bg: 'images/eczane_final.png', talkBg: 'images/eczane_ic_mekan.png', clipPath: 'ellipse(20% 35% at 50% 60%)',
         secret: 'Kurbanın zehirlendiğini biliyordu ama gizledi.',
         murderStory: 'Eczacı Selma, yıllardır kasabada sessiz sedasız çalışan, herkesin güvendiği bir kadındı. Ama bu sessizliğin ardında derin bir nefret gizliydi. Osman Bey, Selma\'nın geçmişine dair bir sır keşfetmiş ve onu aylardır bununla tehdit ediyordu — sessiz kalmasının karşılığında düzenli para talep ediyordu. O gece Selma, planını uygulamaya koydu. Eczanesinin tezgahı altında yetiştirdiği ölümcül bir sarmaşık türünün özünü, son derece dikkatli bir şekilde Osman Bey\'in her gün kullandığı kalp ilacına karıştırdı. Dozajı mükemmel hesaplamıştı — ne çok az, ne çok fazla. İlacı o gün Osman\'ın eline bizzat verdi, gülümseyerek. "Geçmiş olsun Osman Bey, bu ilacı düzenli alın" dedi. Gece yarısı, Osman Bey yatmadan önce ilacını içti. Birkaç dakika içinde kalbinde keskin bir ağrı hissetti. Kalp krizi geçiriyormuş gibi kıvrandı, nefes almaya çalıştı ama zehir çoktan damarlarına yayılmıştı. Selma, o sırada eczanesinin karanlık köşesinde, yağmurun sesini dinleyerek bekledi. Boş ilaç şişesini masanın altına sakladı, parmak izlerini titizlikle sildi. Reçete defterinin son sayfalarını — Osman\'ın gerçek teşhisini ve zehirlenme belirtilerini içeren notları — aceleyle yırtıp attı. Ama her ne kadar profesyonel davranmış olsa da, zehirli sarmaşık tezgahın altında kurumaya bırakılmış halde duruyordu.'
     },
-    3: { id: 3, name: 'Muhtar Kemal', building: 'Muhtarlık', role: 'Kasabanın muhtarı', img: 'images/kemal.png', bg: 'images/muhtarlik_final.png', talkBg: 'images/muhtarlik_ic_mekan.png',
+    3: { id: 3, name: 'Muhtar Kemal', building: 'Muhtarlık', role: 'Kasabanın muhtarı', img: 'images/kemal.png', bg: 'images/muhtarlik_final.png', talkBg: 'images/muhtarlik_ic_mekan.png', clipPath: 'ellipse(22% 35% at 50% 60%)',
         secret: 'Kurbanla arazi anlaşmazlığı vardı.',
         murderStory: 'Muhtar Kemal, kasabanın en güçlü adamıydı — herkesin sırrını biliyor, her kapıyı açıyordu. Ama yaklaşan belediye seçimleri için büyük bir arazi projesine ihtiyacı vardı ve o arazinin sahibi Osman Bey\'di. Haftalardır Osman\'ı arazisini satması için ikna etmeye çalışmıştı ama Osman direndi. "Bu arazi babamdan kalma, satmam" dedi her seferinde. O gece Kemal, tüm diplomatik maskesini çıkardı. Gece yarısı Osman\'ın evine sızdı — muhtarlık kasasındaki yedek anahtarlarla kapıyı açmak çocuk oyuncağıydı. İçeri girdiğinde Osman masasında oturmuş, belgelerini inceliyordu. "Sen de mi Kemal?" dedi Osman, şaşkınlıkla. Kemal sahte tapu belgelerini masaya fırlattı. "Bunu imzalayacaksın, ya da..." Osman belgeleri yırtmaya başladı. Kemal kontrolünü kaybetti. Masadaki ağır bronz mühürü kaptığı gibi Osman\'ın yüzüne indirdi. Şiddetli bir boğuşma başladı — mobilyalar devrildi, Osman\'ın gözlüğü yere düşüp kırıldı. Kemal, son darbeyi kurbanın şakağına indirdiğinde, Osman\'ın gözleri kararıp yere yığıldı. Ölüm sebebi: ağır darbe sonucu beyin kanaması. Kemal panikle evi terk etti ama aceleyle çıkarken yırtılmış tapu belgelerini ve kırık gözlüğü olduğu yerde bıraktı. Ofisine döndüğünde, titreyerek gizli kasasını açıp sahte belgelerin kopyalarını içine kilitledi.'
     },
-    4: { id: 4, name: 'Komiser Güneş', building: 'Karakol', role: 'Kadın polis komiseri', img: 'images/gunes.png', bg: 'images/karakol_final.png', talkBg: 'images/karakol_ic_mekan.png',
+    4: { id: 4, name: 'Komiser Güneş', building: 'Karakol', role: 'Kadın polis komiseri', img: 'images/gunes.png', bg: 'images/karakol_final.png', talkBg: 'images/karakol_ic_mekan.png', clipPath: 'ellipse(20% 35% at 50% 60%)',
         secret: 'Olay yerindeki delilleri sakladı.',
         murderStory: 'Komiser Güneş, kasabanın adalet sembolüydü — ya da öyle görünüyordu. Gerçekte yıllardır Osman Bey\'den düzenli rüşvet alıyordu. Osman, kasabadaki yasadışı arazi işlemlerini ve kaçak ticaret yollarını biliyordu; Güneş ise bu bilgilerin gün yüzüne çıkmaması için olayları kapatıyor, dosyaları kaybediyordu. Ama Osman artık bu düzenden bıkmıştı ve Güneş\'i ihbar etmekle tehdit etti. "Yarın sabah savcılığa gidiyorum" dedi telefonda, sesi kararlıydı. Güneş o gece üniformasını giydi, polis copunu beline taktı ve Osman\'ın evine gitti. Kapıyı açan Osman, komiserin yüzündeki soğuk ifadeyi gördüğünde anladı ama çok geçti. Güneş ilk darbeyi polis copuyla Osman\'ın karnına indirdi. Osman ikiye katlanırken, Güneş onu yere devirdi. Boğuşma sırasında Osman savunma yaraları aldı — kollarında, ellerinde darbe izleri oluştu. Güneş yakın mesafeden copla art arda vurdu. Son darbe şakağına geldiğinde Osman hareketsiz kaldı. Havasız kalma ve travmatik darbeler — bir polisin eğitimli şiddetiyle uyumlu izler. Güneş, bir polis olarak olay yerini profesyonelce temizlemeye çalıştı — parmak izlerini sildi, kan lekelerini temizledi. Ama boğuşma sırasında paltosunun pirinç düğmesi kopmuş, rozeti yere düşmüştü. Karanlıkta bunları fark edemedi. Karakola döndüğünde, "GİZLİ" damgalı dosyaya Osman\'ın ihbar dilekçesini kilitledi ve anahtarı çekmecesinin derinliklerine gömdü.'
     },
-    5: { id: 5, name: 'Terzi Yahya', building: 'Terzi', role: 'Kasabanın terzisi', img: 'images/yahya.png', bg: 'images/terzi_final.png', talkBg: 'images/terzi_ic_mekan.png',
+    5: { id: 5, name: 'Terzi Yahya', building: 'Terzi', role: 'Kasabanın terzisi', img: 'images/yahya.png', bg: 'images/terzi_final.png', talkBg: 'images/terzi_ic_mekan.png', clipPath: 'ellipse(22% 35% at 50% 60%)',
         secret: 'Kurbana gizli cepli ceket dikti, son gören kişi.',
         murderStory: 'Terzi Yahya, kasabanın en yaşlı ve en saygın ustasıydı. Ama bu saygın cephenin arkasında karanlık bir ortaklık vardı — Yahya, yıllardır Osman Bey\'in gizli işlerinin sessiz ortağıydı. Para aklama, belge saklama, hatta kaçak mal transferi... Osman\'ın son diktirdiği ceketin astarına gizli bir cep dikmişti ve bu cepte, tüm yasadışı işlemlerin kaydını içeren bir USB bellek saklanıyordu. Ama Osman, ortaklığı bitirmeye ve Yahya\'yı saf dışı bırakmaya karar vermişti. O gece Yahya, payını almak için Osman\'ın evine gitti. "Param nerede Osman?" diye sordu titreyen bir sesle. Osman güldü. "Senin paran mı? Bu işte sen artık yoksun yaşlı adam. O USB\'yi de sana vermeyeceğim." Yılların birikimi bir anda patladı. Yahya, meslek hayatının en sadık aleti olan iplik makarasını cebinden çıkardı. Kalın, dayanıklı, kopması imkansız terzi ipliğini Osman\'ın boynuna doladı ve tüm gücüyle sıktı. Osman çırpındı, direndi — bu sırada Yahya\'nın diktiği ceketinden kumaş parçaları yırtıldı. Ama Yahya bırakmadı. İplik boyun bölgesinde derin izler bırakarak, Osman\'ın son nefesini de aldı. Yahya titreyerek ayağa kalktı. Kanlı iplik makarasını cebine koydu, yırtılan kumaş parçalarını toplamaya çalıştı ama hepsini bulamadı. Dükkânına döndüğünde, o gece diktiği son ceketin gizli cebindeki not hâlâ duruyordu: "Bu gece gel, konuşalım."'
     }
@@ -74,29 +74,93 @@ const NPC_DATA = {
 
 const SCENE_OBJECTS = {
     1: [ // Kasap
-        { id: 1, name: 'Kanlı Satır', desc: 'Tezgaha sertçe saplanmış, üzerinde taze kan lekeleri olan paslı bir satır. Kan kurbanın kanıyla eşleşiyor olabilir.', top: '58%', left: '64%', img: 'images/bloody_cleaver.png' },
-        { id: 2, name: 'Kara Kaplı Defter', desc: 'Veresiye listesinde kurbanın isminin üzeri kırmızı kalemle çizilmiş. Son sayfada şifreli notlar var.', top: '64%', left: '32%', img: 'images/black_notebook.png' },
-        { id: 3, name: 'Yırtık Önlük', desc: 'Kavga izleri taşıyan, yakası kopmuş bir kasap önlüğü. Cebinde küçük bir anahtar var.', top: '50%', left: '18%', img: 'images/torn_apron.png' }
+        { id: 1, name: 'Kanlı Satır', desc: 'Tezgaha sertçe saplanmış, üzerinde taze kan lekeleri olan paslı bir satır.', top: '58%', left: '64%', img: 'images/bloody_cleaver.png',
+          examineActions: [
+              { type: 'powder', btnText: 'Pudra Sür (Parmak İzi)', resultOverlay: 'show-fingerprint', resultText: 'Satırın sapında net bir başparmak izi belirdi! Şüpheliye ait olabilir.' },
+              { type: 'uv', btnText: 'UV Işığı (Kan İzi)', resultOverlay: 'show-uv', resultText: 'Sadece sapta değil, tezgahta da silinmiş kan izleri parladı!' }
+          ]
+        },
+        { id: 2, name: 'Kara Kaplı Defter', desc: 'Veresiye listesinde kurbanın isminin üzeri kırmızı kalemle çizilmiş.', top: '64%', left: '32%', img: 'images/black_notebook.png',
+          examineActions: [
+              { type: 'read', btnText: 'Defteri İncele', resultLetter: 'Kasap Hasan - Kurban: 50.000 TL Borç! (ÖDENMEDİ)', resultText: 'Kurbanın kasaba çok büyük bir borcu olduğu açıkça yazıyor.' },
+              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Defterin köşesinde sinirle sıkılmış parmak izleri var.' }
+          ]
+        },
+        { id: 3, name: 'Yırtık Önlük', desc: 'Kavga izleri taşıyan, yakası kopmuş bir kasap önlüğü.', top: '50%', left: '18%', img: 'images/torn_apron.png',
+          examineActions: [
+              { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Önlüğün yırtık olan yakasında kurbana ait olabilecek sıçramış kan damlaları var!' }
+          ]
+        }
     ],
     2: [ // Eczane
-        { id: 4, name: 'Boş İlaç Şişesi', desc: 'Zehirli olduğu bilinen, reçetesiz satılmayan ağır bir ilacın boş şişesi. Parmak izleri silinmiş.', top: '58%', left: '28%', img: 'images/empty_medicine_bottle.png' },
-        { id: 5, name: 'Reçete Defteri', desc: 'Kurbanın adının geçtiği, son sayfaları aceleyle yırtılmış defter.', top: '62%', left: '72%', img: 'images/prescription_notebook.png' },
-        { id: 6, name: 'Zehirli Sarmaşık', desc: 'Tezgah altında kurumaya bırakılmış zehirli bir bitki türü. Ölümcül dozda kullanılabilir.', top: '32%', left: '54%', img: 'images/poison_ivy.png' }
+        { id: 4, name: 'Boş İlaç Şişesi', desc: 'Zehirli olduğu bilinen, reçetesiz satılmayan ağır bir ilacın boş şişesi.', top: '58%', left: '28%', img: 'images/empty_medicine_bottle.png',
+          examineActions: [
+              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Şişenin üzerinde eczacı eldiveni izleri var, ama bir de çıplak parmak izi çıktı!' }
+          ]
+        },
+        { id: 5, name: 'Reçete Defteri', desc: 'Kurbanın adının geçtiği, son sayfaları aceleyle yırtılmış defter.', top: '62%', left: '72%', img: 'images/prescription_notebook.png',
+          examineActions: [
+              { type: 'read', btnText: 'Kurşun Kalemle Karala', resultLetter: '(Alt sayfadaki iz) Kurbanın Kalp İlacı - Doz aşımı ölümcül!', resultText: 'Yırtılan sayfanın altındaki kağıda çıkan izleri okumayı başardın!' }
+          ]
+        },
+        { id: 6, name: 'Zehirli Sarmaşık', desc: 'Tezgah altında kurumaya bırakılmış zehirli bir bitki türü.', top: '32%', left: '54%', img: 'images/poison_ivy.png',
+          examineActions: [
+              { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Bitkinin özsuyunun kurbanın ilacına karıştırıldığına dair fosforlu kalıntılar var.' }
+          ]
+        }
     ],
     3: [ // Muhtarlık
-        { id: 7, name: 'Tehdit Mektubu', desc: 'Muhtarın çekmecesinde kurbana yazılmış, henüz gönderilmemiş bir tehdit mektubu. El yazısı titrek.', top: '62%', left: '44%', img: 'images/threat_letter.png' },
-        { id: 8, name: 'Kırık Gözlük', desc: 'Kurbana ait olduğu düşünülen, camı kırık bir okuma gözlüğü.', top: '56%', left: '56%', img: 'images/broken_glasses.png' },
-        { id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa. İçinde sahte belgeler de var.', top: '42%', left: '24%', img: 'images/hidden_safe.png' }
+        { id: 7, name: 'Tehdit Mektubu', desc: 'Muhtarın çekmecesinde kurbana yazılmış, henüz gönderilmemiş mektup.', top: '62%', left: '44%', img: 'images/threat_letter.png',
+          examineActions: [
+              { type: 'read', btnText: 'Mektubu Oku', resultLetter: '"Arazini satmazsan, sonun kötü olur. - K."', resultText: 'Mektubun içeriği muhtarın cinayet niyetini gösteriyor!' },
+              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Mektubun üzerinde terli bir parmak izi belirdi.' }
+          ]
+        },
+        { id: 8, name: 'Kırık Gözlük', desc: 'Kurbana ait olduğu düşünülen, camı kırık bir okuma gözlüğü.', top: '56%', left: '56%', img: 'images/broken_glasses.png',
+          examineActions: [
+              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Gözlüğün camında kurban dışındaki birine ait (muhtemelen Muhtarın) parmak izi var!' },
+              { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Gözlüğün çerçevesinde mikroskobik kan damlaları parladı.' }
+          ]
+        },
+        { id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa.', top: '42%', left: '24%', img: 'images/hidden_safe.png',
+          examineActions: [
+              { type: 'read', btnText: 'Belgeleri İncele', resultLetter: 'SAHTE TAPU: Kurbanın arazisi bedelsiz olarak belediyeye (Muhtara) devredilecektir.', resultText: 'Muhtarın sahte belge düzenlediği kanıtlandı!' }
+          ]
+        }
     ],
     4: [ // Karakol
-        { id: 10, name: 'Polis Rozeti', desc: 'Olay yerinde bulunan, numarası kazınmış bir polis rozeti. Kime ait olduğu belirsiz.', top: '58%', left: '36%', img: 'images/police_badge.png' },
-        { id: 11, name: 'Gizli Dosya', desc: '"GİZLİ" damgalı bir dosya. İçinde kurbanın geçmişiyle ilgili bilgiler var.', top: '52%', left: '62%', img: 'images/evidence_file.png' },
-        { id: 12, name: 'Kayıp Düğme', desc: 'Pahalı bir paltonun kopmuş düğmesi. Terzi Yahya\'nın diktiği kumaşa benziyor.', top: '72%', left: '48%', img: 'images/missing_button.png' }
+        { id: 10, name: 'Polis Rozeti', desc: 'Olay yerinde bulunan, numarası kazınmış bir polis rozeti.', top: '58%', left: '36%', img: 'images/police_badge.png',
+          examineActions: [
+              { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Rozetin arkasında kan lekeleri var. Olay yerinde düştüğü kesinleşti.' }
+          ]
+        },
+        { id: 11, name: 'Gizli Dosya', desc: '"GİZLİ" damgalı bir dosya. İçinde kurbanın geçmişiyle ilgili bilgiler var.', top: '52%', left: '62%', img: 'images/evidence_file.png',
+          examineActions: [
+              { type: 'read', btnText: 'Dosyayı Oku', resultLetter: 'Kurbanın Komiser Güneş hakkında rüşvet şikayet dilekçesi. HASIR ALTI EDİLMİŞ!', resultText: 'Komiserin güçlü bir cinayet motifi olduğu ortaya çıktı.' }
+          ]
+        },
+        { id: 12, name: 'Kayıp Düğme', desc: 'Pahalı bir paltonun kopmuş düğmesi.', top: '72%', left: '48%', img: 'images/missing_button.png',
+          examineActions: [
+              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Düğmede boğuşma sırasında oluşan çekme izleri ve ter var.' }
+          ]
+        }
     ],
     5: [ // Terzi
-        { id: 13, name: 'Kanlı İplik Makarası', desc: 'Üzerinde kurumuş kan lekeleri olan iplik makarası. İplik rengi kurbanın ceketindekiyle aynı.', top: '58%', left: '68%', img: 'images/thread_spool.png' },
-        { id: 14, name: 'Yırtık Kumaş', desc: 'Kurbanın ceketinden kopmuş olabilecek kumaş parçası.', top: '62%', left: '30%', img: 'images/torn_fabric.png' },
-        { id: 15, name: 'Gizli Cep', desc: 'Yahya\'nın diktiği ceketin astarında gizli bir cep. İçinde: "Bu gece gel, konuşalım."', top: '44%', left: '48%', img: 'images/hidden_pocket.png' }
+        { id: 13, name: 'Kanlı İplik Makarası', desc: 'Üzerinde kurumuş kan lekeleri olan iplik makarası.', top: '58%', left: '68%', img: 'images/thread_spool.png',
+          examineActions: [
+              { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Kurbanın boynundaki boğulma izleriyle bu ipliğin kalınlığı birebir eşleşiyor!' }
+          ]
+        },
+        { id: 14, name: 'Yırtık Kumaş', desc: 'Kurbanın ceketinden kopmuş olabilecek kumaş parçası.', top: '62%', left: '30%', img: 'images/torn_fabric.png',
+          examineActions: [
+              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Kumaşta Terzi Yahya nın parmak izleri netleşti.' }
+          ]
+        },
+        { id: 15, name: 'Gizli Cep', desc: 'Yahya nın diktiği ceketin astarında gizli bir cep.', top: '44%', left: '48%', img: 'images/hidden_pocket.png',
+          examineActions: [
+              { type: 'read', btnText: 'Cebin İçini Aç', resultLetter: '"Bu gece gel, konuşalım. USB yi unutma. - Osman"', resultText: 'Kurban ve terzinin o gece gizli bir buluşma ayarladığı kesinleşti!' }
+          ]
+        }
     ]
 };
 
@@ -950,11 +1014,12 @@ function openNpcTalk(npcId) {
     const npc = NPC_DATA[npcId];
     if (!npc) return;
     
-    // NPC Konuşma Ekranı Görseli (eczane_ic_mekan.png, karakol_ic_mekan.png, hasan.png, muhtarlik_ic_mekan.png, terzi_ic_mekan.png)
+    // NPC Konuşma Ekranı Görseli
     const talkBgImage = npc.talkBg || npc.bg;
     const talkContainer = document.querySelector('.npc-talk-container');
     if (talkContainer) {
         talkContainer.style.backgroundImage = `url('${talkBgImage}?v=${Date.now()}')`;
+        talkContainer.className = 'npc-talk-container'; // Duygu filtrelerini sıfırlamak için class'ı yeniliyoruz
     }
 
     // NPC görselini portre olarak gizle (çünkü talkBg tam mekan/karakter sahnesini içerir)
@@ -1030,21 +1095,55 @@ function loadContextualQuestions(npcId) {
         });
 }
 
+let currentTypewriterTimeout = null;
+let isTyping = false;
+
+function typeWriter(element, text, i, onComplete) {
+    if (i < text.length) {
+        isTyping = true;
+        element.innerHTML = text.substring(0, i + 1) + '<span class="typewriter-cursor"></span>';
+        currentTypewriterTimeout = setTimeout(() => typeWriter(element, text, i + 1, onComplete), 20); // Daktilo hızı
+    } else {
+        isTyping = false;
+        element.innerHTML = text; // İmleci kaldır
+        if (onComplete) onComplete();
+    }
+}
+
 function askQuestionBackend(npcId, question) {
     const npc = NPC_DATA[npcId];
     const chatArea = document.getElementById('npc-talk-chat');
     
     askedQuestionCount[npcId] = (askedQuestionCount[npcId] || 0) + 1;
     
+    // Önceki yazma işlemini iptal et
+    if (currentTypewriterTimeout) {
+        clearTimeout(currentTypewriterTimeout);
+        isTyping = false;
+    }
+    
     // Oyuncu mesajı
     const playerMsg = document.createElement('div');
     playerMsg.className = 'npc-talk-message player';
     playerMsg.innerHTML = `<div class="speaker">Dedektif</div><div class="msg-text">${question.q}</div>`;
     chatArea.appendChild(playerMsg);
+    chatArea.scrollTop = chatArea.scrollHeight;
     
-    // Butonları geçici devre dışı bırak
-    document.querySelectorAll('.npc-talk-btn').forEach(b => b.disabled = true);
+    // Butonları gizle (yazma bitene kadar)
+    const btnContainer = document.getElementById('npc-talk-buttons');
+    if (btnContainer) btnContainer.style.display = 'none';
     
+    // Duygu durumuna göre CSS sınıfı belirle ve sadece karakter katmanına uygula
+    const characterLayer = document.getElementById('npc-talk-character-layer');
+    if (characterLayer) {
+        characterLayer.className = 'npc-talk-character-layer'; // Sıfırla
+        if (question.difficulty > 3 || question.category === 'baski') {
+            characterLayer.classList.add('emotion-angry');
+        } else if (question.category === 'yuzlestirme') {
+            characterLayer.classList.add('emotion-nervous');
+        }
+    }
+
     // NPC mırıltı sesi
     if (npcMumble) {
         npcMumble.currentTime = 0;
@@ -1052,42 +1151,171 @@ function askQuestionBackend(npcId, question) {
         setTimeout(() => stopSound(npcMumble), 1500);
     }
     
-    // NPC cevabını belirle (suçlu NPC'ye göre dinamik cevap)
+    // NPC cevabını belirle
     let answer = question.a;
     if (question.guiltyResponse && guiltyNpcId && question.guiltyResponse[guiltyNpcId]) {
         answer = question.guiltyResponse[guiltyNpcId];
     }
     
-    // NPC cevabı (gecikmeli)
+    // NPC cevabı (gecikmeli başlat)
     setTimeout(() => {
         const npcMsg = document.createElement('div');
         npcMsg.className = 'npc-talk-message';
-        npcMsg.innerHTML = `<div class="speaker">${npc.name}</div><div class="msg-text">${answer}</div>`;
+        
+        const speakerDiv = document.createElement('div');
+        speakerDiv.className = 'speaker';
+        speakerDiv.textContent = npc.name;
+        
+        const textDiv = document.createElement('div');
+        textDiv.className = 'msg-text';
+        
+        npcMsg.appendChild(speakerDiv);
+        npcMsg.appendChild(textDiv);
         chatArea.appendChild(npcMsg);
-        chatArea.scrollTop = chatArea.scrollHeight;
         
-        // Konuşma geçmişine kaydet
-        if (!dialogHistory[npcId]) dialogHistory[npcId] = [];
-        dialogHistory[npcId].push({
-            player: question.q,
-            npc: answer,
-            npcName: npc.name,
-            difficulty: question.difficulty
-        });
-        
-        // Backend'e diyalog kaydı yaz
-        logDialog(npcId, question.q, answer, question.difficulty || 1, question.category || 'tanisma');
-        
-        // Kalan soru sayısını güncelle
-        updateQuestionIndicator(npcId);
-        saveGameState();
-        
-        setTimeout(() => {
+        // Yazma sırasında scroll'u aşağıda tutmak için bir interval
+        const scrollInterval = setInterval(() => {
+            if(isTyping) chatArea.scrollTop = chatArea.scrollHeight;
+            else clearInterval(scrollInterval);
+        }, 100);
+
+        // Daktilo efektiyle yaz
+        typeWriter(textDiv, answer, 0, () => {
+            // İpuçlarını kontrol et ve çantaya ekle
+            if (question.relatedClues && question.relatedClues.length > 0) {
+                checkAndDropClues(npcId, question.relatedClues);
+            }
+
+            // Konuşma geçmişine kaydet
+            if (!dialogHistory[npcId]) dialogHistory[npcId] = [];
+            dialogHistory[npcId].push({
+                player: question.q,
+                npc: answer,
+                npcName: npc.name,
+                difficulty: question.difficulty
+            });
+            
+            // Backend'e diyalog kaydı yaz
+            logDialog(npcId, question.q, answer, question.difficulty || 1, question.category || 'tanisma');
+            
+            // Kalan soru sayısını güncelle
+            updateQuestionIndicator(npcId);
+            saveGameState();
+            
+            if (btnContainer) btnContainer.style.display = 'grid'; // Grid veya block, loadContextualQuestions hallediyor ama görünür yapalım
             loadContextualQuestions(npcId);
-        }, 500);
+        });
         
     }, 800);
 }
+
+// YEREL YAPAY ZEKA SERBEST SORU SORMA SİSTEMİ
+function askFreeAiQuestion() {
+    if (!activeNpcId) return;
+    const inputEl = document.getElementById('npc-ai-input');
+    if (!inputEl) return;
+    const questionText = inputEl.value.trim();
+    if (!questionText) return;
+
+    const askedCount = askedQuestionCount[activeNpcId] || 0;
+    if (askedCount >= 5) {
+        alert('Bu NPC ile konuşma hakkınız doldu (5/5). Artık soru soramazsınız!');
+        return;
+    }
+
+    inputEl.value = ''; // Temizle
+    askedQuestionCount[activeNpcId] = askedCount + 1;
+
+    const npc = NPC_DATA[activeNpcId];
+    const chatArea = document.getElementById('npc-talk-chat');
+
+    // Önceki daktilo yazma işlemini iptal et
+    if (currentTypewriterTimeout) {
+        clearTimeout(currentTypewriterTimeout);
+        isTyping = false;
+    }
+
+    // Oyuncu mesajını chat alanına ekle
+    const playerMsg = document.createElement('div');
+    playerMsg.className = 'npc-talk-message player';
+    playerMsg.innerHTML = `<div class="speaker">Dedektif</div><div class="msg-text">${questionText}</div>`;
+    chatArea.appendChild(playerMsg);
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+    // NPC mırıltı sesi
+    if (npcMumble) {
+        npcMumble.currentTime = 0;
+        playSound(npcMumble, 0.25);
+        setTimeout(() => stopSound(npcMumble), 1500);
+    }
+
+    // Backend Yerel Yapay Zeka Motoruna İstek Gönder
+    fetch('/api/game/interrogate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ NpcId: activeNpcId, Question: questionText, GuiltyNpcId: guiltyNpcId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        let answer = data.dialogue || "Bu konuda söylenecek bir şey yok.";
+        let emotion = data.emotion || "Sakin";
+
+        // Karakter duygu stili
+        const characterLayer = document.getElementById('npc-talk-character-layer');
+        if (characterLayer) {
+            characterLayer.className = 'npc-talk-character-layer';
+            if (emotion === 'Panik' || emotion === 'Sinirli') {
+                characterLayer.classList.add('emotion-angry');
+            } else if (emotion === 'Tedirgin' || emotion === 'Gergin') {
+                characterLayer.classList.add('emotion-nervous');
+            }
+        }
+
+        const npcMsg = document.createElement('div');
+        npcMsg.className = 'npc-talk-message';
+        const speakerDiv = document.createElement('div');
+        speakerDiv.className = 'speaker';
+        speakerDiv.textContent = npc.name;
+        const textDiv = document.createElement('div');
+        textDiv.className = 'msg-text';
+
+        npcMsg.appendChild(speakerDiv);
+        npcMsg.appendChild(textDiv);
+        chatArea.appendChild(npcMsg);
+
+        typeWriter(textDiv, answer, 0, () => {
+            if (data.revealedSecret) {
+                showCinematicHelper(data.revealedSecret, false);
+            }
+            if (!dialogHistory[activeNpcId]) dialogHistory[activeNpcId] = [];
+            dialogHistory[activeNpcId].push({
+                player: questionText,
+                npc: answer,
+                npcName: npc.name,
+                difficulty: 3
+            });
+            logDialog(activeNpcId, questionText, answer, 3, 'serbest_ai');
+            updateQuestionIndicator(activeNpcId);
+            saveGameState();
+            loadContextualQuestions(activeNpcId);
+        });
+    })
+    .catch(err => {
+        console.error("Yerel AI hatası:", err);
+        const npcMsg = document.createElement('div');
+        npcMsg.className = 'npc-talk-message';
+        npcMsg.innerHTML = `<div class="speaker">${npc.name}</div><div class="msg-text">*Sessizce süzüyor* Ne demek istiyorsun dedektif?</div>`;
+        chatArea.appendChild(npcMsg);
+        updateQuestionIndicator(activeNpcId);
+    });
+}
+
+document.getElementById('npc-ai-send-btn')?.addEventListener('click', askFreeAiQuestion);
+document.getElementById('npc-ai-input')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        askFreeAiQuestion();
+    }
+});
 
 document.getElementById('npc-talk-close').addEventListener('click', () => {
     npcTalkModal.classList.add('hidden');
@@ -1648,30 +1876,46 @@ document.getElementById('cinematic-skip-btn')?.addEventListener('click', () => {
 document.getElementById('cinematic-tip-btn')?.addEventListener('click', () => provideBuildingSpecificHint(activeNpcId));
 document.getElementById('helper-tip-btn')?.addEventListener('click', () => provideBuildingSpecificHint(activeNpcId));
 
-// Çanta Butonları (Sinematik Balon & Modal)
+// Çanta Butonları (Modal)
 function handleHelperBagClick() {
     openBag();
     if (currentBag.length === 0) {
-        showCinematicHelper('Amirims, çantamız henüz bomboş! Binalara girip etraftaki delilleri toplamalıyız.', false);
+        showCinematicHelper(`Amirims, çantamız henüz bomboş (0/${MAX_BAG_SIZE} delil)! Binalara girip nesnelere tıklayarak delilleri toplayın. Hatırlatırım, çantanıza yalnızca ${MAX_BAG_SIZE} delil alabilirsiniz, dikkatli seçin!`, false);
     } else {
-        const names = currentBag.map(c => c.name).join(', ');
-        showCinematicHelper(`Amirims, çantamızda ${currentBag.length} delil var: ${names}. Şüphelileri sorgularken bu deliller harika ipucudur!`, false);
+        const names = currentBag.map(c => `'${c.name}'`).join(', ');
+        const inspectedCount = currentBag.filter(c => c.inspected).length;
+        let msg = `Amirims, çantamızda ${currentBag.length}/${MAX_BAG_SIZE} delil var: ${names}. `;
+        if (inspectedCount > 0) {
+            msg += `${inspectedCount} tanesi zaten incelendi. `;
+        }
+        if (inspectedCount < currentBag.length) {
+            msg += `Henüz incelenmemiş deliller var, 'İncele' butonuyla detaylı incelemeyi unutmayın!`;
+        } else {
+            msg += `Tüm deliller incelendi, artık şüphelileri sorgulayıp katili bulmaya odaklanmalıyız!`;
+        }
+        showCinematicHelper(msg, false);
     }
 }
-document.getElementById('cinematic-open-bag-btn')?.addEventListener('click', handleHelperBagClick);
+// cinematic-open-bag-btn kaldırıldı, sadece modal butonundan çalışır
 document.getElementById('helper-open-bag-btn')?.addEventListener('click', handleHelperBagClick);
 
 // Delil Analiz Butonları (Sinematik Balon & Modal)
+// FIX: Her zaman çantadaki (currentBag) delilleri analiz et, SCENE_OBJECTS değil
 function handleHelperAnalyzeClick() {
     const textEl = document.getElementById('cinematic-helper-text');
     if (textEl) textEl.textContent = 'Deliller analiz ediliyor...';
 
-    let clueIds = [];
-    if (activeNpcId && SCENE_OBJECTS[activeNpcId]) {
-        clueIds = SCENE_OBJECTS[activeNpcId].map(c => c.id);
-    } else {
-        clueIds = currentBag.map(c => c.id);
+    // Her zaman çantadaki gerçek delilleri kullan
+    const clueIds = currentBag.map(c => c.id);
+
+    // Çantada hiç delil yoksa direkt bildir
+    if (clueIds.length === 0) {
+        showCinematicHelper('Amirims, çantamızda henüz hiçbir delil yok! Binalara girin, nesnelere tıklayın ve delilleri çantaya alın. Analiz edecek bir şeyimiz olsun önce!', false);
+        return;
     }
+
+    // Çantadaki delillerin isimlerini listele
+    const clueNames = currentBag.map(c => `'${c.name}'`).join(', ');
 
     fetch('/api/game/helper/analyze-clues', {
         method: 'POST',
@@ -1683,15 +1927,22 @@ function handleHelperAnalyzeClick() {
         if (data.success) {
             showCinematicHelper(data.analysis, false);
         } else {
-            showCinematicHelper(`Amirims, bu mekandaki ${clueIds.length} delil parçasını analiz ettim. Şüphelilerin ifadeleriyle karşılaştırın.`, false);
+            showCinematicHelper(`Amirims, çantamızdaki ${currentBag.length} delili inceledim: ${clueNames}. Bunları şüphelilerin ifadeleriyle karşılaştırmanızı öneririm!`, false);
         }
     })
     .catch(() => {
-        if (clueIds.length === 0) {
-            showCinematicHelper('Amirims, burada henüz incelenecek delil toplanmadı!', false);
-        } else {
-            showCinematicHelper(`Amirims, ${clueIds.length} delili titizlikle inceledim. Hepsi cinayet gecesine işaret ediyor!`, false);
+        // Backend erişilemezse bile çantadaki bilgiyi göster
+        const inspectedCount = currentBag.filter(c => c.inspected).length;
+        let msg = `Amirims, çantamızda toplam ${currentBag.length}/${MAX_BAG_SIZE} delil var: ${clueNames}. `;
+        if (inspectedCount > 0) {
+            msg += `Bunlardan ${inspectedCount} tanesi incelendi. `;
         }
+        if (currentBag.length < 3) {
+            msg += 'Daha fazla delil toplamak için diğer binaları da ziyaret edin!';
+        } else {
+            msg += 'Deliller katile işaret ediyor olabilir, şüphelilerin ifadeleriyle karşılaştırın!';
+        }
+        showCinematicHelper(msg, false);
     });
 }
 document.getElementById('cinematic-analyze-btn')?.addEventListener('click', handleHelperAnalyzeClick);
@@ -1754,3 +2005,180 @@ function triggerTransition(callback) {
         setTimeout(() => transitionOverlay.classList.remove('flash'), 300);
     }, 500);
 }
+
+// =============================================================
+// 11. DEDEKTİF ÇANTASI (ENVANTER) VE KANITLAR
+// =============================================================
+
+function checkAndDropClues(npcId, clueIds) {
+    let newCluesFound = false;
+    const npcSceneObjects = SCENE_OBJECTS[npcId];
+    if (!npcSceneObjects) return;
+
+    clueIds.forEach(clueId => {
+        // Zaten çantada var mı?
+        if (currentBag.some(c => c.id === clueId)) return;
+        
+        // Clue bilgisini SCENE_OBJECTS içinden bul
+        const clueInfo = npcSceneObjects.find(obj => obj.id === clueId);
+        if (clueInfo) {
+            currentBag.push(clueInfo);
+            newCluesFound = true;
+        }
+    });
+
+    if (newCluesFound) {
+        showClueBadge();
+        // Sinematik bildirim
+        triggerHelperMessage('clue_found', null, false);
+    }
+}
+
+function showClueBadge() {
+    const badge = document.getElementById('clue-badge');
+    if (badge) {
+        badge.classList.remove('hidden');
+    }
+}
+
+function hideClueBadge() {
+    const badge = document.getElementById('clue-badge');
+    if (badge) {
+        badge.classList.add('hidden');
+    }
+}
+
+// Çanta butonunu dinle
+document.getElementById('open-bag-floating-btn')?.addEventListener('click', openBagModal);
+document.getElementById('close-bag-x-btn')?.addEventListener('click', closeBagModal);
+document.getElementById('close-bag-btn')?.addEventListener('click', closeBagModal);
+
+function openBagModal() {
+    hideClueBadge();
+    const bagModal = document.getElementById('bag-modal');
+    if (!bagModal) return;
+    
+    renderBagItems();
+    bagModal.classList.remove('hidden');
+}
+
+function closeBagModal() {
+    const bagModal = document.getElementById('bag-modal');
+    if (bagModal) bagModal.classList.add('hidden');
+}
+
+function renderBagItems() {
+    const container = document.getElementById('bag-items-list');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (currentBag.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); text-align:center;">Henüz hiçbir fiziksel kanıt bulamadınız.</p>';
+        return;
+    }
+    
+    currentBag.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'bag-item';
+        itemEl.style.display = 'flex';
+        itemEl.style.alignItems = 'center';
+        itemEl.style.gap = '15px';
+        itemEl.style.padding = '10px';
+        itemEl.style.border = '1px solid var(--border-color)';
+        itemEl.style.borderRadius = '8px';
+        itemEl.style.marginBottom = '10px';
+        itemEl.style.cursor = 'pointer';
+        itemEl.style.background = 'rgba(255,255,255,0.05)';
+        
+        itemEl.innerHTML = `
+            <img src="${item.img}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" alt="Kanıt">
+            <div>
+                <div style="font-weight: bold; color: var(--accent); font-family: var(--font-heading);">${item.name}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">${item.desc.substring(0, 40)}...</div>
+            </div>
+        `;
+        
+        itemEl.addEventListener('click', () => showDetailedClue(item));
+        container.appendChild(itemEl);
+    });
+}
+
+function showDetailedClue(item) {
+    const detailModal = document.getElementById('detailed-clue-modal');
+    if (!detailModal) return;
+    
+    // UI Reset
+    document.getElementById('detailed-clue-img').src = item.img;
+    document.getElementById('detailed-clue-title').textContent = item.name;
+    document.getElementById('detailed-clue-text').textContent = item.desc;
+    
+    const overlay = document.getElementById('detailed-clue-overlay');
+    if (overlay) overlay.className = 'detailed-clue-overlay'; // Tüm eski efektleri temizle
+    
+    const letterText = document.getElementById('detailed-clue-letter-text');
+    if (letterText) {
+        letterText.className = 'detailed-clue-letter-text hidden';
+        letterText.innerHTML = '';
+    }
+    
+    const resultBox = document.getElementById('detailed-clue-result');
+    if (resultBox) {
+        resultBox.className = 'detailed-clue-result hidden';
+        resultBox.innerHTML = '';
+    }
+    
+    const actionsBox = document.getElementById('detailed-clue-actions');
+    if (actionsBox) actionsBox.innerHTML = '';
+    
+    // Adli tıp butonlarını oluştur
+    if (item.examineActions && item.examineActions.length > 0 && actionsBox) {
+        item.examineActions.forEach(action => {
+            const btn = document.createElement('button');
+            btn.innerHTML = action.type === 'uv' ? '<i class="fa-solid fa-lightbulb"></i> ' + action.btnText :
+                            action.type === 'powder' ? '<i class="fa-solid fa-fingerprint"></i> ' + action.btnText :
+                            '<i class="fa-solid fa-envelope-open-text"></i> ' + action.btnText;
+            
+            btn.addEventListener('click', () => {
+                // Tıklanınca eski efektleri temizle
+                overlay.className = 'detailed-clue-overlay';
+                letterText.className = 'detailed-clue-letter-text hidden';
+                resultBox.classList.add('hidden');
+                
+                // Efekti uygula
+                if (action.type === 'powder') {
+                    // Siyah pudra dökülme animasyonu
+                    const dust = document.createElement('div');
+                    dust.className = 'powder-dust active';
+                    document.getElementById('detailed-clue-img-wrapper').appendChild(dust);
+                    
+                    // 1 saniye sonra parmak izini çıkar
+                    setTimeout(() => {
+                        overlay.classList.add(action.resultOverlay);
+                        resultBox.textContent = action.resultText;
+                        resultBox.classList.remove('hidden');
+                        setTimeout(() => dust.remove(), 1000); // animasyon bitince DOM'dan sil
+                    }, 1000);
+                } else if (action.type === 'uv') {
+                    overlay.classList.add(action.resultOverlay);
+                    resultBox.textContent = action.resultText;
+                    resultBox.classList.remove('hidden');
+                } else if (action.type === 'read') {
+                    letterText.textContent = action.resultLetter;
+                    letterText.classList.remove('hidden');
+                    // CSS transition tetiklensin diye minik bir gecikme
+                    setTimeout(() => letterText.classList.add('show-text'), 50); 
+                    resultBox.textContent = action.resultText;
+                    resultBox.classList.remove('hidden');
+                }
+            });
+            actionsBox.appendChild(btn);
+        });
+    }
+    
+    detailModal.classList.remove('hidden');
+}
+
+document.getElementById('close-detailed-clue-btn')?.addEventListener('click', () => {
+    document.getElementById('detailed-clue-modal')?.classList.add('hidden');
+});

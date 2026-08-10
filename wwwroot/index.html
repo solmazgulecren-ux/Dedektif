@@ -12,7 +12,7 @@
         rel="stylesheet">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=16">
+    <link rel="stylesheet" href="css/style.css?v=100">
 </head>
 
 <body class="noir-theme">
@@ -224,9 +224,8 @@
                 <!-- NEW: Buttons directly under the speech bubble -->
                 <div class="cinematic-helper-actions">
                     <button id="cinematic-prev-btn" class="btn btn-accent" style="display:none;"><i class="fa-solid fa-backward-step"></i> Önceki</button>
-                    <button id="cinematic-analyze-btn" class="btn btn-accent"><i class="fa-solid fa-magnifying-glass-chart"></i> Delilleri Analiz Et</button>
+                    <button id="cinematic-analyze-btn" class="btn btn-accent"><i class="fa-solid fa-magnifying-glass-chart"></i> Delilleri İncele</button>
                     <button id="cinematic-tip-btn" class="btn btn-accent"><i class="fa-solid fa-forward-step"></i> Başka İpucu Söyle</button>
-                    <button id="cinematic-open-bag-btn" class="btn btn-accent"><i class="fa-solid fa-briefcase"></i> Çantayı Aç</button>
                     <button id="cinematic-skip-btn" class="btn btn-accent"><i class="fa-solid fa-forward"></i> Geç</button>
                 </div>
             </div>
@@ -266,10 +265,8 @@
     <!-- 6. NPC TALK FULLSCREEN -->
     <div id="npc-talk-modal" class="modal-backdrop hidden">
         <div class="npc-talk-container">
-            <!-- NPC Portrait — object-fit ile ekrana sığdırılır -->
-            <div class="npc-talk-portrait-wrap">
-                <img id="npc-talk-portrait-img" class="npc-talk-portrait-img" src="" alt="NPC">
-            </div>
+            <!-- Sadece karakterin olduğu bölgeyi kesmek için ikinci katman (clip-path için) -->
+            <div id="npc-talk-character-layer" class="npc-talk-character-layer"></div>
             <!-- Dark overlay for readability -->
             <div class="npc-talk-overlay"></div>
 
@@ -286,14 +283,22 @@
                 <!-- Messages will be dynamically added -->
             </div>
 
-            <!-- Bottom: 4 question buttons -->
+            <!-- Bottom: 4 question buttons & Free AI Question Input -->
             <div class="npc-talk-buttons-area">
                 <div id="npc-talk-buttons" class="npc-talk-buttons-grid">
                     <!-- 4 buttons dynamically loaded -->
                 </div>
+                <div class="npc-ai-input-container">
+                    <input type="text" id="npc-ai-input" class="npc-ai-input" placeholder="🕵️ Şüpheliyi Türkçe sorgula... (Örn: Şüpheli hareketlerinin sebebi ne? Cinayeti sen mi işledin?)" maxlength="150" autocomplete="off">
+                    <button id="npc-ai-send-btn" class="btn btn-primary npc-ai-send-btn">
+                        <i class="fa-solid fa-paper-plane"></i> SOR
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+
+
 
     <!-- 7. INVENTORY (BAG) MODAL -->
     <div id="bag-modal" class="modal hidden">
@@ -318,16 +323,24 @@
         </div>
     </div>
 
-    <!-- DETAILED CLUE MODAL -->
+    <!-- DETAILED CLUE MODAL (Forensic Lab) -->
     <div id="detailed-clue-modal" class="detailed-clue-modal hidden">
         <button id="close-detailed-clue-btn" class="detailed-clue-close"><i class="fa-solid fa-xmark"></i></button>
         <div class="detailed-clue-content">
-            <div class="detailed-clue-img-wrapper">
+            <div class="detailed-clue-img-wrapper" id="detailed-clue-img-wrapper">
                 <img id="detailed-clue-img" src="" alt="Detaylı Görsel">
+                <div id="detailed-clue-overlay" class="detailed-clue-overlay"></div>
+                <div id="detailed-clue-letter-text" class="detailed-clue-letter-text hidden"></div>
             </div>
             <div class="detailed-clue-text-wrapper">
                 <div id="detailed-clue-title" class="detailed-clue-title"></div>
                 <div id="detailed-clue-text"></div>
+                
+                <!-- Adli Tıp Araçları (Ad-hoc butonlar eklenecek) -->
+                <div id="detailed-clue-actions" class="detailed-clue-actions"></div>
+                
+                <!-- İşlem Sonucu Ekranı -->
+                <div id="detailed-clue-result" class="detailed-clue-result hidden"></div>
             </div>
         </div>
     </div>
@@ -503,7 +516,7 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=16"></script>
+    <script src="js/app.js?v=100"></script>
 </body>
 
 </html>
