@@ -1093,6 +1093,7 @@ canvas {
 }
 
 .npc-talk-message {
+    position: relative;
     background: rgba(0, 0, 0, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 10px;
@@ -3413,4 +3414,130 @@ canvas {
     50% {
         transform: scale(1.2);
     }
+}
+
+/* ========================================================= */
+/* 12. STRESS BAR AND NEW UI ELEMENTS                        */
+/* ========================================================= */
+.npc-stress-container {
+    width: 100%;
+    margin-bottom: 15px;
+    background: rgba(10, 10, 15, 0.8);
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.npc-stress-label {
+    font-size: 0.8rem;
+    color: #e0e0e0;
+    font-weight: bold;
+}
+.npc-stress-track {
+    width: 100%;
+    height: 8px;
+    background: #222;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.npc-stress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--danger));
+    transition: width 0.5s ease-in-out;
+}
+
+/* 3D Clue & Forensic Canvas */
+.clue-3d-wrapper {
+    position: relative;
+    width: 90%;
+    max-height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.1s;
+    transform-style: preserve-3d;
+}
+.clue-canvas-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Let clicks pass to wrapper usually */
+}
+.clue-canvas-overlay.active {
+    pointer-events: auto;
+    cursor: crosshair;
+}
+.forensic-tools {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.forensic-tool-btn {
+    background: rgba(20, 20, 25, 0.9);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 15px;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.forensic-tool-btn:hover, .forensic-tool-btn.active {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 0 15px var(--accent);
+}
+
+/* Save Testimony Button */
+.save-testimony-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.2s, color 0.2s;
+    opacity: 0.6;
+}
+.save-testimony-btn:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+.save-testimony-btn:disabled {
+    color: #4CAF50;
+    opacity: 1;
+    cursor: default;
+    transform: none;
+}
+
+/* Hidden Clues */
+.hotspot-wrapper.hidden-clue {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+.hotspot-wrapper.hidden-clue:hover {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 10px var(--accent)) drop-shadow(0 0 20px var(--accent));
+}
+.hotspot-wrapper.hidden-clue .hotspot-label {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.hotspot-wrapper.hidden-clue:hover .hotspot-label {
+    opacity: 1;
 }

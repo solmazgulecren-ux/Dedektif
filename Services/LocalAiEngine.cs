@@ -140,6 +140,7 @@ public class LocalAiEngine
         string responseText = "";
         string emotion = "Sakin";
         int trustChange = 0;
+        int stressIncrease = 0;
         string? revealedSecret = null;
 
         // 3. Fetch dynamic dialogues from database
@@ -229,12 +230,21 @@ public class LocalAiEngine
                     // Dinamik Akıllı Fallback (Manuel Cevaplar)
                     responseText = GetDynamicFallback(rawTrLower);
                     emotion = "Düşünceli";
+                    emotion = "Kararsız";
+                    stressIncrease = isGuilty ? 15 : 5; // YZ bilinmeyen soruda suçluysa daha çok streslenir
                 }
             }
         }
         else
         {
             responseText = GetGenericPersonaResponse(npc, isGuilty, userQuestion);
+        }
+
+        // Suçluyu darlayan kilit kelimeler stresi artırır
+        if (isGuilty && (rawTrLower.Contains("neden") || rawTrLower.Contains("yalan") || rawTrLower.Contains("saklıyorsun")))
+        {
+            stressIncrease += 20;
+            emotion = "Gergin";
         }
 
         if (isGuilty && npcCluesInBagCount > 0 && _random.Next(100) < 45 && revealedSecret == null)
@@ -247,7 +257,8 @@ public class LocalAiEngine
             Dialogue = responseText,
             Emotion = emotion,
             TrustChange = trustChange,
-            RevealedSecret = revealedSecret
+            RevealedSecret = revealedSecret,
+            StressIncrease = stressIncrease
         };
     }
 

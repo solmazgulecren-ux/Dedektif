@@ -255,9 +255,18 @@
                 </div>
             </div>
             <!-- Sağ Taraf: Görsel (NPC arka plan buhulu + ipucu büyük) -->
-            <div class="clue-inspect-visual">
+            <div class="clue-inspect-visual" id="clue-inspect-visual">
                 <div id="clue-inspect-bg" class="clue-inspect-bg-blur"></div>
-                <img id="clue-inspect-img" class="clue-inspect-item-img" src="" alt="İpucu Görseli">
+                <div class="clue-3d-wrapper" id="clue-3d-wrapper">
+                    <img id="clue-inspect-img" class="clue-inspect-item-img" src="" alt="İpucu Görseli">
+                    <canvas id="clue-uv-canvas" class="clue-canvas-overlay hidden"></canvas>
+                    <canvas id="clue-dust-canvas" class="clue-canvas-overlay hidden"></canvas>
+                </div>
+                <!-- Adli Araçlar -->
+                <div class="forensic-tools">
+                    <button id="tool-uv-btn" class="forensic-tool-btn" title="UV Işığı (Gizli yazıları gösterir)"><i class="fa-solid fa-lightbulb"></i> UV</button>
+                    <button id="tool-dust-btn" class="forensic-tool-btn" title="Parmak İzi Tozu (Fare ile kazıyın)"><i class="fa-solid fa-paintbrush"></i> Toz</button>
+                </div>
             </div>
         </div>
     </div>
@@ -276,7 +285,15 @@
             </button>
 
             <!-- Remaining questions indicator -->
-            <div id="npc-talk-stage" class="npc-talk-stage-indicator">Kalan: 20 soru</div>
+            <div id="npc-talk-stage" class="npc-talk-stage-indicator">Kalan: 5 soru</div>
+            
+            <!-- STRESS BAR -->
+            <div class="npc-stress-container" title="NPC Stres Seviyesi - %100 olursa sizi kovar!">
+                <div class="npc-stress-label"><i class="fa-solid fa-heart-pulse"></i> STRES: <span id="npc-stress-pct">0%</span></div>
+                <div class="npc-stress-track">
+                    <div id="npc-stress-fill" class="npc-stress-fill" style="width: 0%;"></div>
+                </div>
+            </div>
 
             <!-- Chat area (left side) -->
             <div id="npc-talk-chat" class="npc-talk-chat-area">

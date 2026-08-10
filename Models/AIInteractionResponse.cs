@@ -10,4 +10,5 @@ public class AIInteractionResponse
     public string Emotion { get; set; } = string.Empty;
     public int TrustChange { get; set; }
     public string? RevealedSecret { get; set; }
+    public int StressIncrease { get; set; }
 }

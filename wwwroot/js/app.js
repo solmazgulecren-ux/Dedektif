@@ -44,6 +44,7 @@ let npcTalkCompleted = {}; // { npcId: true/false }
 let isMuted = localStorage.getItem('gameMuted') === 'true';
 let npcQuestionPools = {}; // { npcId: [remaining questions] }
 let askedQuestionCount = {}; // { npcId: count }
+let npcStressLevels = {}; // { npcId: stressPercent }
 var shownCinematicContexts = new Set(); // Bir kez gösterilen bağlamları takip et
 var cinematicTypewriterTimeout = null;
 var helperMessageHistory = []; // { text: string }
@@ -96,7 +97,7 @@ const SCENE_OBJECTS = {
         }
     ],
     2: [ // Eczane
-        { id: 4, name: 'Boş İlaç Şişesi', desc: 'Zehirli olduğu bilinen, reçetesiz satılmayan ağır bir ilacın boş şişesi.', top: '58%', left: '28%', img: 'images/empty_medicine_bottle.png',
+        { id: 4, name: 'Gizli Zehir Şişesi', desc: 'Rafların arkasına saklanmış, zehirli olduğu bilinen ağır bir ilacın boş şişesi.', top: '48%', left: '20%', img: 'images/empty_medicine_bottle.png', isHidden: true,
           examineActions: [
               { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Şişenin üzerinde eczacı eldiveni izleri var, ama bir de çıplak parmak izi çıktı!' }
           ]
@@ -125,7 +126,7 @@ const SCENE_OBJECTS = {
               { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Gözlüğün çerçevesinde mikroskobik kan damlaları parladı.' }
           ]
         },
-        { id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa.', top: '42%', left: '24%', img: 'images/hidden_safe.png',
+        { id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa.', top: '42%', left: '24%', img: 'images/hidden_safe.png', isHidden: true,
           examineActions: [
               { type: 'read', btnText: 'Belgeleri İncele', resultLetter: 'SAHTE TAPU: Kurbanın arazisi bedelsiz olarak belediyeye (Muhtara) devredilecektir.', resultText: 'Muhtarın sahte belge düzenlediği kanıtlandı!' }
           ]
@@ -234,7 +235,7 @@ const NPC_ALL_QUESTIONS = {
         { q: 'Kurbanla son görüşmeniz ne zamandı?', a: 'Cinayet gününden iki gün önce. Bağırdı çağırdı. "Arazimi vermeyeceğim, mahkemeye giderim!" dedi.', difficulty: 2, category: 'derinlesme', relatedClues: [7] },
         { q: 'Bu tehdit mektubunu sen yazdın, çekmecende bulduk!', a: '*Yüzü kızarır* Bunu sinirle yazdım! Göndermeyecektim! Herkes kızgınken bir şeyler yazar!', difficulty: 3, category: 'yuzlestirme', relatedClues: [7] },
         { q: 'Kurbanın kırık gözlüğü senin odanda ne işi var?', a: 'Kavga ettiğimizde düştü! Kırdım evet, ama sonra pişman oldum. Geri verecektim...', difficulty: 3, category: 'yuzlestirme', relatedClues: [8] },
-        { q: 'Kasadaki sahte belgeler neyin nesi?', a: '*Terler* Onlar... eski belediye evrakları. Bazen prosedürler hızlansın diye bazı belgeler... düzenlenir.', difficulty: 3, category: 'yuzlestirme', relatedClues: [9] },
+        { q: 'Kasadaki sahte belgeler neyin nesi?', a: '*Terler* Onlar... eski belediye evrakları. Bazen prosedürler hızlansın diye bazı belgeler... düzenler.', difficulty: 3, category: 'yuzlestirme', relatedClues: [9] },
         { q: 'Kasap Hasan cinayet gecesi geldiğini kanıtlayabilir.', a: 'Tamam! Evet, kasaba gittim! Et aldım! Ama bu beni katil yapmaz!', difficulty: 3, category: 'yuzlestirme', relatedClues: [1, 2] },
         { q: 'Gece yarısı et almak için mi çıktın gerçekten?', a: '... Tamam, et bahaneydi. Kurbanın evinin önünden geçmek istedim. Tehdit mektubu yazdığım için vicdan azabı çekiyordum.', difficulty: 4, category: 'baski', relatedClues: [7], guiltyResponse: { 1: 'Kasap\'ın söylediklerine inanmayın! O adam yalancının teki!', 2: 'Selma beni çerçevelemeye çalışıyor! O zehirci kadın!', 3: '*Masayı yumruklar* TAMAM! Kurbanın evine gittim! Konuşmak istedim, barışmak... Ama o beni kovdu, aşağıladı. "Sahte tapularını biliyorum" dedi. Tartıştık... ve ben... kontrol... *susar*', 4: 'Komiser Güneş her şeyi biliyor! O gece beni aradı, "Muhtar sakin ol" dedi. Neden böyle dedi?', 5: 'Yahya\'nın elinde bir paket vardı o gece, onu araştırın!' } },
         { q: 'Kurbanın evinde ne gördün?', a: 'Işıklar yanıyordu. Bir gölge gördüm pencerede... Kurban değildi. Başka birisi vardı orada.', difficulty: 4, category: 'baski', relatedClues: [] },
@@ -275,7 +276,7 @@ const NPC_ALL_QUESTIONS = {
         { q: 'Kurbanın sipariş ettiği ceket nasıl bir ceketti?', a: 'Özel bir ceket... Gizli cepleri olan, astarı kalın. "İçine belgeler koyacağım" demişti.', difficulty: 2, category: 'derinlesme', relatedClues: [14, 15] },
         { q: 'Kurban sana belge saklatmak mı istedi?', a: 'Hayır! Sadece cekete cep dikeyim dedi. Belgeleri kendisi koyacaktı. Ben sadece terziyim!', difficulty: 2, category: 'derinlesme', relatedClues: [15] },
         { q: 'Cinayet gecesi dükkânından çıktın mı?', a: '*Duraksır* Bir kez çıktım. Sigara içmeye. Ama hemen döndüm. 10 dakika bile sürmedi.', difficulty: 2, category: 'derinlesme', relatedClues: [], guiltyResponse: { 1: 'Kasap\'ın dükkânında ışık yanıyordu ama girmedim oraya!', 2: 'Eczane\'nin ışığı da açıktı. Selma pencereden baktı ama beni görmemiş olmalı... *yutkunur*', 3: 'Muhtar\'ın sokakta olduğunu gördüm, ama yüzünü seçemedim.', 4: 'Komiser\'in devriye aracı geçti sokaktan... Beni görmüş olabilir.', 5: '*Elleri titrer* Tamam... 10 dakikadan fazla dışarıdaydım. Kurbanın evine gittim. Notu ben yazmıştım, "Bu gece gel konuşalım" diye. Gittim. Kapı açıktı. İçeri girdim. Osman... Osman yerde yatıyordu. Ama ben varmadan ölmüştü! ...Yoksa ölmemiş miydi?' } },
-        { q: 'Eczacı Selma seni kurbanın evine giderken gördü.', a: 'Selma mı?! Yanılmış olmalı! Sadece sigara içmeye çıktım! *Elleri titrer*', difficulty: 2, category: 'derinlesme', relatedClues: [] },
+        { q: 'Eczacı Selma kurbanın evine giderken gördü.', a: 'Selma mı?! Yanılmış olmalı! Sadece sigara içmeye çıktım! *Elleri titrer*', difficulty: 2, category: 'derinlesme', relatedClues: [] },
         { q: 'Eczacı Selma kurbanın evine giderken gördü.', a: 'Selma mı?! Yanılmış olmalı! Sadece sigara içmeye çıktım! *Elleri titrer*', difficulty: 2, category: 'derinlesme', relatedClues: [] },
         { q: 'Bu kanlı iplik makarası senin dükkânından!', a: 'Kan mı?! İmkânsız! Kumaş keserken elimi keserim, o benim kanım olabilir!', difficulty: 3, category: 'yuzlestirme', relatedClues: [13] },
         { q: 'Bu yırtık kumaş kurbanın ceketinden kopmuş.', a: '*Yutkunur* O kumaş bende vardı evet. Ceketi dikerken artan parça. Her terzi artık kumaş saklar!', difficulty: 3, category: 'yuzlestirme', relatedClues: [14] },
@@ -510,11 +511,13 @@ function initGame() {
     activeNpcId = null;
     npcQuestionPools = {};
     askedQuestionCount = {};
+    npcStressLevels = {};
     
     // Her NPC için soru havuzunu sıfırla
     for (let id = 1; id <= 5; id++) {
         npcQuestionPools[id] = [...(NPC_ALL_QUESTIONS[id] || [])];
         askedQuestionCount[id] = 0;
+        npcStressLevels[id] = 0;
     }
     
     // Suçluyu backend API'den sıfırla
@@ -943,6 +946,10 @@ function openBuilding(npcId) {
         img.className = 'hotspot-img';
         img.alt = obj.name;
         
+        if (obj.isHidden) {
+            wrapper.classList.add('hidden-clue');
+        }
+        
         const label = document.createElement('span');
         label.className = 'hotspot-label';
         label.textContent = obj.name;
@@ -983,6 +990,9 @@ function openClueInspect(obj, npcId) {
     document.getElementById('clue-inspect-img').src = obj.img;
     const bgImage = npc.talkBg || npc.bg;
     document.getElementById('clue-inspect-bg').style.backgroundImage = `url('${bgImage}')`;
+    
+    // Araçları sıfırla
+    if (window.resetForensicTools) window.resetForensicTools();
     
     const takeBtn = document.getElementById('clue-take-btn');
     const isAlreadyInBag = currentBag.some(b => b.id === obj.id);
@@ -1026,7 +1036,128 @@ document.getElementById('clue-take-btn').addEventListener('click', () => {
 
 document.getElementById('clue-leave-btn').addEventListener('click', () => {
     clueInspectModal.classList.add('hidden');
+    if (window.resetForensicTools) window.resetForensicTools();
 });
+
+// =============================================================
+// 3.5 FORENSIC TOOLS & 3D TILT
+// =============================================================
+
+let activeForensicTool = null;
+let isDrawing = false;
+let lastX = 0, lastY = 0;
+
+function setupForensicTools() {
+    const uvBtn = document.getElementById('tool-uv-btn');
+    const dustBtn = document.getElementById('tool-dust-btn');
+    const uvCanvas = document.getElementById('clue-uv-canvas');
+    const dustCanvas = document.getElementById('clue-dust-canvas');
+    const visualArea = document.getElementById('clue-inspect-visual');
+    const wrapper = document.getElementById('clue-3d-wrapper');
+    if(!uvBtn) return;
+
+    window.resetForensicTools = function() {
+        activeForensicTool = null;
+        uvBtn.classList.remove('active');
+        dustBtn.classList.remove('active');
+        uvCanvas.classList.add('hidden');
+        dustCanvas.classList.add('hidden');
+        uvCanvas.classList.remove('active');
+        dustCanvas.classList.remove('active');
+        visualArea.style.cursor = 'default';
+        wrapper.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    };
+
+    uvBtn.addEventListener('click', () => {
+        resetForensicTools();
+        activeForensicTool = 'uv';
+        uvBtn.classList.add('active');
+        uvCanvas.classList.remove('hidden');
+        uvCanvas.classList.add('active');
+        
+        uvCanvas.width = wrapper.offsetWidth;
+        uvCanvas.height = wrapper.offsetHeight;
+        const ctx = uvCanvas.getContext('2d');
+        ctx.fillStyle = 'rgba(20, 0, 40, 0.85)';
+        ctx.fillRect(0, 0, uvCanvas.width, uvCanvas.height);
+    });
+
+    dustBtn.addEventListener('click', () => {
+        resetForensicTools();
+        activeForensicTool = 'dust';
+        dustBtn.classList.add('active');
+        dustCanvas.classList.remove('hidden');
+        dustCanvas.classList.add('active');
+        
+        dustCanvas.width = wrapper.offsetWidth;
+        dustCanvas.height = wrapper.offsetHeight;
+    });
+
+    visualArea.addEventListener('mousemove', (e) => {
+        if (activeForensicTool) return;
+        const rect = visualArea.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -15;
+        const rotateY = ((x - centerX) / centerX) * 15;
+        wrapper.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+
+    visualArea.addEventListener('mouseleave', () => {
+        if (!activeForensicTool) {
+            wrapper.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+        }
+    });
+
+    const handleDraw = (e, canvas) => {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const ctx = canvas.getContext('2d');
+        
+        if (activeForensicTool === 'uv') {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = 'rgba(20, 0, 40, 0.85)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'destination-out';
+            const grad = ctx.createRadialGradient(x, y, 10, x, y, 90);
+            grad.addColorStop(0, 'rgba(0,0,0,1)');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(x, y, 90, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (activeForensicTool === 'dust') {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = 'rgba(10, 10, 10, 0.15)';
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 40;
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+        lastX = x;
+        lastY = y;
+    };
+
+    [uvCanvas, dustCanvas].forEach(canvas => {
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+        });
+        canvas.addEventListener('mousemove', (e) => handleDraw(e, canvas));
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mouseleave', () => isDrawing = false);
+    });
+}
+document.addEventListener('DOMContentLoaded', setupForensicTools);
 
 // =============================================================
 // 4. LEAVE BUILDING (WARNING)
@@ -1120,6 +1251,22 @@ function updateQuestionIndicator(npcId) {
     // 5 Soru limitini tamamen UI üzerinden zorla
     const aiSection = document.querySelector('.npc-talk-ai-section');
     const btnContainer = document.getElementById('npc-talk-buttons');
+    
+    // Stres Kontrolü
+    const stress = npcStressLevels[npcId] || 0;
+    const stressFill = document.getElementById('npc-stress-fill');
+    const stressPct = document.getElementById('npc-stress-pct');
+    if (stressFill) stressFill.style.width = stress + '%';
+    if (stressPct) stressPct.textContent = stress + '%';
+
+    if (stress >= 100) {
+        if (aiSection) aiSection.style.display = 'none';
+        if (btnContainer) {
+            btnContainer.innerHTML = '<div class="npc-talk-end-msg" style="color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Karakter öfkelendi ve sorguyu terk etti! Artık onunla konuşamazsınız.</div>';
+        }
+        return; // Soru sorma limitini ezip direkt engelle
+    }
+
     if (remainingLimit <= 0) {
         if (aiSection) aiSection.style.display = 'none';
         if (btnContainer) {
@@ -1368,9 +1515,25 @@ function askFreeAiQuestion() {
 
         npcMsg.appendChild(speakerDiv);
         npcMsg.appendChild(textDiv);
-        chatArea.appendChild(npcMsg);
 
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'save-testimony-btn';
+        saveBtn.innerHTML = '<i class="fa-solid fa-thumbtack"></i>';
+        saveBtn.title = 'İfadeyi Delil Olarak Kaydet (Çapraz Sorgu)';
+        saveBtn.onclick = () => {
+            saveTestimonyToBag(npc.name, answer);
+            saveBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
+            saveBtn.disabled = true;
+        };
+        npcMsg.appendChild(saveBtn);
+
+        chatArea.appendChild(npcMsg);
         typeWriter(textDiv, answer, 0, () => {
+            const stressInc = data.stressIncrease || 0;
+            if (stressInc > 0) {
+                npcStressLevels[activeNpcId] = Math.min(100, (npcStressLevels[activeNpcId] || 0) + stressInc);
+            }
+
             if (data.revealedSecret) {
                 showCinematicHelper(data.revealedSecret, false);
             }
@@ -2074,6 +2237,7 @@ function saveGameState() {
         visitedBuildings: [...visitedBuildings],
         dialogHistory: dialogHistory,
         askedQuestionCount: askedQuestionCount,
+        npcStressLevels: npcStressLevels,
         guiltyNpcId: guiltyNpcId
     };
     fetch('/api/game/state/save', {
@@ -2121,6 +2285,28 @@ function checkAndDropClues(npcId, clueIds) {
         // Sinematik bildirim
         triggerHelperMessage('clue_found', null, false);
     }
+}
+
+function saveTestimonyToBag(npcName, testimonyText) {
+    if (currentBag.length >= 5) {
+        alert("Çantanız dolu! (Maksimum 5 delil). Önce eski delilleri Adli Tıp'a göndermelisiniz.");
+        return;
+    }
+    
+    // Generate a unique ID for the testimony
+    const testimonyId = 1000 + currentBag.length; 
+    const testimonyClue = {
+        id: testimonyId,
+        name: `${npcName}'nin İfadesi`,
+        desc: `"${testimonyText}"`,
+        img: 'images/helper_avatar.png', // Temporary generic icon or a custom testimony icon
+        scene: activeNpcId
+    };
+    
+    currentBag.push(testimonyClue);
+    showClueBadge();
+    triggerHelperMessage('testimony_saved', `Amirims, ${npcName} karakterinin bu sözünü kaydettim! Diğer şüphelilere bu ifadeyi kanıt olarak sunabilirsiniz.`, true);
+    saveGameState();
 }
 
 function showClueBadge() {
