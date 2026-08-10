@@ -23,9 +23,12 @@ const transitionOverlay = document.getElementById('transition-overlay');
 // === AUDIO ELEMENTS ===
 const bgMusic = document.getElementById('bg-music');
 const rainSound = document.getElementById('rain-sound');
+const thunderSound = document.getElementById('thunder-sound');
+const chatterSound = document.getElementById('chatter-sound');
 const doorCreak = document.getElementById('door-creak');
 const doorClose = document.getElementById('door-close');
-const npcMumble = document.getElementById('npc-mumble');
+const mumbleMale = document.getElementById('mumble-male');
+const mumbleFemale = document.getElementById('mumble-female');
 const typewriterSound = document.getElementById('typewriter-sound');
 
 // === GAME STATE ===
@@ -273,6 +276,7 @@ const NPC_ALL_QUESTIONS = {
         { q: 'Kurban sana belge saklatmak mı istedi?', a: 'Hayır! Sadece cekete cep dikeyim dedi. Belgeleri kendisi koyacaktı. Ben sadece terziyim!', difficulty: 2, category: 'derinlesme', relatedClues: [15] },
         { q: 'Cinayet gecesi dükkânından çıktın mı?', a: '*Duraksır* Bir kez çıktım. Sigara içmeye. Ama hemen döndüm. 10 dakika bile sürmedi.', difficulty: 2, category: 'derinlesme', relatedClues: [], guiltyResponse: { 1: 'Kasap\'ın dükkânında ışık yanıyordu ama girmedim oraya!', 2: 'Eczane\'nin ışığı da açıktı. Selma pencereden baktı ama beni görmemiş olmalı... *yutkunur*', 3: 'Muhtar\'ın sokakta olduğunu gördüm, ama yüzünü seçemedim.', 4: 'Komiser\'in devriye aracı geçti sokaktan... Beni görmüş olabilir.', 5: '*Elleri titrer* Tamam... 10 dakikadan fazla dışarıdaydım. Kurbanın evine gittim. Notu ben yazmıştım, "Bu gece gel konuşalım" diye. Gittim. Kapı açıktı. İçeri girdim. Osman... Osman yerde yatıyordu. Ama ben varmadan ölmüştü! ...Yoksa ölmemiş miydi?' } },
         { q: 'Eczacı Selma seni kurbanın evine giderken gördü.', a: 'Selma mı?! Yanılmış olmalı! Sadece sigara içmeye çıktım! *Elleri titrer*', difficulty: 2, category: 'derinlesme', relatedClues: [] },
+        { q: 'Eczacı Selma kurbanın evine giderken gördü.', a: 'Selma mı?! Yanılmış olmalı! Sadece sigara içmeye çıktım! *Elleri titrer*', difficulty: 2, category: 'derinlesme', relatedClues: [] },
         { q: 'Bu kanlı iplik makarası senin dükkânından!', a: 'Kan mı?! İmkânsız! Kumaş keserken elimi keserim, o benim kanım olabilir!', difficulty: 3, category: 'yuzlestirme', relatedClues: [13] },
         { q: 'Bu yırtık kumaş kurbanın ceketinden kopmuş.', a: '*Yutkunur* O kumaş bende vardı evet. Ceketi dikerken artan parça. Her terzi artık kumaş saklar!', difficulty: 3, category: 'yuzlestirme', relatedClues: [14] },
         { q: 'Gizli cepteki not "Bu gece gel, konuşalım" yazıyor. Senin el yazın!', a: '*Terler* Ben yazdım evet. Kurban benimle konuşmak istedi! Gizli bir şey anlatacaktı ama... varamadım!', difficulty: 3, category: 'yuzlestirme', relatedClues: [15], guiltyResponse: { 1: 'Kasap Hasan\'ın o satırla bir ilgisi olabilir! Benden bıçak kılıfı istedi!', 2: 'Selma\'nın zehirleri var, onu araştırın! Ben sadece not yazdım!', 3: 'Muhtar\'ın tehdit mektubu daha tehlikeli bir delil!', 4: 'Komiser bu notu biliyordu! Dosyasında yazıyor!', 5: '*Titrer* Evet, o notu ben yazdım. Kurbanla buluşacaktık. Ama gittiğimde... kapı açıktı. Girdim. Tartıştık. O belgeler yüzünden... USB\'deki bilgiler... Ben sadece korumak istiyordum ama Osman vermek istemedi. Çekiştirdik ve...' } },
@@ -292,6 +296,37 @@ const NPC_ALL_QUESTIONS = {
 // SES SİSTEMİ
 // =============================================================
 
+// Web Audio API for Character Voices (Undertale / Animal Crossing style)
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSynthVoice(isFemale) {
+    if (isMuted) return;
+    try {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        // Kadınlar için ince (sine), Erkekler için tok (triangle/sawtooth) ses dalgası
+        osc.type = isFemale ? 'sine' : 'triangle';
+        
+        // Rastgele tonlama ile gerçekçi konuşma/mırıldanma hissi
+        const baseFreq = isFemale ? (400 + Math.random() * 150) : (120 + Math.random() * 60);
+        osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+        
+        // Sesin şiddeti ve süresi
+        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.06);
+    } catch(e) { console.log('Web Audio Hatası:', e); }
+}
+
 function playSound(audioEl, volume = 0.5) {
     if (!audioEl || isMuted) return;
     try {
@@ -299,6 +334,16 @@ function playSound(audioEl, volume = 0.5) {
         audioEl.currentTime = 0;
         audioEl.play().catch(e => console.log('Ses hatası:', e));
     } catch(e) { console.log('Ses hatası:', e); }
+}
+
+function playMumbleSound(audioEl, volume = 0.5) {
+    if (!audioEl || isMuted) return;
+    try {
+        const clone = audioEl.cloneNode();
+        clone.volume = Math.min(1, Math.max(0, volume));
+        clone.play().catch(e => {});
+        clone.onended = () => { clone.remove(); };
+    } catch(e) {}
 }
 
 function playLoopSound(audioEl, volume = 0.3) {
@@ -319,7 +364,7 @@ function stopSound(audioEl) {
 }
 
 function stopAllSounds() {
-    [bgMusic, rainSound, doorCreak, doorClose, npcMumble, typewriterSound].forEach(a => {
+    [bgMusic, rainSound, thunderSound, chatterSound, doorCreak, doorClose, mumbleMale, mumbleFemale, typewriterSound].forEach(a => {
         if (a) { a.pause(); a.currentTime = 0; }
     });
 }
@@ -342,6 +387,7 @@ function toggleMute() {
         if (!splashScreen || splashScreen.classList.contains('hidden')) {
             playLoopSound(bgMusic, 0.3);
             playLoopSound(rainSound, 0.5);
+            playLoopSound(chatterSound, 0.2);
         }
     }
 }
@@ -754,7 +800,7 @@ function startVideoPlayback() {
         buildingTransitionVideo.style.display = 'block';
         buildingTransitionVideo.style.opacity = '1';
         buildingTransitionVideo.style.zIndex = '50';
-        buildingTransitionVideo.muted = false;
+        buildingTransitionVideo.muted = isMuted;
         buildingTransitionVideo.volume = 0.85;
 
         try {
@@ -767,6 +813,12 @@ function startVideoPlayback() {
         if (playPromise !== undefined) {
             playPromise.then(() => {
                 console.log(`${theme.name} animasyon videosu başladı.`);
+                // Ana müziği kıs (Videodaki ses daha net duyulsun)
+                if (!isMuted) {
+                    if (bgMusic) bgMusic.volume = 0.1;
+                    if (rainSound) rainSound.volume = 0.2;
+                    if (chatterSound) chatterSound.volume = 0.05;
+                }
             }).catch(e => {
                 console.warn('Video oynatma başlatılamadı, alternatif deneniyor:', e);
                 // Muted fallback
@@ -816,6 +868,7 @@ function finishVideoTransition() {
     if (!isMuted) {
         if (bgMusic && !bgMusic.paused) bgMusic.volume = 0.3;
         if (rainSound && !rainSound.paused) rainSound.volume = 0.5;
+        if (chatterSound && !chatterSound.paused) chatterSound.volume = 0.2;
     }
 
     buildingEntryModal.classList.add('hidden');
@@ -832,6 +885,7 @@ cancelEntryBtn?.addEventListener('click', (e) => {
     if (!isMuted) {
         if (bgMusic && !bgMusic.paused) bgMusic.volume = 0.3;
         if (rainSound && !rainSound.paused) rainSound.volume = 0.5;
+        if (chatterSound && !chatterSound.paused) chatterSound.volume = 0.2;
     }
 
     pendingBuildingNpcId = null;
@@ -1038,10 +1092,11 @@ function openNpcTalk(npcId) {
     if (chatArea) chatArea.innerHTML = '';
     
     // NPC mırıltı sesi çal
-    if (npcMumble) {
-        npcMumble.currentTime = 0;
-        playSound(npcMumble, 0.3);
-        setTimeout(() => stopSound(npcMumble), 2000);
+    let mumble = (npcId == 2 || npcId == 4) ? mumbleFemale : mumbleMale;
+    if (mumble) {
+        mumble.currentTime = 0;
+        playSound(mumble, 0.3);
+        setTimeout(() => stopSound(mumble), 2000);
     }
     
     // Kalan soru sayısını güncelle
@@ -1059,8 +1114,20 @@ function openNpcTalk(npcId) {
 
 function updateQuestionIndicator(npcId) {
     const asked = askedQuestionCount[npcId] || 0;
-    const remainingLimit = 5 - asked;
+    const remainingLimit = Math.max(0, 5 - asked);
     document.getElementById('npc-talk-stage').textContent = `Kalan Soru Hakkı: ${remainingLimit}/5`;
+
+    // 5 Soru limitini tamamen UI üzerinden zorla
+    const aiSection = document.querySelector('.npc-talk-ai-section');
+    const btnContainer = document.getElementById('npc-talk-buttons');
+    if (remainingLimit <= 0) {
+        if (aiSection) aiSection.style.display = 'none';
+        if (btnContainer) {
+            btnContainer.innerHTML = '<div class="npc-talk-end-msg"><i class="fa-solid fa-check-circle"></i> Sorgu tamamlandı. Bu NPC\'ye sorabileceğiniz soru kalmadı. (5/5)</div>';
+        }
+    } else {
+        if (aiSection) aiSection.style.display = 'flex';
+    }
 }
 
 function loadContextualQuestions(npcId) {
@@ -1107,6 +1174,19 @@ function typeWriter(element, text, i, onComplete) {
     if (i < text.length) {
         isTyping = true;
         element.innerHTML = text.substring(0, i + 1) + '<span class="typewriter-cursor"></span>';
+        
+        // Ses efekti (Her 3 harfte bir mırıldanma/ses tonu)
+        if (i % 3 === 0) {
+            // Eczacı Selma (2) ve Komiser Güneş (4) kadın
+            if (activeNpcId == 2 || activeNpcId == 4) {
+                playSynthVoice(true); // Kadın sesi
+            } 
+            // Kasap Hasan (1), Muhtar Kemal (3), Terzi Yahya (5) erkek
+            else if (activeNpcId == 1 || activeNpcId == 3 || activeNpcId == 5) {
+                playSynthVoice(false); // Erkek sesi
+            } 
+        }
+        
         currentTypewriterTimeout = setTimeout(() => typeWriter(element, text, i + 1, onComplete), 20); // Daktilo hızı
     } else {
         isTyping = false;
@@ -1150,10 +1230,11 @@ function askQuestionBackend(npcId, question) {
     }
 
     // NPC mırıltı sesi
-    if (npcMumble) {
-        npcMumble.currentTime = 0;
-        playSound(npcMumble, 0.25);
-        setTimeout(() => stopSound(npcMumble), 1500);
+    let mumble = (npcId == 2 || npcId == 4) ? mumbleFemale : mumbleMale;
+    if (mumble) {
+        mumble.currentTime = 0;
+        playSound(mumble, 0.25);
+        setTimeout(() => stopSound(mumble), 1500);
     }
     
     // NPC cevabını belirle
@@ -1248,10 +1329,11 @@ function askFreeAiQuestion() {
     chatArea.scrollTop = chatArea.scrollHeight;
 
     // NPC mırıltı sesi
-    if (npcMumble) {
-        npcMumble.currentTime = 0;
-        playSound(npcMumble, 0.25);
-        setTimeout(() => stopSound(npcMumble), 1500);
+    let mumble = (activeNpcId == 2 || activeNpcId == 4) ? mumbleFemale : mumbleMale;
+    if (mumble) {
+        mumble.currentTime = 0;
+        playSound(mumble, 0.25);
+        setTimeout(() => stopSound(mumble), 1500);
     }
 
     // Backend Yerel Yapay Zeka Motoruna İstek Gönder
@@ -1324,8 +1406,10 @@ document.getElementById('npc-ai-input')?.addEventListener('keypress', (e) => {
 
 document.getElementById('npc-talk-close').addEventListener('click', () => {
     npcTalkModal.classList.add('hidden');
-    stopSound(npcMumble);
+    stopSound(mumbleMale);
+    stopSound(mumbleFemale);
 });
+// Removed duplicate startThunder function
 
 // =============================================================
 // 6. BAG (ÇANTA) VE DETAYLI İNCELEME
@@ -2187,3 +2271,29 @@ function showDetailedClue(item) {
 document.getElementById('close-detailed-clue-btn')?.addEventListener('click', () => {
     document.getElementById('detailed-clue-modal')?.classList.add('hidden');
 });
+
+// === THUNDER EFFECT ===
+function startThunder() {
+    setInterval(() => {
+        if (!isMuted && thunderSound) {
+            playSound(thunderSound, Math.random() * 0.4 + 0.3); // 0.3 - 0.7 volume
+            // Flash effect for immersion
+            const canvas = document.getElementById('town-map-canvas');
+            if (canvas && !townMapScreen.classList.contains('hidden')) {
+                const overlay = document.createElement('div');
+                overlay.style.position = 'absolute';
+                overlay.style.top = 0; overlay.style.left = 0; overlay.style.right = 0; overlay.style.bottom = 0;
+                overlay.style.backgroundColor = 'rgba(255,255,255,0.4)';
+                overlay.style.pointerEvents = 'none';
+                overlay.style.zIndex = 9999;
+                overlay.style.transition = 'opacity 0.2s';
+                canvas.appendChild(overlay);
+                setTimeout(() => { overlay.style.opacity = 0; }, 100);
+                setTimeout(() => { overlay.remove(); }, 300);
+            }
+        }
+    }, Math.random() * 20000 + 10000); // 10-30 seconds
+}
+
+// Start thunder immediately when game starts
+startThunder();
