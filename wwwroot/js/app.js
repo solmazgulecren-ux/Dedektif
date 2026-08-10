@@ -638,7 +638,12 @@ document.getElementById('story-continue-btn').addEventListener('click', () => {
     // Çetin harita girişinde konuşsun
     setTimeout(() => {
         triggerHelperMessage('story_end');
-        setTimeout(() => triggerHelperMessage('map_enter'), 10000);
+        setTimeout(() => {
+            // Sadece kasaba ekranındayken tetikle
+            if (!townMapScreen.classList.contains('hidden')) {
+                triggerHelperMessage('map_enter');
+            }
+        }, 10000);
     }, 1200);
 });
 

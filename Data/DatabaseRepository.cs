@@ -137,6 +137,15 @@ public class DatabaseRepository
             return Enumerable.Empty<Clue>();
         }
     }
+    public async Task UpdateNPCAsync(NPC npc)
+    {
+        using var db = CreateConnection();
+        await db.ExecuteAsync(@"
+            UPDATE NPCs 
+            SET TrustLevel = @TrustLevel, FearLevel = @FearLevel, IsGuilty = @IsGuilty 
+            WHERE NPCId = @NPCId", 
+            npc);
+    }
 
     public async Task UpdateClueStatusAsync(int clueId, string status)
     {
@@ -184,6 +193,18 @@ public class DatabaseRepository
             new { NPCId = npcId });
     }
 
+    public async Task ClearAllDialogLogsAsync()
+    {
+        using var db = CreateConnection();
+        await db.ExecuteAsync("DELETE FROM DialogLogs");
+    }
+
+    public async Task ClearPlayerInventoryAsync()
+    {
+        using var db = CreateConnection();
+        await db.ExecuteAsync("DELETE FROM PlayerInventory");
+    }
+
     public async Task<IEnumerable<DialogLog>> GetRecentDialogLogsAsync(int npcId, int count = 10)
     {
         using var db = CreateConnection();
@@ -227,6 +248,7 @@ public class DatabaseRepository
                 var sql = File.ReadAllText(schemaPath);
                 await db.ExecuteAsync(sql);
             }
+
 
             // Gelişmiş yapay zeka hafıza verilerini yükle (1000+ Cümle)
             var aiSeeder = new AISeeder(this);

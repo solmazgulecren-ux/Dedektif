@@ -325,7 +325,11 @@ class Program
                         npc.IsGuilty = (npc.NPCId == guiltyId);
                         npc.TrustLevel = 50;
                         npc.FearLevel = 30;
+                        await repository.UpdateNPCAsync(npc);
                     }
+                    
+                    await repository.ClearAllDialogLogsAsync();
+                    await repository.ClearPlayerInventoryAsync();
                 }
                 catch { }
 
