@@ -547,4 +547,22 @@ public class DatabaseRepository
         }
         catch { }
     }
+
+    // =============================================
+    // Backend API Metotları
+    // =============================================
+
+    public async Task<int> StartGameSessionAsync(int guiltyNpcId)
+    {
+        using var db = CreateConnection();
+        try
+        {
+            var query = _isSqlite 
+                ? "INSERT INTO GameSessions (GuiltyNPCId, StartedAt) VALUES (@GuiltyNPCId, @StartedAt); SELECT last_insert_rowid();"
+                : "INSERT INTO GameSessions (GuiltyNPCId, StartedAt) VALUES (@GuiltyNPCId, @StartedAt); SELECT CAST(SCOPE_IDENTITY() as int);";
+            return await db.ExecuteScalarAsync<int>(query, new { GuiltyNPCId = guiltyNpcId, StartedAt = DateTime.UtcNow.ToString("O") });
+        }
+        catch { return 1; }
+    }
+
 }

@@ -216,7 +216,72 @@ class Program
         // YENİ EKLENEN C# BACKEND SİSTEMLERİ (OTOPSİ & DETAYLAR)
         // =============================================
 
-        // OTOPSİ RAPORU ENDPOINT
+        // OTOPSİ VE ADLİ LAB BULGULARI SAKLAMA
+        var submittedForensicFindings = new List<string>();
+
+        // ADLİ TIBBA GÖNDER ENDPOINT (DİNAMİK LAB EŞLEŞTİRME SİSTEMİ)
+        app.MapPost("/api/game/forensic/submit", async (ForensicSubmitRequest request) =>
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(request.FindingText))
+                {
+                    var npcs = await repository.GetAllNPCsAsync();
+                    var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
+                    int guiltyId = guiltyNpc?.NPCId ?? 1;
+
+                    // Clue Owner Mapping (1..15 -> 5 NPCs)
+                    int ownerNpcId = Math.Clamp((request.ClueId - 1) / 3 + 1, 1, 5);
+                    var ownerNpc = npcs.FirstOrDefault(n => n.NPCId == ownerNpcId);
+                    string ownerName = ownerNpc?.Name ?? "Dükkân Sahibi";
+
+                    bool isGuiltyClue = (ownerNpcId == guiltyId);
+                    bool isFingerprint = request.FindingText.Contains("PARMAK İZİ");
+                    bool isBlood = request.FindingText.Contains("KAN LEKESİ");
+
+                    string entry = "";
+
+                    if (isFingerprint)
+                    {
+                        if (isGuiltyClue)
+                        {
+                            entry = $"[🔬 PARMAK İZİ EŞLEŞTİ - {request.ClueName}]: Adli tıp daktilografik incelemesinde iz, EMNİYET KAYITLARINDAKİ ŞÜPHELİ PROFİLİ İLE %99.8 EŞLEŞTİ! (Katilin doğrudan olay müdahalesi doğrulandı).";
+                        }
+                        else
+                        {
+                            entry = $"[🔬 PARMAK İZİ EŞLEŞTİ - {request.ClueName}]: Adli tıp daktilografik incelemesinde iz, dükkân sahibi {ownerName} ile eşleşti. (Olağan mekan içi temas izi - Gerçek katil DNA'sı değil).";
+                        }
+                    }
+                    else if (isBlood)
+                    {
+                        if (isGuiltyClue)
+                        {
+                            entry = $"[🧬 KAN & DNA EŞLEŞTİ - {request.ClueName}]: Numunedeki kan grubu ve serolojik profil, kurban Osman Bey'in kanıyla TAM EŞLEŞTİ! (Cinayet aleti şüphesi doğrulandı).";
+                        }
+                        else
+                        {
+                            entry = $"[🧬 KAN & DNA EŞLEŞTİ - {request.ClueName}]: Numunedeki serolojik inceleme tamamlandı. Kan lekesi kurbana ait DEĞİL (Olağan mekanik leke/hayvansal artık).";
+                        }
+                    }
+                    else
+                    {
+                        entry = $"[🔬 ADLİ LAB İNCELEME - {request.ClueName}]: {request.FindingText}";
+                    }
+
+                    if (!submittedForensicFindings.Contains(entry))
+                    {
+                        submittedForensicFindings.Add(entry);
+                    }
+                }
+                return Results.Ok(new { success = true, totalFindings = submittedForensicFindings.Count });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // OTOPSİ RAPORU ENDPOINT (ZENGİN HTML DOSYA RAPORU)
         app.MapGet("/api/game/autopsy", async () =>
         {
             try
@@ -226,44 +291,120 @@ class Program
                 
                 if (guiltyNpc == null) return Results.NotFound("Suçlu atanmamış.");
 
-                string report = "=== OTOPSİ RAPORU ===\n";
-                report += "Kurban: Osman Bey\n";
-                report += "Ölüm Saati: Cinayet gecesi 23:45 - 00:30 arası.\n\n";
-                report += "BULGULAR:\n";
+                string reportHtml = @"
+                <div class='autopsy-dossier'>
+                    <div class='autopsy-paper-header'>
+                        <div class='autopsy-official-seal'>
+                            <i class='fa-solid fa-scale-balanced'></i> T.C. ADLİ TIP KURUMU BAŞBAKANLIK OTOPSİ İHTİSAS DAİRESİ
+                        </div>
+                        <div class='autopsy-dossier-no'>RESMİ SORGULAMA DOSYASI #104-B</div>
+                    </div>
+                    
+                    <div class='autopsy-meta-grid'>
+                        <div class='autopsy-meta-item'><strong>KURBAN:</strong> Osman Bey (58, Erkek)</div>
+                        <div class='autopsy-meta-item'><strong>TAHMİNİ ÖLÜM SAATİ:</strong> 23:45 - 00:30</div>
+                        <div class='autopsy-meta-item'><strong>OTOPSİ PROTOKOL NO:</strong> OTPS-7819-B</div>
+                        <div class='autopsy-meta-item'><strong>GİZLİLİK DERECESİ:</strong> <span class='autopsy-alert-tag'>🚨 ÇOK GİZLİ</span></div>
+                    </div>
+
+                    <div class='autopsy-divider-line'></div>
+
+                    <div class='autopsy-sec-title'><i class='fa-solid fa-microscope'></i> OTOPSİ UZMANI OTOPİSİ & ADLİ BULGULARI</div>
+                    <div class='autopsy-main-finding'>";
 
                 switch (guiltyNpc.NPCId)
                 {
                     case 1: // Kasap
-                        report += "- Boyun bölgesinde ağır ve nispeten kör bir kesici aletle oluşturulmuş geniş ve derin bir yara mevcuttur.\n";
-                        report += "- Yaranın yapısı, darbenin oldukça yüksek bir kuvvetle indirildiğini göstermektedir.\n";
-                        report += "- Kurbanın sağ el tırnak altı dokularında, mücadele esnasında koptuğu anlaşılan kalın, koyu renkli ve muhtemelen deri veya benzeri dayanıklı bir kumaş türüne ait mikroskobik lifler ve parçacıklar izole edilmiştir.";
+                        reportHtml += @"
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[YARA PATOLOJİSİ]</span> Boyun bölgesinde ağır, geniş ve tırtıklı bir kesici aletle oluşturulmuş derin kesi yarası saptanmıştır.</div>
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[MEKANİK KUVVET]</span> Darbenin yüksek kas gücü ve el kontrolüyle tek hamlede indirildiği doğrulanmıştır.</div>
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[MİKROSKOBİK ANOMALİ]</span> Kurbanın sağ el tırnak altlarında ağır iş önlüğü kumaş lifleri ve deri döküntüleri izole edilmiştir.</div>";
                         break;
                     case 2: // Eczacı
-                        report += "- Kurbanın vücudunda boğuşmaya veya herhangi bir fiziksel travmaya bağlı harici bir ize rastlanmamıştır.\n";
-                        report += "- Kan örneği üzerinde yapılan detaylı toksikolojik tarama sonucunda, kardiyovasküler sistemi doğrudan hedef alan nadir bitkisel bir toksin türünün varlığı saptanmıştır.\n";
-                        report += "- Toksinin kurbanın sistemine, muhtemelen düzenli kullandığı farmakolojik bir madde üzerinden alındığı, bu maddenin yavaşça etki gösterecek dozajda hazırlandığı tespit edilmiştir.";
+                        reportHtml += @"
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[YARA PATOLOJİSİ]</span> Vücutta dışarıdan fiziki darbe veya zorlama izine rastlanmamıştır.</div>
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[TOKSİKOLOJİ RAPORU]</span> Serum analizinde kardiyovasküler felce sebep olan nadir bitkisel sarmaşık alkaloidi (zehir) tespit edilmiştir.</div>
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[UYGULAMA METODU]</span> Madde kurbanın günlük kullandığı reçeteli ilaç dozu içerisine kasten karıştırılmıştır.</div>";
                         break;
                     case 3: // Muhtar
-                        report += "- Kurbanın kollarında ve göğsünde belirgin savunma yaraları ve ciddi bir arbedenin izleri mevcuttur.\n";
-                        report += "- Kafatasının sağ paryetal bölgesinde, düz yüzeyli ağır ve sert bir cisimle oluşturulmuş künt travmaya bağlı kırık ve subdural kanama saptanmıştır.\n";
-                        report += "- Kurbanın kıyafetleri üzerinde yapılan kimyasal analizde, yakın zamanda yoğun bir basınca maruz kalmış mürekkep lekeleri ve sert kâğıt kalıntıları gözlemlenmiştir.";
+                        reportHtml += @"
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[YARA PATOLOJİSİ]</span> Göğüs ve kollarda arbede izleri ile kırık gözlük camı parçacıkları tespit edilmiştir.</div>
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[TRAVMA ANALİZİ]</span> Kafatasının sağ parietal bölgesinde ağır bronz cisim darbesine bağlı künt travma ve subdural hematom mevcuttur.</div>
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[BELGE KANITI]</span> Elbise liflerinde resmi evrak kâğıdı tozu ve kırmızı mühür mürekkebi kalıntıları saptanmıştır.</div>";
                         break;
                     case 4: // Komiser
-                        report += "- Gövde ve kollar üzerinde uzun, silindirik, esnek fakat ağır bir nesnenin tekrar tekrar vurulması sonucu oluşan hematomlar izlenmiştir.\n";
-                        report += "- Kurbanın boyun çevresinde, travmaya ek olarak asfiksiye (havasız kalma) işaret eden kanamalar ve sıkışma bulguları saptanmıştır.\n";
-                        report += "- Cesedin üzerindeki bazı epitel dokuların özel bir solüsyonla silindiği, olay sonrasında delilleri yok etmeye yönelik sistemli bir çaba gösterildiği saptanmıştır.";
+                        reportHtml += @"
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[YARA PATOLOJİSİ]</span> Sırt ve kaburga bölgesinde silindirik polis jopuna uygun doğrusal travma izleri saptanmıştır.</div>
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[ASFİKSİ]</span> Boyun çevresinde sert müdahale sonucu havasız kalmaya işaret eden deri altı kanaması mevcuttur.</div>
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[LABORATUVAR]</span> Olay yerindeki bazı kan lekelerinin kimyasal solüsyonla silinmeye çalışıldığı anlaşılmıştır.</div>";
                         break;
                     case 5: // Terzi
-                        report += "- Kurbanın boyun çevresinde çepeçevre uzanan, çok ince, pürüzsüz ancak aşırı yüksek gerilime dayanıklı bir bağ (özel büküm materyal) ile oluşturulmuş ligatür izi (boğulma) görülmektedir.\n";
-                        report += "- Tırnak altlarında savunma izine rastlanmamış olması, eylemin kurbanın arkasından, aniden ve kurbanın failin yaklaşmasına müsaade ettiği bir mesafeden gerçekleştirildiğini göstermektedir.\n";
-                        report += "- Kurbanın dış giysisinde (ceket) sıradışı bir ağırlık dengesizliği ve iç astarına sonradan eklenmiş, oldukça nizami gizli bir bölme tespit edilmiştir.";
+                        reportHtml += @"
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[YARA PATOLOJİSİ]</span> Boyunda yüksek dayanıklı büküm terzi ipliğiyle oluşturulmuş ligatür (boğulma) izi saptanmıştır.</div>
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[MÜCADELE İZİ]</span> Eylemin kurbanın yakını tarafından arkadan gafil avlanarak yapıldığı değerlendirilmektedir.</div>
+                        <div class='autopsy-bullet'><span class='bullet-tag'>[ELBİSE ANALİZİ]</span> Kurbanın ceket astarında özel kesilmiş gizli bir cep yırtığı gözlemlenmiştir.</div>";
                         break;
                     default:
-                        report += "- Kesin ölüm sebebi belirlenemedi. Adli tıp incelemesi sürüyor.";
+                        reportHtml += "<div class='autopsy-bullet'>• Kesin ölüm sebebi belirlenemedi. Adli tıp laboratuvar incelemesi sürüyor.</div>";
                         break;
                 }
 
-                return Results.Ok(new { success = true, report = report });
+                reportHtml += "</div>";
+
+                if (submittedForensicFindings.Count > 0)
+                {
+                    reportHtml += @"
+                    <div class='autopsy-divider-line'></div>
+                    <div class='autopsy-sec-title'><i class='fa-solid fa-vial-circle-check'></i> DEDEKTİF ADLİ LAB EŞLEŞTİRME SONUÇLARI</div>
+                    <div class='autopsy-findings-list'>";
+
+                    foreach (var finding in submittedForensicFindings)
+                    {
+                        bool isMatch = finding.Contains("EŞLEŞTİ!");
+                        string badgeClass = isMatch ? "badge-match" : "badge-nomatch";
+                        string badgeIcon = isMatch ? "<i class='fa-solid fa-circle-check'></i>" : "<i class='fa-solid fa-circle-exclamation'></i>";
+
+                        reportHtml += $@"
+                        <div class='autopsy-finding-card {badgeClass}'>
+                            <div class='finding-header'>{badgeIcon} {finding}</div>
+                        </div>";
+                    }
+
+                    reportHtml += "</div>";
+                }
+
+                reportHtml += "</div>";
+
+                return Results.Ok(new { success = true, report = reportHtml });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // DİNAMİK ADLİ LABORATUVAR STATE ENDPOINT
+        app.MapGet("/api/game/forensic-state", async () =>
+        {
+            try
+            {
+                var npcs = await repository.GetAllNPCsAsync();
+                var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
+                int guiltyId = guiltyNpc?.NPCId ?? 0;
+
+                int weaponId = 0;
+                int fingerprintId = 0;
+
+                switch(guiltyId) 
+                {
+                    case 1: weaponId = 1; fingerprintId = 2; break; // Kasap (Satır, Defter)
+                    case 2: weaponId = 6; fingerprintId = 4; break; // Eczacı (Sarmaşık, Şişe)
+                    case 3: weaponId = 8; fingerprintId = 7; break; // Muhtar (Gözlük, Mektup)
+                    case 4: weaponId = 10; fingerprintId = 12; break; // Komiser (Rozet, Düğme)
+                    case 5: weaponId = 13; fingerprintId = 14; break; // Terzi (Makara, Kumaş)
+                }
+
+                return Results.Ok(new { success = true, guiltyId, weaponId, fingerprintId });
             }
             catch (Exception ex)
             {
@@ -309,11 +450,13 @@ class Program
             }
         });
 
-        // 6. Oyunu Sıfırla
+
+        // 7. Oyunu Sıfırla
         app.MapPost("/api/game/reset", async () =>
         {
             try
             {
+                submittedForensicFindings.Clear();
                 var random = new Random();
                 int guiltyId = random.Next(1, 6);
                 
@@ -629,4 +772,12 @@ public class DialogLogRequest
     public int Difficulty { get; set; }
     public string Category { get; set; } = string.Empty;
 }
+
+public class ForensicSubmitRequest
+{
+    public int ClueId { get; set; }
+    public string ClueName { get; set; } = string.Empty;
+    public string FindingText { get; set; } = string.Empty;
+}
+
 

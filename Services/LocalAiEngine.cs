@@ -79,6 +79,31 @@ public class LocalAiEngine
         // Yeni NLP motoru: Cümleyi köklerine ayır ve sokak ağzını düzelt
         string processedSentence = TurkishTextEngine.PreprocessSentence(normalizedAscii);
 
+        // Neden / Selamlama / Nezaket Kontrolü
+        bool isGreeting = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, 
+            "merhaba", "selam", "gunaydin", "iyi gunler", "iyi aksamlar", "kolay gelsin", "nasilsin", "nasilsiniz", "hos bulduk", "tesekkur", "saol", "sagol");
+
+        if (isGreeting)
+        {
+            string greetingResponse = npc.NPCId switch
+            {
+                1 => "Aleykümselam amirim, dükkânıma hoş geldiniz. Buyurun, cinayet soruşturmasında size nasıl yardımcı olabilirim?",
+                2 => "Merhaba amirim, şifa dükkânıma hoş geldiniz. İnşallah bu acı olayı kısa sürede aydınlatırsınız. Dinliyorum amirim.",
+                3 => "Selamlar amirim, muhtarlık makamımıza safalar getirdiniz. Kasabamızın huzuru için ne gerekiyorsa sormaktan çekinmeyin.",
+                4 => "Merhaba amirim, kolay gelsin. Karakolumuz ve tüm imkânlarımız emrinizdedir, buyurun.",
+                5 => "Hoş geldiniz amirim, sefalar getirdiniz. Şöyle oturun, bir sıcak çayımı için... Sorularınızı dinliyorum.",
+                _ => "Merhaba amirim, hoş geldiniz. Dinliyorum sizi."
+            };
+
+            return new AIInteractionResponse
+            {
+                Dialogue = greetingResponse,
+                Emotion = "Sakin",
+                TrustChange = 1,
+                StressIncrease = 0
+            };
+        }
+
         bool isDirectAccusation = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, 
             "sen yap", "sen oldur", "katil sen", "itiraf et", "suclu sen", "sucu sen", 
             "kurban sen", "sen kiy", "cinayet sen", "kaza degil", "katil kim");
@@ -502,12 +527,12 @@ public class LocalAiEngine
     {
         return npc.NPCId switch
         {
-            1 => isGuilty ? "*Et satırını tezgaha vurur* Ne soracaksan net sor amirim! İşim başımdan aşkın, etler bozulacak!" : "Buyur amirim. Kasap dükkânında cinayet mi çözülür bilmem ama ne biliyorsam anlatırım.",
-            2 => isGuilty ? "*İlaç şişelerini düzeltirken elleri titrer* Lütfen hızlı olun, reçeteleri hazırlamam lazım..." : "Hoş geldiniz amirim. Tıbbi konular veya kurbanın ilaçları hakkında bir soru mu soracaksınız?",
-            3 => isGuilty ? "*Kravatını gevşetir, terini siler* Kasabamızın huzuru için soruşturmayı uzatmayın lütfen." : "Buyrun amirim, muhtarlık kapısı vatandaşımıza da devlete de açıktır. Ne gerekiyorsa sorun.",
-            4 => isGuilty ? "*Masasındaki dosyayı kapatır* Soruşturma gizlidir amirim. Sorularınızı resmi kanaldan sorun." : "Amirim, polis teşkilatı olarak soruşturmanızda her türlü kolaylığı sağlamaya hazırız.",
-            5 => isGuilty ? "*Gözlüklerinin üstünden bakar, yutkunur* Kumaşlar, dikişler... Yaşlı bir terziye ne sorabilirsiniz ki?" : "Hoş geldiniz amirim. Bir çayımı için, dikiş dikerken laflayalım.",
-            _ => "Dinliyorum amirim."
+            1 => "Buyur amirim. Kasap dükkânında cinayet mi çözülür bilmem ama aklıma gelen ne varsa yardımcı olurum.",
+            2 => "Hoş geldiniz amirim. Tıbbi konular, reçeteler veya kurban Osman Bey hakkında ne öğrenmek istersiniz?",
+            3 => "Buyrun amirim, muhtarlık kapısı devletimizin her temsilcisine açıktır. Sorularınızı dinliyorum.",
+            4 => "Amirim, emniyet mensubu olarak soruşturmanızda her türlü kolaylığı sağlamaya hazırım. Dinliyorum.",
+            5 => "Hoş geldiniz amirim. Bir sıcak çayımı için, ne merak ediyorsanız sorun laflayalım.",
+            _ => "Dinliyorum amirim, buyurun."
         };
     }
 }

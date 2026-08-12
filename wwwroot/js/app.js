@@ -54,23 +54,28 @@ var currentHelperMessageText = '';
 
 // === GAME DATA ===
 const NPC_DATA = {
-    1: { id: 1, name: 'Kasap Hasan', building: 'Kasap', role: 'Kasabadaki eski kasap', img: 'images/hasan.png', bg: 'images/butcher_interior.png', talkBg: 'images/hasan.png', clipPath: 'ellipse(22% 35% at 50% 55%)',
+    1: {
+        id: 1, name: 'Kasap Hasan', building: 'Kasap', role: 'Kasabadaki eski kasap', img: 'images/hasan.png', bg: 'images/butcher_interior.png', talkBg: 'images/hasan.png', clipPath: 'ellipse(22% 35% at 50% 55%)',
         secret: 'Cinayet gecesi dükkânında gizlice muhtara et sattı.',
         murderStory: 'Yağmurlu bir sonbahar gecesiydi. Kasap Hasan, dükkânını kapattıktan sonra doğruca Osman Bey\'in evine yürüdü. Yıllardır biriken veresiye borcu artık dayanılmaz bir hal almıştı — Osman Bey her seferinde ödemeyi erteliyordu. O gece Hasan son kez parasını istemeye gitti. Kapıyı Osman Bey açtığında, Hasan\'ın gözlerindeki öfkeyi fark edemedi. "Paran yarın gelecek" dedi alaycı bir gülümsemeyle. "Yarın mı? Yıllardır yarın diyorsun!" diye kükredi Hasan. Tartışma kızıştıkça Hasan\'ın eli yanında getirdiği satıra gitti. Bir anlık öfke krizinde, o ağır satırı kurbanın boyun bölgesine indirdi. Derin, tırtıklı yara — ancak bir kasabın elinden çıkabilecek bir darbeydi. Osman Bey son çırpınışlarında Hasan\'ın siyah deri önlüğünden parçalar kopartmaya çalıştı, tırnakları arasında kalan o küçük parçalar, son nefesinde bile savaştığının kanıtıydı. Hasan panikle satırı dükkânına götürüp tezgaha sapladı. Kanlı önlüğünü bir köşeye fırlattı, kara kaplı veresiye defterindeki Osman\'ın adını kırmızı kalemle çizdi. Ama karanlıkta ne kadar temizlerse temizlesin, kanın izi her yere sinmişti.'
     },
-    2: { id: 2, name: 'Eczacı Selma', building: 'Eczane', role: 'Eczane sahibi', img: 'images/selma.png', bg: 'images/eczane_final.png', talkBg: 'images/eczane_ic_mekan.png', clipPath: 'ellipse(20% 35% at 50% 60%)',
+    2: {
+        id: 2, name: 'Eczacı Selma', building: 'Eczane', role: 'Eczane sahibi', img: 'images/selma.png', bg: 'images/eczane_final.png', talkBg: 'images/eczane_ic_mekan.png', clipPath: 'ellipse(20% 35% at 50% 60%)',
         secret: 'Kurbanın zehirlendiğini biliyordu ama gizledi.',
         murderStory: 'Eczacı Selma, yıllardır kasabada sessiz sedasız çalışan, herkesin güvendiği bir kadındı. Ama bu sessizliğin ardında derin bir nefret gizliydi. Osman Bey, Selma\'nın geçmişine dair bir sır keşfetmiş ve onu aylardır bununla tehdit ediyordu — sessiz kalmasının karşılığında düzenli para talep ediyordu. O gece Selma, planını uygulamaya koydu. Eczanesinin tezgahı altında yetiştirdiği ölümcül bir sarmaşık türünün özünü, son derece dikkatli bir şekilde Osman Bey\'in her gün kullandığı kalp ilacına karıştırdı. Dozajı mükemmel hesaplamıştı — ne çok az, ne çok fazla. İlacı o gün Osman\'ın eline bizzat verdi, gülümseyerek. "Geçmiş olsun Osman Bey, bu ilacı düzenli alın" dedi. Gece yarısı, Osman Bey yatmadan önce ilacını içti. Birkaç dakika içinde kalbinde keskin bir ağrı hissetti. Kalp krizi geçiriyormuş gibi kıvrandı, nefes almaya çalıştı ama zehir çoktan damarlarına yayılmıştı. Selma, o sırada eczanesinin karanlık köşesinde, yağmurun sesini dinleyerek bekledi. Boş ilaç şişesini masanın altına sakladı, parmak izlerini titizlikle sildi. Reçete defterinin son sayfalarını — Osman\'ın gerçek teşhisini ve zehirlenme belirtilerini içeren notları — aceleyle yırtıp attı. Ama her ne kadar profesyonel davranmış olsa da, zehirli sarmaşık tezgahın altında kurumaya bırakılmış halde duruyordu.'
     },
-    3: { id: 3, name: 'Muhtar Kemal', building: 'Muhtarlık', role: 'Kasabanın muhtarı', img: 'images/kemal.png', bg: 'images/muhtarlik_final.png', talkBg: 'images/muhtarlik_ic_mekan.png', clipPath: 'ellipse(22% 35% at 50% 60%)',
+    3: {
+        id: 3, name: 'Muhtar Kemal', building: 'Muhtarlık', role: 'Kasabanın muhtarı', img: 'images/kemal.png', bg: 'images/muhtarlik_wide.png', talkBg: 'images/muhtar_final.png', clipPath: 'ellipse(22% 35% at 50% 60%)',
         secret: 'Kurbanla arazi anlaşmazlığı vardı.',
         murderStory: 'Muhtar Kemal, kasabanın en güçlü adamıydı — herkesin sırrını biliyor, her kapıyı açıyordu. Ama yaklaşan belediye seçimleri için büyük bir arazi projesine ihtiyacı vardı ve o arazinin sahibi Osman Bey\'di. Haftalardır Osman\'ı arazisini satması için ikna etmeye çalışmıştı ama Osman direndi. "Bu arazi babamdan kalma, satmam" dedi her seferinde. O gece Kemal, tüm diplomatik maskesini çıkardı. Gece yarısı Osman\'ın evine sızdı — muhtarlık kasasındaki yedek anahtarlarla kapıyı açmak çocuk oyuncağıydı. İçeri girdiğinde Osman masasında oturmuş, belgelerini inceliyordu. "Sen de mi Kemal?" dedi Osman, şaşkınlıkla. Kemal sahte tapu belgelerini masaya fırlattı. "Bunu imzalayacaksın, ya da..." Osman belgeleri yırtmaya başladı. Kemal kontrolünü kaybetti. Masadaki ağır bronz mühürü kaptığı gibi Osman\'ın yüzüne indirdi. Şiddetli bir boğuşma başladı — mobilyalar devrildi, Osman\'ın gözlüğü yere düşüp kırıldı. Kemal, son darbeyi kurbanın şakağına indirdiğinde, Osman\'ın gözleri kararıp yere yığıldı. Ölüm sebebi: ağır darbe sonucu beyin kanaması. Kemal panikle evi terk etti ama aceleyle çıkarken yırtılmış tapu belgelerini ve kırık gözlüğü olduğu yerde bıraktı. Ofisine döndüğünde, titreyerek gizli kasasını açıp sahte belgelerin kopyalarını içine kilitledi.'
     },
-    4: { id: 4, name: 'Komiser Güneş', building: 'Karakol', role: 'Kadın polis komiseri', img: 'images/gunes.png', bg: 'images/karakol_final.png', talkBg: 'images/karakol_ic_mekan.png', clipPath: 'ellipse(20% 35% at 50% 60%)',
+    4: {
+        id: 4, name: 'Komiser Güneş', building: 'Karakol', role: 'Kadın polis komiseri', img: 'images/gunes.png', bg: 'images/karakol_final.png', talkBg: 'images/karakol_ic_mekan.png', clipPath: 'ellipse(20% 35% at 50% 60%)',
         secret: 'Olay yerindeki delilleri sakladı.',
         murderStory: 'Komiser Güneş, kasabanın adalet sembolüydü — ya da öyle görünüyordu. Gerçekte yıllardır Osman Bey\'den düzenli rüşvet alıyordu. Osman, kasabadaki yasadışı arazi işlemlerini ve kaçak ticaret yollarını biliyordu; Güneş ise bu bilgilerin gün yüzüne çıkmaması için olayları kapatıyor, dosyaları kaybediyordu. Ama Osman artık bu düzenden bıkmıştı ve Güneş\'i ihbar etmekle tehdit etti. "Yarın sabah savcılığa gidiyorum" dedi telefonda, sesi kararlıydı. Güneş o gece üniformasını giydi, polis copunu beline taktı ve Osman\'ın evine gitti. Kapıyı açan Osman, komiserin yüzündeki soğuk ifadeyi gördüğünde anladı ama çok geçti. Güneş ilk darbeyi polis copuyla Osman\'ın karnına indirdi. Osman ikiye katlanırken, Güneş onu yere devirdi. Boğuşma sırasında Osman savunma yaraları aldı — kollarında, ellerinde darbe izleri oluştu. Güneş yakın mesafeden copla art arda vurdu. Son darbe şakağına geldiğinde Osman hareketsiz kaldı. Havasız kalma ve travmatik darbeler — bir polisin eğitimli şiddetiyle uyumlu izler. Güneş, bir polis olarak olay yerini profesyonelce temizlemeye çalıştı — parmak izlerini sildi, kan lekelerini temizledi. Ama boğuşma sırasında paltosunun pirinç düğmesi kopmuş, rozeti yere düşmüştü. Karanlıkta bunları fark edemedi. Karakola döndüğünde, "GİZLİ" damgalı dosyaya Osman\'ın ihbar dilekçesini kilitledi ve anahtarı çekmecesinin derinliklerine gömdü.'
     },
-    5: { id: 5, name: 'Terzi Yahya', building: 'Terzi', role: 'Kasabanın terzisi', img: 'images/yahya.png', bg: 'images/terzi_final.png', talkBg: 'images/terzi_ic_mekan.png', clipPath: 'ellipse(22% 35% at 50% 60%)',
+    5: {
+        id: 5, name: 'Terzi Yahya', building: 'Terzi', role: 'Kasabanın terzisi', img: 'images/yahya.png', bg: 'images/terzi_final.png', talkBg: 'images/terzi_ic_mekan.png', clipPath: 'ellipse(22% 35% at 50% 60%)',
         secret: 'Kurbana gizli cepli ceket dikti, son gören kişi.',
         murderStory: 'Terzi Yahya, kasabanın en yaşlı ve en saygın ustasıydı. Ama bu saygın cephenin arkasında karanlık bir ortaklık vardı — Yahya, yıllardır Osman Bey\'in gizli işlerinin sessiz ortağıydı. Para aklama, belge saklama, hatta kaçak mal transferi... Osman\'ın son diktirdiği ceketin astarına gizli bir cep dikmişti ve bu cepte, tüm yasadışı işlemlerin kaydını içeren bir USB bellek saklanıyordu. Ama Osman, ortaklığı bitirmeye ve Yahya\'yı saf dışı bırakmaya karar vermişti. O gece Yahya, payını almak için Osman\'ın evine gitti. "Param nerede Osman?" diye sordu titreyen bir sesle. Osman güldü. "Senin paran mı? Bu işte sen artık yoksun yaşlı adam. O USB\'yi de sana vermeyeceğim." Yılların birikimi bir anda patladı. Yahya, meslek hayatının en sadık aleti olan iplik makarasını cebinden çıkardı. Kalın, dayanıklı, kopması imkansız terzi ipliğini Osman\'ın boynuna doladı ve tüm gücüyle sıktı. Osman çırpındı, direndi — bu sırada Yahya\'nın diktiği ceketinden kumaş parçaları yırtıldı. Ama Yahya bırakmadı. İplik boyun bölgesinde derin izler bırakarak, Osman\'ın son nefesini de aldı. Yahya titreyerek ayağa kalktı. Kanlı iplik makarasını cebine koydu, yırtılan kumaş parçalarını toplamaya çalıştı ama hepsini bulamadı. Dükkânına döndüğünde, o gece diktiği son ceketin gizli cebindeki not hâlâ duruyordu: "Bu gece gel, konuşalım."'
     }
@@ -78,92 +83,73 @@ const NPC_DATA = {
 
 const SCENE_OBJECTS = {
     1: [ // Kasap
-        { id: 1, name: 'Kanlı Satır', desc: 'Tezgaha sertçe saplanmış, üzerinde taze kan lekeleri olan paslı bir satır.', top: '58%', left: '64%', img: 'images/bloody_cleaver.png',
-          examineActions: [
-              { type: 'powder', btnText: 'Pudra Sür (Parmak İzi)', resultOverlay: 'show-fingerprint', resultText: 'Satırın sapında net bir başparmak izi belirdi! Şüpheliye ait olabilir.' },
-              { type: 'uv', btnText: 'UV Işığı (Kan İzi)', resultOverlay: 'show-uv', resultText: 'Sadece sapta değil, tezgahta da silinmiş kan izleri parladı!' }
-          ]
+        {
+            id: 1, name: 'Kanlı Satır', desc: 'Tezgaha sertçe saplanmış, üzerinde taze kan lekeleri olan paslı bir satır.', top: '75%', left: '45%', img: 'images/bloody_cleaver.png',
+            fingerprintSpot: { xRatio: 0.35, yRatio: 0.75 }, bloodSpot: { xRatio: 0.65, yRatio: 0.35 }
         },
-        { id: 2, name: 'Kara Kaplı Defter', desc: 'Veresiye listesinde kurbanın isminin üzeri kırmızı kalemle çizilmiş.', top: '64%', left: '32%', img: 'images/black_notebook.png',
-          examineActions: [
-              { type: 'read', btnText: 'Defteri İncele', resultLetter: 'Kasap Hasan - Kurban: 50.000 TL Borç! (ÖDENMEDİ)', resultText: 'Kurbanın kasaba çok büyük bir borcu olduğu açıkça yazıyor.' },
-              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Defterin köşesinde sinirle sıkılmış parmak izleri var.' }
-          ]
+        {
+            id: 2, name: 'Kara Kaplı Defter', desc: 'Veresiye listesinde kurbanın isminin üzeri kırmızı kalemle çizilmiş.', top: '65%', left: '30%', img: 'images/black_notebook.png',
+            fingerprintSpot: { xRatio: 0.3, yRatio: 0.3 }, bloodSpot: { xRatio: 0.7, yRatio: 0.7 }
         },
-        { id: 3, name: 'Yırtık Önlük', desc: 'Kavga izleri taşıyan, yakası kopmuş bir kasap önlüğü.', top: '50%', left: '18%', img: 'images/torn_apron.png',
-          examineActions: [
-              { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Önlüğün yırtık olan yakasında kurbana ait olabilecek sıçramış kan damlaları var!' }
-          ]
+        {
+            id: 3, name: 'Yırtık Önlük', desc: 'Askının arkasında gizlenmiş, kavga izleri taşıyan, yakası kopmuş kasap önlüğü.', top: '40%', left: '10%', img: 'images/torn_apron.png', isHidden: true,
+            fingerprintSpot: { xRatio: 0.4, yRatio: 0.6 }, bloodSpot: { xRatio: 0.55, yRatio: 0.3 }
         }
     ],
     2: [ // Eczane
-        { id: 4, name: 'Gizli Zehir Şişesi', desc: 'Rafların arkasına saklanmış, zehirli olduğu bilinen ağır bir ilacın boş şişesi.', top: '48%', left: '20%', img: 'images/empty_medicine_bottle.png', isHidden: true,
-          examineActions: [
-              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Şişenin üzerinde eczacı eldiveni izleri var, ama bir de çıplak parmak izi çıktı!' }
-          ]
+        {
+            id: 4, name: 'Gizli Zehir Şişesi', desc: 'İlaç raflarının arkasına saklanmış, zehirli olduğu bilinen ağır bir ilacın boş şişesi.', top: '55%', left: '75%', img: 'images/empty_medicine_bottle.png', isHidden: true,
+            fingerprintSpot: { xRatio: 0.5, yRatio: 0.25 }, bloodSpot: { xRatio: 0.5, yRatio: 0.75 }
         },
-        { id: 5, name: 'Reçete Defteri', desc: 'Kurbanın adının geçtiği, son sayfaları aceleyle yırtılmış defter.', top: '62%', left: '72%', img: 'images/prescription_notebook.png',
-          examineActions: [
-              { type: 'read', btnText: 'Kurşun Kalemle Karala', resultLetter: '(Alt sayfadaki iz) Kurbanın Kalp İlacı - Doz aşımı ölümcül!', resultText: 'Yırtılan sayfanın altındaki kağıda çıkan izleri okumayı başardın!' }
-          ]
+        {
+            id: 5, name: 'Reçete Defteri', desc: 'Kurbanın adının geçtiği, son sayfaları aceleyle yırtılmış defter.', top: '75%', left: '40%', img: 'images/prescription_notebook.png',
+            fingerprintSpot: { xRatio: 0.25, yRatio: 0.5 }, bloodSpot: { xRatio: 0.75, yRatio: 0.4 }
         },
-        { id: 6, name: 'Zehirli Sarmaşık', desc: 'Tezgah altında kurumaya bırakılmış zehirli bir bitki türü.', top: '32%', left: '54%', img: 'images/poison_ivy.png',
-          examineActions: [
-              { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Bitkinin özsuyunun kurbanın ilacına karıştırıldığına dair fosforlu kalıntılar var.' }
-          ]
+        {
+            id: 6, name: 'Zehirli Sarmaşık', desc: 'Tezgah altında kurumaya bırakılmış zehirli bir bitki türü.', top: '15%', left: '45%', img: 'images/poison_ivy.png',
+            fingerprintSpot: { xRatio: 0.4, yRatio: 0.6 }, bloodSpot: { xRatio: 0.6, yRatio: 0.4 }
         }
     ],
     3: [ // Muhtarlık
-        { id: 7, name: 'Tehdit Mektubu', desc: 'Muhtarın çekmecesinde kurbana yazılmış, henüz gönderilmemiş mektup.', top: '62%', left: '44%', img: 'images/threat_letter.png',
-          examineActions: [
-              { type: 'read', btnText: 'Mektubu Oku', resultLetter: '"Arazini satmazsan, sonun kötü olur. - K."', resultText: 'Mektubun içeriği muhtarın cinayet niyetini gösteriyor!' },
-              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Mektubun üzerinde terli bir parmak izi belirdi.' }
-          ]
+        {
+            id: 7, name: 'Tehdit Mektubu', desc: 'Muhtarın çekmecesinde kurbana yazılmış, henüz gönderilmemiş mektup.', top: '60%', left: '45%', img: 'images/threat_letter.png',
+            fingerprintSpot: { xRatio: 0.7, yRatio: 0.8 }, bloodSpot: { xRatio: 0.3, yRatio: 0.4 }
         },
-        { id: 8, name: 'Kırık Gözlük', desc: 'Kurbana ait olduğu düşünülen, camı kırık bir okuma gözlüğü.', top: '56%', left: '56%', img: 'images/broken_glasses.png',
-          examineActions: [
-              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Gözlüğün camında kurban dışındaki birine ait (muhtemelen Muhtarın) parmak izi var!' },
-              { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Gözlüğün çerçevesinde mikroskobik kan damlaları parladı.' }
-          ]
+        {
+            id: 8, name: 'Kırık Gözlük', desc: 'Kurbana ait olduğu düşünülen, camı kırık bir okuma gözlüğü.', top: '65%', left: '55%', img: 'images/broken_glasses.png',
+            fingerprintSpot: { xRatio: 0.5, yRatio: 0.45 }, bloodSpot: { xRatio: 0.7, yRatio: 0.55 }
         },
-        { id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa.', top: '42%', left: '24%', img: 'images/hidden_safe.png', isHidden: true,
-          examineActions: [
-              { type: 'read', btnText: 'Belgeleri İncele', resultLetter: 'SAHTE TAPU: Kurbanın arazisi bedelsiz olarak belediyeye (Muhtara) devredilecektir.', resultText: 'Muhtarın sahte belge düzenlediği kanıtlandı!' }
-          ]
+        {
+            id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa.', top: '30%', left: '15%', img: 'images/hidden_safe.png', isHidden: true,
+            fingerprintSpot: { xRatio: 0.6, yRatio: 0.5 }, bloodSpot: { xRatio: 0.35, yRatio: 0.5 }
         }
     ],
     4: [ // Karakol
-        { id: 10, name: 'Polis Rozeti', desc: 'Olay yerinde bulunan, numarası kazınmış bir polis rozeti.', top: '58%', left: '36%', img: 'images/police_badge.png',
-          examineActions: [
-              { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Rozetin arkasında kan lekeleri var. Olay yerinde düştüğü kesinleşti.' }
-          ]
+        {
+            id: 10, name: 'Polis Rozeti', desc: 'Olay yerinde bulunan, numarası kazınmış bir polis rozeti.', top: '65%', left: '40%', img: 'images/police_badge.png',
+            fingerprintSpot: { xRatio: 0.5, yRatio: 0.4 }, bloodSpot: { xRatio: 0.5, yRatio: 0.7 }
         },
-        { id: 11, name: 'Gizli Dosya', desc: '"GİZLİ" damgalı bir dosya. İçinde kurbanın geçmişiyle ilgili bilgiler var.', top: '52%', left: '62%', img: 'images/evidence_file.png',
-          examineActions: [
-              { type: 'read', btnText: 'Dosyayı Oku', resultLetter: 'Kurbanın Komiser Güneş hakkında rüşvet şikayet dilekçesi. HASIR ALTI EDİLMİŞ!', resultText: 'Komiserin güçlü bir cinayet motifi olduğu ortaya çıktı.' }
-          ]
+        {
+            id: 11, name: 'Gizli Dosya', desc: 'Kilitli evrak dolabında gizlenmiş "GİZLİ" damgalı bir dosya.', top: '45%', left: '80%', img: 'images/evidence_file.png', isHidden: true,
+            fingerprintSpot: { xRatio: 0.8, yRatio: 0.25 }, bloodSpot: { xRatio: 0.4, yRatio: 0.6 }
         },
-        { id: 12, name: 'Kayıp Düğme', desc: 'Pahalı bir paltonun kopmuş düğmesi.', top: '72%', left: '48%', img: 'images/missing_button.png',
-          examineActions: [
-              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Düğmede boğuşma sırasında oluşan çekme izleri ve ter var.' }
-          ]
+        {
+            id: 12, name: 'Kayıp Düğme', desc: 'Pahalı bir paltonun kopmuş düğmesi.', top: '85%', left: '60%', img: 'images/missing_button.png',
+            fingerprintSpot: { xRatio: 0.5, yRatio: 0.5 }, bloodSpot: { xRatio: 0.45, yRatio: 0.45 }
         }
     ],
     5: [ // Terzi
-        { id: 13, name: 'Kanlı İplik Makarası', desc: 'Üzerinde kurumuş kan lekeleri olan iplik makarası.', top: '58%', left: '68%', img: 'images/thread_spool.png',
-          examineActions: [
-              { type: 'uv', btnText: 'UV Işığı', resultOverlay: 'show-uv', resultText: 'Kurbanın boynundaki boğulma izleriyle bu ipliğin kalınlığı birebir eşleşiyor!' }
-          ]
+        {
+            id: 13, name: 'Kanlı İplik Makarası', desc: 'Üzerinde kurumuş kan lekeleri olan iplik makarası.', top: '75%', left: '50%', img: 'images/thread_spool.png',
+            fingerprintSpot: { xRatio: 0.35, yRatio: 0.3 }, bloodSpot: { xRatio: 0.55, yRatio: 0.6 }
         },
-        { id: 14, name: 'Yırtık Kumaş', desc: 'Kurbanın ceketinden kopmuş olabilecek kumaş parçası.', top: '62%', left: '30%', img: 'images/torn_fabric.png',
-          examineActions: [
-              { type: 'powder', btnText: 'Pudra Sür', resultOverlay: 'show-fingerprint', resultText: 'Kumaşta Terzi Yahya nın parmak izleri netleşti.' }
-          ]
+        {
+            id: 14, name: 'Yırtık Kumaş', desc: 'Kurbanın ceketinden kopmuş olabilecek kumaş parçası.', top: '80%', left: '40%', img: 'images/torn_fabric.png',
+            fingerprintSpot: { xRatio: 0.3, yRatio: 0.7 }, bloodSpot: { xRatio: 0.65, yRatio: 0.35 }
         },
-        { id: 15, name: 'Gizli Cep', desc: 'Yahya nın diktiği ceketin astarında gizli bir cep.', top: '44%', left: '48%', img: 'images/hidden_pocket.png',
-          examineActions: [
-              { type: 'read', btnText: 'Cebin İçini Aç', resultLetter: '"Bu gece gel, konuşalım. USB yi unutma. - Osman"', resultText: 'Kurban ve terzinin o gece gizli bir buluşma ayarladığı kesinleşti!' }
-          ]
+        {
+            id: 15, name: 'Gizli Cep', desc: 'Mankendeki ceketin astarında saklanmış gizli bir cep.', top: '45%', left: '35%', img: 'images/hidden_pocket.png', isHidden: true,
+            fingerprintSpot: { xRatio: 0.5, yRatio: 0.35 }, bloodSpot: { xRatio: 0.5, yRatio: 0.65 }
         }
     ]
 };
@@ -308,24 +294,24 @@ function playSynthVoice(isFemale) {
         }
         const osc = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
-        
+
         osc.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-        
+
         // Kadınlar için ince (sine), Erkekler için tok (triangle/sawtooth) ses dalgası
         osc.type = isFemale ? 'sine' : 'triangle';
-        
+
         // Rastgele tonlama ile gerçekçi konuşma/mırıldanma hissi
         const baseFreq = isFemale ? (400 + Math.random() * 150) : (120 + Math.random() * 60);
         osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
-        
+
         // Sesin şiddeti ve süresi
         gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
-        
+
         osc.start();
         osc.stop(audioCtx.currentTime + 0.06);
-    } catch(e) { console.log('Web Audio Hatası:', e); }
+    } catch (e) { console.log('Web Audio Hatası:', e); }
 }
 
 function playSound(audioEl, volume = 0.5) {
@@ -334,7 +320,7 @@ function playSound(audioEl, volume = 0.5) {
         audioEl.volume = Math.min(1, Math.max(0, volume));
         audioEl.currentTime = 0;
         audioEl.play().catch(e => console.log('Ses hatası:', e));
-    } catch(e) { console.log('Ses hatası:', e); }
+    } catch (e) { console.log('Ses hatası:', e); }
 }
 
 function playMumbleSound(audioEl, volume = 0.5) {
@@ -342,9 +328,9 @@ function playMumbleSound(audioEl, volume = 0.5) {
     try {
         const clone = audioEl.cloneNode();
         clone.volume = Math.min(1, Math.max(0, volume));
-        clone.play().catch(e => {});
+        clone.play().catch(e => { });
         clone.onended = () => { clone.remove(); };
-    } catch(e) {}
+    } catch (e) { }
 }
 
 function playLoopSound(audioEl, volume = 0.3) {
@@ -353,7 +339,7 @@ function playLoopSound(audioEl, volume = 0.3) {
         audioEl.volume = Math.min(1, Math.max(0, volume));
         audioEl.loop = true;
         audioEl.play().catch(e => console.log('Ses hatası:', e));
-    } catch(e) { console.log('Ses hatası:', e); }
+    } catch (e) { console.log('Ses hatası:', e); }
 }
 
 function stopSound(audioEl) {
@@ -361,7 +347,7 @@ function stopSound(audioEl) {
     try {
         audioEl.pause();
         audioEl.currentTime = 0;
-    } catch(e) {}
+    } catch (e) { }
 }
 
 function stopAllSounds() {
@@ -373,10 +359,10 @@ function stopAllSounds() {
 function toggleMute() {
     isMuted = !isMuted;
     localStorage.setItem('gameMuted', isMuted);
-    
+
     const btn = document.getElementById('mute-toggle-btn');
     if (!btn) return;
-    
+
     if (isMuted) {
         btn.classList.add('muted');
         btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
@@ -402,31 +388,35 @@ function startAutopsyTimer() {
     autopsyTimeLeft = 240;
     isAutopsyReady = false;
     const container = document.getElementById('autopsy-timer-container');
-    
+
     // Sayaç süresince buton gizli tutulur (ekranda geri sayım gösterilmez)
     if (container) {
         container.classList.add('hidden');
         container.classList.remove('ready');
     }
-    
+
     if (autopsyTimer) clearInterval(autopsyTimer);
-    
+
     autopsyTimer = setInterval(() => {
         autopsyTimeLeft--;
-        
+
         if (autopsyTimeLeft <= 0) {
             clearInterval(autopsyTimer);
             isAutopsyReady = true;
-            
+
             // Rapor hazır olduğunda butonu göster
             if (container) {
                 container.classList.remove('hidden');
                 container.classList.add('ready');
                 container.innerHTML = '<i class="fa-solid fa-file-signature"></i> OTOPSİ RAPORU GELDİ! (TIKLA)';
             }
-            
+
             // Mesaj Bildirimi (Custom Modal)
             const notifModal = document.getElementById('global-notification-modal');
+            const notifText = document.getElementById('global-notification-text');
+            if (notifText) {
+                notifText.textContent = "📋 OTOPSİ RAPORU VE ADLİ LAB SONUÇLARI GELDİ!\n\nAdli Tıp Kurumu'ndan beklenen detaylı otopsi raporu ve laboratuvar bulguları merkeze ulaştı. Haritadaki 'OTOPSİ RAPORU GELDİ' butonuna tıklayarak hemen inceleyebilirsiniz.";
+            }
             if (notifModal) {
                 notifModal.classList.remove('hidden');
             }
@@ -456,7 +446,7 @@ document.getElementById('autopsy-timer-container').addEventListener('click', () 
         }
         return;
     }
-    
+
     // Backend'den otopsi raporunu çek
     fetch('/api/game/autopsy')
         .then(async res => {
@@ -468,7 +458,7 @@ document.getElementById('autopsy-timer-container').addEventListener('click', () 
         })
         .then(data => {
             if (data.success) {
-                document.getElementById('autopsy-text').textContent = data.report;
+                document.getElementById('autopsy-text').innerHTML = data.report;
                 document.getElementById('autopsy-modal').classList.remove('hidden');
             }
         })
@@ -487,9 +477,9 @@ document.getElementById('close-autopsy').addEventListener('click', () => {
 function initMuteButton() {
     const btn = document.getElementById('mute-toggle-btn');
     if (!btn) return;
-    
+
     btn.addEventListener('click', toggleMute);
-    
+
     // Kayıtlı durumu uygula
     if (isMuted) {
         btn.classList.add('muted');
@@ -512,14 +502,26 @@ function initGame() {
     npcQuestionPools = {};
     askedQuestionCount = {};
     npcStressLevels = {};
-    
+
+    // Otopsi Zamanlayıcısını Tamamen Sıfırla
+    if (autopsyTimer) clearInterval(autopsyTimer);
+    autopsyTimer = null;
+    isAutopsyReady = false;
+    autopsyTimeLeft = 240;
+    const autopsyContainer = document.getElementById('autopsy-timer-container');
+    if (autopsyContainer) {
+        autopsyContainer.classList.add('hidden');
+        autopsyContainer.classList.remove('ready');
+        autopsyContainer.innerHTML = '<i class="fa-solid fa-clock"></i> <span id="autopsy-status-text">Otopsi Raporu Hazırlanıyor...</span>';
+    }
+
     // Her NPC için soru havuzunu sıfırla
     for (let id = 1; id <= 5; id++) {
         npcQuestionPools[id] = [...(NPC_ALL_QUESTIONS[id] || [])];
         askedQuestionCount[id] = 0;
         npcStressLevels[id] = 0;
     }
-    
+
     // Suçluyu backend API'den sıfırla
     fetch('/api/game/reset', { method: 'POST' })
         .then(res => res.json())
@@ -535,18 +537,18 @@ function initGame() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ GuiltyNpcId: guiltyNpcId })
                 })
-                .then(r => r.json())
-                .then(sData => {
-                    if (sData.success) currentSessionId = sData.sessionId;
-                })
-                .catch(() => {});
+                    .then(r => r.json())
+                    .then(sData => {
+                        if (sData.success) currentSessionId = sData.sessionId;
+                    })
+                    .catch(() => { });
             }
         })
         .catch(err => console.error('API Error:', err));
-    
+
     // Sinematik bağlamları sıfırla
     shownCinematicContexts = new Set();
-    
+
     // Haritadaki binaları resetle
     visitedBuildings.clear();
     const buildingIcons = {
@@ -631,7 +633,7 @@ function startTypewriter() {
     const continueBtn = document.getElementById('story-continue-btn');
     const skipBtn = document.getElementById('skip-story-btn');
     const cursor = document.querySelector('.story-cursor');
-    
+
     if (skipBtn) skipBtn.classList.remove('hidden');
     if (continueBtn) continueBtn.classList.add('hidden');
     if (cursor) cursor.style.display = 'inline-block';
@@ -660,12 +662,12 @@ function finishTypewriter() {
     isTypewriterActive = false;
     if (typewriterTimeout) clearTimeout(typewriterTimeout);
     stopSound(typewriterSound);
-    
+
     const el = document.getElementById('typewriter-text');
     const continueBtn = document.getElementById('story-continue-btn');
     const skipBtn = document.getElementById('skip-story-btn');
     const cursor = document.querySelector('.story-cursor');
-    
+
     if (el) el.textContent = STORY_TEXT;
     if (cursor) cursor.style.display = 'none';
     if (skipBtn) skipBtn.classList.add('hidden');
@@ -759,7 +761,7 @@ function openDoorTransitionModal(npcId) {
 
     document.getElementById('door-building-title').textContent = `${npc.building.toUpperCase()} - ${npc.name.toUpperCase()}`;
     document.getElementById('door-building-desc').textContent = `${npc.building} binasına girmek için kapıyı tıklayın`;
-    
+
     // Kapı modalının ve arka planının Kasap görsel standardında yüklenmesi
     const bgUrl = `url('${npc.bg}?v=${Date.now()}')`;
     if (buildingEntryModal) {
@@ -807,30 +809,33 @@ function startVideoPlayback() {
         buildingTransitionVideo.volume = 0.85;
 
         try {
-            buildingTransitionVideo.src = theme.video;
+            if (!buildingTransitionVideo.src.includes(theme.video)) {
+                buildingTransitionVideo.src = theme.video;
+            }
             buildingTransitionVideo.currentTime = theme.start || 0;
-            buildingTransitionVideo.load();
-        } catch(e) {}
+        } catch (e) { }
 
-        const playPromise = buildingTransitionVideo.play();
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                console.log(`${theme.name} animasyon videosu başladı.`);
-                // Ana müziği kıs (Videodaki ses daha net duyulsun)
-                if (!isMuted) {
-                    if (bgMusic) bgMusic.volume = 0.1;
-                    if (rainSound) rainSound.volume = 0.2;
-                    if (chatterSound) chatterSound.volume = 0.05;
-                }
-            }).catch(e => {
-                console.warn('Video oynatma başlatılamadı, alternatif deneniyor:', e);
-                // Muted fallback
-                buildingTransitionVideo.muted = true;
-                buildingTransitionVideo.play().catch(() => finishVideoTransition());
-            });
-        }
+        const attemptPlay = () => {
+            try { buildingTransitionVideo.currentTime = theme.start || 0; } catch (e) { }
+            const playPromise = buildingTransitionVideo.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    if (!isMuted) {
+                        if (bgMusic) bgMusic.volume = 0.1;
+                        if (rainSound) rainSound.volume = 0.2;
+                        if (chatterSound) chatterSound.volume = 0.05;
+                    }
+                }).catch(e => {
+                    console.warn('Video sessiz modda deneniyor:', e);
+                    buildingTransitionVideo.muted = true;
+                    buildingTransitionVideo.play().catch(() => finishVideoTransition());
+                });
+            }
+        };
 
-        // Bitiş kontrolü
+        buildingTransitionVideo.onloadedmetadata = attemptPlay;
+        attemptPlay();
+
         buildingTransitionVideo.onended = () => {
             finishVideoTransition();
         };
@@ -853,7 +858,7 @@ function startVideoPlayback() {
                 if (currentVideoCheckTimer) clearInterval(currentVideoCheckTimer);
                 finishVideoTransition();
             }
-        }, 2200);
+        }, 1900);
     } else {
         finishVideoTransition();
     }
@@ -899,13 +904,8 @@ function openBuilding(npcId) {
     activeNpcId = npcId;
     const npc = NPC_DATA[npcId];
     if (!npc) return;
-    
-    // Bina iç mekan görseli
-    const interiorBgImage = npc.bg;
-    const bgUrl = `url('${interiorBgImage}?v=${Date.now()}')`;
-    const stageCanvas = document.getElementById('interior-stage-canvas');
-    
-    // Geniş panoramik devam görselleri (arka plan cover katmanı için)
+
+    // Geniş panoramik birleştirici devam görselleri
     const WIDE_PANORAMAS = {
         1: 'images/kasap_wide.png',
         2: 'images/eczane_wide.png',
@@ -914,22 +914,38 @@ function openBuilding(npcId) {
         5: 'images/terzi_wide.png'
     };
 
-    // Katman 1: interiorScreen → cover (geniş panoramik görsel ile ekranı tamamen kaplar)
-    if (interiorScreen) {
-        const wideImg = WIDE_PANORAMAS[npcId];
-        if (wideImg) {
-            interiorScreen.style.backgroundImage = `url('${wideImg}?v=${Date.now()}')`;
-        } else {
-            interiorScreen.style.backgroundImage = bgUrl;
-        }
+    const wideImgUrl = `url('${(WIDE_PANORAMAS[npcId] || npc.bg)}?v=${Date.now()}')`;
+    const mainBgUrl = `url('${npc.bg}?v=${Date.now()}')`;
+
+    const stageCanvas = document.getElementById('interior-stage-canvas');
+    const intScreen = document.getElementById('interior-screen');
+    const sideLeft = document.getElementById('interior-side-left');
+    const sideRight = document.getElementById('interior-side-right');
+
+    // Katman 1: Ana kapsayıcı arkaplanı (Geniş panoramik kaplama - Kesintisiz birleştirici görsel)
+    if (intScreen) {
+        intScreen.setAttribute('data-npc-id', npcId);
+        intScreen.style.backgroundImage = wideImgUrl;
+        intScreen.style.backgroundSize = 'cover';
+        intScreen.style.backgroundPosition = 'center';
     }
-    // Katman 2: stageCanvas → contain (orijinal kare görsel ortada net ve bozulmadan)
+
+    // Katman 2: Ortadaki ana sahne canvas (Şeffaf kapsayıcı - Siyah boşluk yok)
     if (stageCanvas) {
-        stageCanvas.style.backgroundImage = bgUrl;
+        stageCanvas.style.backgroundImage = mainBgUrl;
+        stageCanvas.style.backgroundSize = 'contain';
+        stageCanvas.style.backgroundPosition = 'center';
+        stageCanvas.style.backgroundColor = 'transparent';
+    }
+
+    // Siyah boşluk ve dikiş izi yaratmaması için yan paneller temizlendi
+    if (sideLeft && sideRight) {
+        sideLeft.style.display = 'none';
+        sideRight.style.display = 'none';
     }
 
     document.getElementById('talk-npc-name').innerText = npc.name + ' ile Konuş';
-    
+
     // Load Hotspots
     const container = document.getElementById('hotspots-container');
     container.innerHTML = '';
@@ -940,36 +956,35 @@ function openBuilding(npcId) {
         wrapper.style.position = 'absolute';
         wrapper.style.top = obj.top;
         wrapper.style.left = obj.left;
-        
+
         const img = document.createElement('img');
         img.src = obj.img;
         img.className = 'hotspot-img';
         img.alt = obj.name;
-        
+
         if (obj.isHidden) {
             wrapper.classList.add('hidden-clue');
         }
-        
+
         const label = document.createElement('span');
         label.className = 'hotspot-label';
         label.textContent = obj.name;
-        
+
         wrapper.appendChild(img);
         wrapper.appendChild(label);
-        wrapper.addEventListener('click', () => openClueInspect(obj, npcId));
+        wrapper.addEventListener('click', () => openBuildingClueModal(obj, npcId));
         container.appendChild(wrapper);
     });
-    
+
     // Kapı gıcırtısı + kapanma sesi
     playSound(doorCreak, 0.7);
     setTimeout(() => {
         playSound(doorClose, 0.5);
     }, 600);
 
-    triggerTransition(() => {
-        townMapScreen.classList.add('hidden');
-        interiorScreen.classList.remove('hidden');
-    });
+    // No double transition since video provides it
+    townMapScreen.classList.add('hidden');
+    interiorScreen.classList.remove('hidden');
 
     // Çetin binaya girişte konuşsun
     const buildingName = npc.building;
@@ -978,22 +993,129 @@ function openBuilding(npcId) {
 }
 
 // =============================================================
-// 3. CLUE INSPECTION
+// 3. CLUE INSPECTION (BİNA İÇİ KÜÇÜK MODAL & ADLİ LAB EKRANI)
 // =============================================================
 
-function openClueInspect(obj, npcId) {
+const buildingClueModal = document.getElementById('building-clue-modal');
+
+// Bina İçindeki Küçük İnceleme Modalı (Scene Object Click inside Building)
+function openBuildingClueModal(obj, npcId) {
     currentPendingObject = obj;
-    const npc = NPC_DATA[npcId];
-    
+
+    document.getElementById('building-clue-title').textContent = obj.name;
+    document.getElementById('building-clue-desc').textContent = obj.desc;
+    document.getElementById('building-clue-img').src = obj.img;
+
+    const takeBtn = document.getElementById('building-clue-take-btn');
+    const isAlreadyInBag = currentBag.some(b => b.id === obj.id);
+    if (takeBtn) {
+        if (isAlreadyInBag) {
+            takeBtn.disabled = true;
+            takeBtn.innerHTML = '<i class="fa-solid fa-check"></i> Çantada Mevcut';
+            takeBtn.style.opacity = '0.6';
+            takeBtn.style.cursor = 'not-allowed';
+        } else {
+            takeBtn.disabled = false;
+            takeBtn.innerHTML = '<i class="fa-solid fa-briefcase"></i> Çantaya Al';
+            takeBtn.style.opacity = '1';
+            takeBtn.style.cursor = 'pointer';
+        }
+    }
+
+    if (buildingClueModal) buildingClueModal.classList.remove('hidden');
+}
+
+document.getElementById('building-clue-take-btn')?.addEventListener('click', () => {
+    if (!currentPendingObject) return;
+
+    if (currentBag.some(b => b.id === currentPendingObject.id)) {
+        alert('Bu delil zaten çantanızda bulunuyor!');
+        buildingClueModal.classList.add('hidden');
+        return;
+    }
+
+    if (currentBag.length >= MAX_BAG_SIZE) {
+        alert('Çantanız doldu! Maksimum 5 delil taşıyabilirsiniz.');
+    } else {
+        currentBag.push(currentPendingObject);
+        logAction('collect_clue', currentPendingObject.id, currentPendingObject.name);
+        saveGameState();
+        showCinematicHelper(`Harika Amirims! '${currentPendingObject.name}' delilini çantaya attık! (${currentBag.length}/${MAX_BAG_SIZE} delil).`, false);
+    }
+    if (buildingClueModal) buildingClueModal.classList.add('hidden');
+});
+
+document.getElementById('building-clue-leave-btn')?.addEventListener('click', () => {
+    if (buildingClueModal) buildingClueModal.classList.add('hidden');
+});
+document.getElementById('building-clue-close-btn')?.addEventListener('click', () => {
+    if (buildingClueModal) buildingClueModal.classList.add('hidden');
+});
+
+// Ana İnceleme Ekranı (Haritadan/Çantadan Erişilen Gerçek Büyüklükteki Lab İnceleme)
+function openClueInspect(obj, npcId, fromBag = false) {
+    // KONTROL: Bina içerisinden laboratuvar inceleme ekranına girmeye çalışılırsa engelle
+    if (activeNpcId !== null && !fromBag) {
+        openBuildingClueModal(obj, npcId);
+        return;
+    }
+
+    if (activeNpcId !== null && fromBag) {
+        const notifModal = document.getElementById('global-notification-modal');
+        const notifText = document.getElementById('global-notification-text');
+        if (notifText) {
+            notifText.textContent = "Bina içlerinden detaylı laboratuvar incelemesi yapılamaz! Önce delili çantaya alıp kasaba haritasına (dışarıya) dönmelisiniz.";
+        }
+        if (notifModal) notifModal.classList.remove('hidden');
+        showCinematicHelper("Amirims! Bina içlerinden detaylı laboratuvar incelemesi yapılamaz! Önce delili çantaya alıp kasaba haritasına dönmelisiniz.", false);
+        return;
+    }
+
+    currentPendingObject = obj;
+    const npc = NPC_DATA[npcId] || NPC_DATA[1];
+
     document.getElementById('clue-inspect-title').textContent = obj.name;
     document.getElementById('clue-inspect-desc').textContent = obj.desc;
     document.getElementById('clue-inspect-img').src = obj.img;
     const bgImage = npc.talkBg || npc.bg;
     document.getElementById('clue-inspect-bg').style.backgroundImage = `url('${bgImage}')`;
-    
+
+    // Okuma Modu Butonunu Göster/Gizle
+    const readBtn = document.getElementById('clue-read-btn');
+    if (readBtn) {
+        if ([2, 5, 7, 9, 11, 15].includes(obj.id)) {
+            readBtn.classList.remove('hidden');
+        } else {
+            readBtn.classList.add('hidden');
+        }
+    }
+
+    // Yeşil İpucu Mesaj Kutusu ve Adli Tıbba Gönder Butonunu Sıfırla
+    const findingBox = document.getElementById('forensic-finding-box');
+    const sendBtn = document.getElementById('send-forensic-btn');
+    if (findingBox) findingBox.classList.add('hidden');
+    if (sendBtn) {
+        sendBtn.classList.add('hidden');
+        if (typeof isAutopsyReady !== 'undefined' && isAutopsyReady) {
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fa-solid fa-ban"></i> ADLİ TIP RAPORU GELDİ';
+        } else {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ADLİ TIBBA GÖNDER';
+        }
+    }
+    window.currentForensicFindingText = "";
+
+    // Fetch dynamic forensic state
+    fetch('/api/game/forensic-state')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) window.currentForensicState = data;
+        }).catch(err => console.error("Forensic state error:", err));
+
     // Araçları sıfırla
     if (window.resetForensicTools) window.resetForensicTools();
-    
+
     const takeBtn = document.getElementById('clue-take-btn');
     const isAlreadyInBag = currentBag.some(b => b.id === obj.id);
     if (takeBtn) {
@@ -1008,6 +1130,15 @@ function openClueInspect(obj, npcId) {
             takeBtn.style.opacity = '1';
             takeBtn.style.cursor = 'pointer';
         }
+    }
+
+    const forensicTools = document.querySelector('.forensic-tools');
+    const thumbsContainer = document.getElementById('clue-thumbnails');
+    if (forensicTools) {
+        forensicTools.style.display = 'flex';
+    }
+    if (thumbsContainer && window.populateThumbnails) {
+        window.populateThumbnails();
     }
 
     clueInspectModal.classList.remove('hidden');
@@ -1031,41 +1162,278 @@ document.getElementById('clue-take-btn').addEventListener('click', () => {
         // Çetin Çantaya Delil Alındığında Otomatik Konuşsun
         showCinematicHelper(`Harika Amirims! '${currentPendingObject.name}' delilini çantaya attık! (${currentBag.length}/${MAX_BAG_SIZE} delil). Şüphelileri sorgularken bu delili ipucu olarak kullanabiliriz.`, false);
     }
+    document.getElementById('document-reader-overlay')?.classList.add('hidden');
     clueInspectModal.classList.add('hidden');
 });
 
 document.getElementById('clue-leave-btn').addEventListener('click', () => {
     clueInspectModal.classList.add('hidden');
+    document.getElementById('document-reader-overlay')?.classList.add('hidden');
     if (window.resetForensicTools) window.resetForensicTools();
 });
 
+document.getElementById('clue-read-btn')?.addEventListener('click', () => {
+    if (!currentPendingObject) return;
+    const overlay = document.getElementById('document-reader-overlay');
+    const content = document.getElementById('document-reader-content');
+    if (!overlay || !content) return;
+
+    let text = "";
+    content.className = "document-reader-content"; // reset class
+
+    switch (currentPendingObject.id) {
+        case 7: // Tehdit Mektubu
+            content.classList.add('threat-letter');
+            content.innerHTML = `
+                <div class="letter-header">T.C. KASABA MUHTARLIĞI NOTU</div>
+                <div class="letter-body">
+                    <p>Osman Bey,</p>
+                    <p>Karanlık sırlar sonsuza dek gizli kalmaz. Arazileri devretmeyi reddetmenin bir bedeli olacak.</p>
+                    <p>Zamanın doldu. Bu gece yaptıklarının hesabını vereceksin!</p>
+                    <div class="letter-signature">Ecelin kapıda...</div>
+                </div>
+            `;
+            break;
+        case 15: // Gizli Cep Notu
+            content.classList.add('secret-note');
+            content.innerHTML = `
+                <div class="secret-note-title">GİZLİ NOT</div>
+                <p>Her şey planlandığı gibi gidiyor.</p>
+                <p>Artık geri dönüş yok. Yarın gece yarısı eski depoda buluşalım.</p>
+                <div class="secret-note-sig">- O.</div>
+            `;
+            break;
+        case 2: // Kara Kaplı Defter (Açık İki Sayfalı Veresiye Defteri)
+            content.classList.add('black-book');
+            content.innerHTML = `
+                <div class="open-notebook-wrapper">
+                    <div class="notebook-spine"></div>
+                    <div class="notebook-page left-page">
+                        <div class="notebook-title">VERESİYE & HESAPLAR</div>
+                        <div class="notebook-date">1994 Güz Tahsilatları</div>
+                        <div class="ledger-row">
+                            <span class="ledger-name">Bakkal Rıza:</span>
+                            <span class="ledger-val">15.000 TL</span>
+                        </div>
+                        <div class="ledger-row">
+                            <span class="ledger-name">Manav Hasan:</span>
+                            <span class="ledger-val">4.200 TL</span>
+                        </div>
+                        <div class="ledger-row">
+                            <span class="ledger-name">Terzi Yahya:</span>
+                            <span class="ledger-val">-20.000 TL (Borçlu)</span>
+                        </div>
+                        <div class="ledger-row strike-row">
+                            <span class="ledger-name victim-strike">Osman Bey:</span>
+                            <span class="ledger-val victim-strike-val">150.000 TL</span>
+                            <div class="hand-strike-line"></div>
+                        </div>
+                        <div class="ledger-row">
+                            <span class="ledger-name">Eczacı Selma:</span>
+                            <span class="ledger-val">8.500 TL</span>
+                        </div>
+                    </div>
+                    <div class="notebook-page right-page">
+                        <div class="notebook-title">SÖZLÜ ANLAŞMALAR</div>
+                        <div class="handwritten-note">• Osman Bey borcunu her soruşumda erteleyip alay ediyor. Sabrım kalmadı.</div>
+                        <div class="handwritten-note">• Bu borç tahsil edilmezse dükkânı batıracağım. O gece son kez hesaba kapatmaya gideceğim.</div>
+                        <div class="notebook-stamp">TAHSİLAT BEKLİYOR</div>
+                    </div>
+                </div>
+            `;
+            break;
+        case 5: // Reçete Defteri
+            content.classList.add('prescription');
+            content.innerHTML = `
+                <div class="prescription-header">
+                    <h3>SAĞLIK OCAĞI REÇETE VE İLAÇ KAYDI</h3>
+                    <p>Tarih: 12 Kasım 1994 | Protokol No: #904</p>
+                </div>
+                <div class="prescription-body">
+                    <p><strong>Hasta Adı:</strong> Osman Bey (Yaş: 54)</p>
+                    <p><strong>Teşhis:</strong> Şiddetli Uykusuzluk & Göğüs Darlığı</p>
+                    <hr>
+                    <p><strong>Verilen İlaçlar:</strong></p>
+                    <p>1. Diazepam 5mg — Günde 1 Adet (Gece)</p>
+                    <p class="torn-text">2. [BİTKİSEL ZEHİRLİ EKSTRE — SAYFA ACALEYLE YIRTIK]</p>
+                </div>
+            `;
+            break;
+        case 9: // Gizli Kasa (Sahte Tapular)
+            content.classList.add('title-deeds');
+            content.innerHTML = `
+                <div class="deed-seal">T.C. TAPU İDARESİ</div>
+                <h3 class="deed-title">KASABA ARAZİ DEVİR SENEDİ</h3>
+                <p><strong>Pafta No:</strong> 14 / <strong>Parsel:</strong> 89</p>
+                <p><strong>Mülk Sahibi:</strong> Osman Bey</p>
+                <p><strong>Devredilen Taraf:</strong> Kasaba Muhtarlığı</p>
+                <div class="deed-warning">[SAHTE İMZA — HÜKÜMSÜZDÜR]</div>
+            `;
+            break;
+        case 11: // Gizli Dosya (Karakol Emniyet Dosyası)
+            content.classList.add('confidential-file');
+            content.innerHTML = `
+                <div class="police-file-header">EMNİYET AMİRLİĞİ SORGULAMA DOSYASI #88</div>
+                <p><strong>ŞÜPHELİ:</strong> Osman Bey</p>
+                <p><strong>SUÇLAMA:</strong> Yasa Dışı İhbar & İrtikap</p>
+                <p><strong>DURUM:</strong> Tahkikat komiser emriyle GİZLİ kategorisine alınmış ve durdurulmuştur.</p>
+                <div class="police-file-sig">İmza: Komiser Güneş</div>
+            `;
+            break;
+    }
+    overlay.classList.remove('hidden');
+});
+
+document.getElementById('document-reader-close')?.addEventListener('click', () => {
+    document.getElementById('document-reader-overlay')?.classList.add('hidden');
+});
+
 // =============================================================
-// 3.5 FORENSIC TOOLS & 3D TILT
+// 3.5 FORENSIC TOOLS & 3D TILT (BÜYÜTEÇ, UV, TOZ VE ADLİ TIP)
 // =============================================================
 
 let activeForensicTool = null;
 let isDrawing = false;
 let lastX = 0, lastY = 0;
 
+function triggerForensicFinding(findingText) {
+    window.currentForensicFindingText = findingText;
+    const findingBox = document.getElementById('forensic-finding-box');
+    const findingTextEl = document.getElementById('forensic-finding-text');
+    const sendBtn = document.getElementById('send-forensic-btn');
+
+    if (findingTextEl) findingTextEl.textContent = findingText;
+    if (findingBox) findingBox.classList.remove('hidden');
+    if (sendBtn) {
+        sendBtn.classList.remove('hidden');
+        if (typeof isAutopsyReady !== 'undefined' && isAutopsyReady) {
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fa-solid fa-ban"></i> OTOPSİ GELDİ - SÜRE DOLDU';
+        }
+    }
+}
+
+// Adli Tıbba Gönder Buton Dinleyicisi
+document.addEventListener('DOMContentLoaded', () => {
+    const sendBtn = document.getElementById('send-forensic-btn');
+    if (sendBtn) {
+        sendBtn.addEventListener('click', () => {
+            if (!currentPendingObject || !window.currentForensicFindingText) return;
+
+            fetch('/api/game/forensic/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ClueId: currentPendingObject.id,
+                    ClueName: currentPendingObject.name,
+                    FindingText: window.currentForensicFindingText
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        sendBtn.disabled = true;
+                        sendBtn.innerHTML = '<i class="fa-solid fa-check"></i> ADLİ TIBBA GÖNDERİLDİ';
+                        sendBtn.disabled = true; // Button disabled after sending
+                        sendBtn.style.opacity = '0.7';
+                        sendBtn.style.cursor = 'default';
+                        showCinematicHelper(`Harika Amirims! '${currentPendingObject.name}' üzerindeki bu bulguyu (${window.currentForensicFindingText}) Adli Tıp Merkezi'ne ilettim. Otopsi raporuna yeni detaylar eklendi!`, false);
+                    }
+                })
+                .catch(err => console.error("Adli Tıp gönderme hatası:", err));
+        });
+    }
+});
+
+let dustAnimationFrame;
+
+const realFingerprint = new Image();
+realFingerprint.src = 'images/real_fingerprint.png';
+
+const realBloodStain = new Image();
+realBloodStain.src = 'images/real_blood_stain.png';
+
 function setupForensicTools() {
     const uvBtn = document.getElementById('tool-uv-btn');
     const dustBtn = document.getElementById('tool-dust-btn');
+    const magBtn = document.getElementById('tool-mag-btn');
     const uvCanvas = document.getElementById('clue-uv-canvas');
     const dustCanvas = document.getElementById('clue-dust-canvas');
     const visualArea = document.getElementById('clue-inspect-visual');
     const wrapper = document.getElementById('clue-3d-wrapper');
-    if(!uvBtn) return;
+    const magnifierLens = document.getElementById('magnifier-lens');
+    const imgEl = document.getElementById('clue-inspect-img');
+    if (!uvBtn) return;
 
-    window.resetForensicTools = function() {
+    let currentRotationIndex = 0;
+    const angles = ['', '_right', '_back', '_left'];
+
+    const syncCanvasSize = () => {
+        const w = wrapper.offsetWidth || 400;
+        const h = wrapper.offsetHeight || 400;
+        [uvCanvas, dustCanvas].forEach(c => {
+            if (c) {
+                c.width = w;
+                c.height = h;
+            }
+        });
+    };
+
+    window.resetForensicTools = function () {
         activeForensicTool = null;
         uvBtn.classList.remove('active');
         dustBtn.classList.remove('active');
+        if (magBtn) magBtn.classList.remove('active');
         uvCanvas.classList.add('hidden');
         dustCanvas.classList.add('hidden');
         uvCanvas.classList.remove('active');
         dustCanvas.classList.remove('active');
         visualArea.style.cursor = 'default';
-        wrapper.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        visualArea.classList.remove('cursor-uv', 'cursor-dust', 'cursor-magnify');
+        wrapper.style.transform = 'none';
+        currentRotationIndex = 0;
+        if (magnifierLens) magnifierLens.style.display = 'none';
+
+        const rotateControls = document.getElementById('clue-rotate-controls');
+        if (rotateControls) {
+            rotateControls.classList.remove('hidden');
+        }
+    };
+
+    const updateRotationImage = () => {
+        if (!currentPendingObject) return;
+        const baseSrc = currentPendingObject.img.replace('.png', '');
+        const suffix = angles[currentRotationIndex];
+        imgEl.src = `${baseSrc}${suffix}.png`;
+
+        syncCanvasSize();
+        uvCanvas.getContext('2d').clearRect(0, 0, uvCanvas.width, uvCanvas.height);
+        dustCanvas.getContext('2d').clearRect(0, 0, dustCanvas.width, dustCanvas.height);
+        if (activeForensicTool === 'uv') uvBtn.click();
+    };
+
+    window.populateThumbnails = () => {
+        const thumbsContainer = document.getElementById('clue-thumbnails');
+        if (!thumbsContainer || !currentPendingObject) return;
+        thumbsContainer.innerHTML = '';
+        thumbsContainer.classList.remove('hidden');
+
+        angles.forEach((suffix, index) => {
+            const baseSrc = currentPendingObject.img.replace('.png', '');
+            const thumbImg = document.createElement('img');
+            thumbImg.src = `${baseSrc}${suffix}.png`;
+            thumbImg.className = 'clue-thumbnail';
+            if (index === currentRotationIndex) thumbImg.classList.add('active');
+
+            thumbImg.addEventListener('click', () => {
+                currentRotationIndex = index;
+                updateRotationImage();
+                document.querySelectorAll('.clue-thumbnail').forEach(t => t.classList.remove('active'));
+                thumbImg.classList.add('active');
+            });
+
+            thumbsContainer.appendChild(thumbImg);
+        });
     };
 
     uvBtn.addEventListener('click', () => {
@@ -1074,11 +1442,11 @@ function setupForensicTools() {
         uvBtn.classList.add('active');
         uvCanvas.classList.remove('hidden');
         uvCanvas.classList.add('active');
-        
-        uvCanvas.width = wrapper.offsetWidth;
-        uvCanvas.height = wrapper.offsetHeight;
+        visualArea.classList.add('cursor-uv');
+
+        syncCanvasSize();
         const ctx = uvCanvas.getContext('2d');
-        ctx.fillStyle = 'rgba(20, 0, 40, 0.85)';
+        ctx.fillStyle = 'rgba(10, 5, 20, 0.9)';
         ctx.fillRect(0, 0, uvCanvas.width, uvCanvas.height);
     });
 
@@ -1088,74 +1456,142 @@ function setupForensicTools() {
         dustBtn.classList.add('active');
         dustCanvas.classList.remove('hidden');
         dustCanvas.classList.add('active');
-        
-        dustCanvas.width = wrapper.offsetWidth;
-        dustCanvas.height = wrapper.offsetHeight;
+        visualArea.classList.add('cursor-dust');
+
+        syncCanvasSize();
+        const ctx = dustCanvas.getContext('2d');
+        ctx.clearRect(0, 0, dustCanvas.width, dustCanvas.height);
     });
 
-    visualArea.addEventListener('mousemove', (e) => {
-        if (activeForensicTool) return;
-        const rect = visualArea.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const rotateX = ((y - centerY) / centerY) * -15;
-        const rotateY = ((x - centerX) / centerX) * 15;
-        wrapper.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-    });
+    if (magBtn) {
+        magBtn.addEventListener('click', () => {
+            resetForensicTools();
+            activeForensicTool = 'magnify';
+            magBtn.classList.add('active');
+            visualArea.classList.add('cursor-magnify');
+        });
+    }
 
-    visualArea.addEventListener('mouseleave', () => {
-        if (!activeForensicTool) {
-            wrapper.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
-        }
-    });
+    // Interactive handling for tools
+    const handleToolInteraction = (e) => {
+        if (!activeForensicTool) return;
 
-    const handleDraw = (e, canvas) => {
-        if (!isDrawing) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const ctx = canvas.getContext('2d');
-        
-        if (activeForensicTool === 'uv') {
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const x = e.clientX - wrapperRect.left;
+        const y = e.clientY - wrapperRect.top;
+
+        if (activeForensicTool === 'magnify') {
+            const imgRect = imgEl.getBoundingClientRect();
+            const containerRect = visualArea.getBoundingClientRect();
+            const relX = e.clientX - imgRect.left;
+            const relY = e.clientY - imgRect.top;
+
+            if (magnifierLens && relX >= -30 && relX <= imgRect.width + 30 && relY >= -30 && relY <= imgRect.height + 30) {
+                magnifierLens.style.display = 'block';
+                const zoom = 2.4;
+                const lensSize = 220;
+                magnifierLens.style.width = lensSize + 'px';
+                magnifierLens.style.height = lensSize + 'px';
+
+                magnifierLens.style.left = (e.clientX - containerRect.left - lensSize / 2) + 'px';
+                magnifierLens.style.top = (e.clientY - containerRect.top - lensSize / 2) + 'px';
+
+                magnifierLens.style.backgroundImage = `url('${imgEl.src}')`;
+                magnifierLens.style.backgroundSize = `${imgRect.width * zoom}px ${imgRect.height * zoom}px`;
+                magnifierLens.style.backgroundPosition = `-${relX * zoom - lensSize / 2}px -${relY * zoom - lensSize / 2}px`;
+            } else if (magnifierLens) {
+                magnifierLens.style.display = 'none';
+            }
+        } else if (activeForensicTool === 'uv') {
+            const ctx = uvCanvas.getContext('2d');
             ctx.globalCompositeOperation = 'source-over';
-            ctx.fillStyle = 'rgba(20, 0, 40, 0.85)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(8, 5, 20, 0.92)';
+            ctx.fillRect(0, 0, uvCanvas.width, uvCanvas.height);
+
+            // Spotlight hole
             ctx.globalCompositeOperation = 'destination-out';
-            const grad = ctx.createRadialGradient(x, y, 10, x, y, 90);
+            const grad = ctx.createRadialGradient(x, y, 15, x, y, 130);
             grad.addColorStop(0, 'rgba(0,0,0,1)');
             grad.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.fillStyle = grad;
             ctx.beginPath();
-            ctx.arc(x, y, 90, 0, Math.PI * 2);
+            ctx.arc(x, y, 130, 0, Math.PI * 2);
             ctx.fill();
-        } else if (activeForensicTool === 'dust') {
+
+            // Neon purple ring
             ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = 'rgba(10, 10, 10, 0.15)';
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-            ctx.lineWidth = 40;
+            const purpleGrad = ctx.createRadialGradient(x, y, 15, x, y, 130);
+            purpleGrad.addColorStop(0, 'rgba(192, 38, 211, 0.55)');
+            purpleGrad.addColorStop(1, 'rgba(192, 38, 211, 0)');
+            ctx.fillStyle = purpleGrad;
             ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(x, y);
-            ctx.stroke();
+            ctx.arc(x, y, 130, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Kan lekesi gösterimi (Cinayet aletleri veya kurban dokuları)
+            const isMurderWeapon = currentPendingObject && (
+                (window.currentForensicState && currentPendingObject.id === window.currentForensicState.weaponId) ||
+                [1, 3, 6, 8, 10, 13].includes(currentPendingObject.id)
+            );
+
+            if (isMurderWeapon) {
+                const spot = currentPendingObject.bloodSpot || { xRatio: 0.5, yRatio: 0.5 };
+                const cx = uvCanvas.width * spot.xRatio;
+                const cy = uvCanvas.height * spot.yRatio;
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'multiply'; // Beyaz arkaplanı siler, kanı koyu olarak aktarır
+                ctx.globalAlpha = 0.9;
+                ctx.drawImage(realBloodStain, cx - 45, cy - 45, 90, 90);
+                ctx.restore();
+
+                if (Math.abs(x - cx) < 130 && Math.abs(y - cy) < 130) {
+                    triggerForensicFinding(`KAN LEKESİ TESPİT EDİLDİ! (${currentPendingObject.name} üzerinde kurbana ait biyolojik kan lekesi)`);
+                }
+            }
+        } else if (activeForensicTool === 'dust') {
+            const ctx = dustCanvas.getContext('2d');
+            ctx.fillStyle = 'rgba(20, 20, 25, 0.85)';
+            ctx.shadowColor = 'rgba(0,0,0,0.9)';
+            ctx.shadowBlur = 4;
+
+            for (let i = 0; i < 20; i++) {
+                const rx = (Math.random() - 0.5) * 40;
+                const ry = (Math.random() - 0.5) * 40;
+                ctx.beginPath();
+                ctx.arc(x + rx, y + ry, Math.random() * 3 + 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.shadowBlur = 0;
+
+            const hasFingerprint = currentPendingObject && (
+                (window.currentForensicState && (currentPendingObject.id === window.currentForensicState.fingerprintId || currentPendingObject.id === window.currentForensicState.weaponId)) ||
+                [1, 2, 4, 7, 8, 9, 12, 14, 15].includes(currentPendingObject.id)
+            );
+
+            if (hasFingerprint) {
+                const spot = currentPendingObject.fingerprintSpot || { xRatio: 0.5, yRatio: 0.5 };
+                const cx = dustCanvas.width * spot.xRatio;
+                const cy = dustCanvas.height * spot.yRatio;
+
+                if (Math.abs(x - cx) < 130 && Math.abs(y - cy) < 130) {
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'screen'; // Siyah arkaplanı siler, parlayan parmak izini bırakır
+                    ctx.globalAlpha = 0.85;
+                    ctx.drawImage(realFingerprint, cx - 40, cy - 40, 80, 80);
+                    ctx.restore();
+                    triggerForensicFinding(`PARMAK İZİ BULUNDU! (${currentPendingObject.name} üzerinde net şüpheli parmak izi)`);
+                }
+            }
         }
-        lastX = x;
-        lastY = y;
     };
 
-    [uvCanvas, dustCanvas].forEach(canvas => {
-        canvas.addEventListener('mousedown', (e) => {
-            isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            lastX = e.clientX - rect.left;
-            lastY = e.clientY - rect.top;
-        });
-        canvas.addEventListener('mousemove', (e) => handleDraw(e, canvas));
-        canvas.addEventListener('mouseup', () => isDrawing = false);
-        canvas.addEventListener('mouseleave', () => isDrawing = false);
+    visualArea.addEventListener('mousemove', handleToolInteraction);
+    visualArea.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        handleToolInteraction(e);
     });
+    visualArea.addEventListener('mouseup', () => isDrawing = false);
 }
 document.addEventListener('DOMContentLoaded', setupForensicTools);
 
@@ -1188,6 +1624,7 @@ document.getElementById('exit-confirm-btn').addEventListener('click', () => {
     triggerTransition(() => {
         interiorScreen.classList.add('hidden');
         townMapScreen.classList.remove('hidden');
+        activeNpcId = null;
     });
 });
 
@@ -1203,25 +1640,33 @@ document.getElementById('talk-npc-btn').addEventListener('click', () => {
 function openNpcTalk(npcId) {
     const npc = NPC_DATA[npcId];
     if (!npc) return;
-    
-    // NPC Konuşma Ekranı Görseli
+
+    // NPC Konuşma Ekranı Görseli (Tüm ekranı tam kaplayacak şekilde)
     const talkBgImage = npc.talkBg || npc.bg;
     const talkContainer = document.querySelector('.npc-talk-container');
+    const characterLayer = document.getElementById('npc-talk-character-layer');
+
     if (talkContainer) {
         talkContainer.style.backgroundImage = `url('${talkBgImage}?v=${Date.now()}')`;
-        talkContainer.className = 'npc-talk-container'; // Duygu filtrelerini sıfırlamak için class'ı yeniliyoruz
+        talkContainer.style.backgroundSize = 'cover';
+        talkContainer.style.backgroundPosition = 'center';
+        talkContainer.className = 'npc-talk-container';
     }
 
-    // NPC görselini portre olarak gizle (çünkü talkBg tam mekan/karakter sahnesini içerir)
+    if (characterLayer) {
+        characterLayer.style.backgroundImage = 'none';
+        characterLayer.className = 'npc-talk-character-layer';
+    }
+
     const portraitImg = document.getElementById('npc-talk-portrait-img');
     if (portraitImg) {
         portraitImg.style.display = 'none';
     }
-    
+
     // Chat alanını temizle
     const chatArea = document.getElementById('npc-talk-chat');
     if (chatArea) chatArea.innerHTML = '';
-    
+
     // NPC mırıltı sesi çal
     let mumble = (npcId == 2 || npcId == 4) ? mumbleFemale : mumbleMale;
     if (mumble) {
@@ -1229,19 +1674,33 @@ function openNpcTalk(npcId) {
         playSound(mumble, 0.3);
         setTimeout(() => stopSound(mumble), 2000);
     }
-    
+
     // Kalan soru sayısını güncelle
     updateQuestionIndicator(npcId);
-    
+
     // Sıradaki mantıksal soruları yükle
     loadContextualQuestions(npcId);
-    
-    if (npcTalkModal) npcTalkModal.classList.remove('hidden');
+
+    // Modal Elementini Görünür Yap (Garantili açılma için getElementById)
+    const talkModal = document.getElementById('npc-talk-modal');
+    if (talkModal) {
+        talkModal.classList.remove('hidden');
+        talkModal.style.display = 'block';
+    }
 
     // Çetin NPC konuşma başlangıcında söylesin
     setTimeout(() => triggerHelperMessage('npc_talk', null, false), 800);
     logAction('ask_question', npcId, npc.name);
 }
+
+// Konuşma Ekranı Kapat Butonu
+document.getElementById('npc-talk-close')?.addEventListener('click', () => {
+    const talkModal = document.getElementById('npc-talk-modal');
+    if (talkModal) {
+        talkModal.classList.add('hidden');
+        talkModal.style.display = 'none';
+    }
+});
 
 function updateQuestionIndicator(npcId) {
     const asked = askedQuestionCount[npcId] || 0;
@@ -1251,7 +1710,7 @@ function updateQuestionIndicator(npcId) {
     // 5 Soru limitini tamamen UI üzerinden zorla
     const aiSection = document.querySelector('.npc-talk-ai-section');
     const btnContainer = document.getElementById('npc-talk-buttons');
-    
+
     // Stres Kontrolü
     const stress = npcStressLevels[npcId] || 0;
     const stressFill = document.getElementById('npc-stress-fill');
@@ -1279,30 +1738,56 @@ function updateQuestionIndicator(npcId) {
 
 function loadContextualQuestions(npcId) {
     const container = document.getElementById('npc-talk-buttons');
-    container.innerHTML = '<div style="color:var(--text-muted); text-align:center;">Diyaloglar yükleniyor...</div>';
-    
+    if (!container) return;
+
+    const stress = npcStressLevels[npcId] || 0;
     const askedCount = askedQuestionCount[npcId] || 0;
+    const aiSection = document.querySelector('.npc-talk-ai-section');
+
+    if (stress >= 100) {
+        if (aiSection) aiSection.style.display = 'none';
+        container.innerHTML = '<div class="npc-talk-end-msg" style="color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Karakter öfkelendi ve sorguyu terk etti! Artık onunla konuşamazsınız.</div>';
+        return;
+    }
+
+    if (askedCount >= 5) {
+        if (aiSection) aiSection.style.display = 'none';
+        container.innerHTML = '<div class="npc-talk-end-msg"><i class="fa-solid fa-check-circle"></i> Sorgu tamamlandı. Bu NPC\'ye sorabileceğiniz soru kalmadı. (5/5)</div>';
+        npcTalkCompleted[npcId] = true;
+        return;
+    }
+
+    container.innerHTML = '<div style="color:var(--text-muted); text-align:center;">Diyaloglar yükleniyor...</div>';
+
     const categories = ['tanisma', 'derinlesme', 'yuzlestirme', 'baski', 'son'];
     const currentCategory = categories[askedCount] || 'son';
-    
+
     // C# API'den diyalogları çek
     fetch(`/api/game/dialogues?npcId=${npcId}&category=${currentCategory}`)
         .then(res => res.json())
         .then(data => {
+            // Asenkron istek dönerken stres veya soru limiti dolmuş olabilir
+            const currentStress = npcStressLevels[npcId] || 0;
+            const currentAsked = askedQuestionCount[npcId] || 0;
+            if (currentStress >= 100 || currentAsked >= 5) {
+                updateQuestionIndicator(npcId);
+                return;
+            }
+
             container.innerHTML = '';
-            
-            if (!data.success || data.dialogues.length === 0 || askedCount >= 5) {
+
+            if (!data.success || data.dialogues.length === 0) {
                 container.innerHTML = '<div class="npc-talk-end-msg"><i class="fa-solid fa-check-circle"></i> Sorgu tamamlandı. NPC artık konuşmak istemiyor. Geri dönebilirsiniz.</div>';
                 npcTalkCompleted[npcId] = true;
                 return;
             }
-            
+
             const questionsToShow = data.dialogues;
             questionsToShow.forEach((q, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'npc-talk-btn';
                 btn.innerHTML = `<i class="fa-regular fa-comment-dots"></i> ${q.q}`;
-                
+
                 btn.dataset.question = JSON.stringify(q);
                 btn.onclick = () => { askQuestionBackend(npcId, q); };
                 container.appendChild(btn);
@@ -1321,19 +1806,19 @@ function typeWriter(element, text, i, onComplete) {
     if (i < text.length) {
         isTyping = true;
         element.innerHTML = text.substring(0, i + 1) + '<span class="typewriter-cursor"></span>';
-        
+
         // Ses efekti (Her 3 harfte bir mırıldanma/ses tonu)
         if (i % 3 === 0) {
             // Eczacı Selma (2) ve Komiser Güneş (4) kadın
             if (activeNpcId == 2 || activeNpcId == 4) {
                 playSynthVoice(true); // Kadın sesi
-            } 
+            }
             // Kasap Hasan (1), Muhtar Kemal (3), Terzi Yahya (5) erkek
             else if (activeNpcId == 1 || activeNpcId == 3 || activeNpcId == 5) {
                 playSynthVoice(false); // Erkek sesi
-            } 
+            }
         }
-        
+
         currentTypewriterTimeout = setTimeout(() => typeWriter(element, text, i + 1, onComplete), 20); // Daktilo hızı
     } else {
         isTyping = false;
@@ -1345,26 +1830,26 @@ function typeWriter(element, text, i, onComplete) {
 function askQuestionBackend(npcId, question) {
     const npc = NPC_DATA[npcId];
     const chatArea = document.getElementById('npc-talk-chat');
-    
+
     askedQuestionCount[npcId] = (askedQuestionCount[npcId] || 0) + 1;
-    
+
     // Önceki yazma işlemini iptal et
     if (currentTypewriterTimeout) {
         clearTimeout(currentTypewriterTimeout);
         isTyping = false;
     }
-    
+
     // Oyuncu mesajı
     const playerMsg = document.createElement('div');
     playerMsg.className = 'npc-talk-message player';
     playerMsg.innerHTML = `<div class="speaker">Dedektif</div><div class="msg-text">${question.q}</div>`;
     chatArea.appendChild(playerMsg);
     chatArea.scrollTop = chatArea.scrollHeight;
-    
+
     // Butonları gizle (yazma bitene kadar)
     const btnContainer = document.getElementById('npc-talk-buttons');
     if (btnContainer) btnContainer.style.display = 'none';
-    
+
     // Duygu durumuna göre CSS sınıfı belirle ve sadece karakter katmanına uygula
     const characterLayer = document.getElementById('npc-talk-character-layer');
     if (characterLayer) {
@@ -1383,32 +1868,32 @@ function askQuestionBackend(npcId, question) {
         playSound(mumble, 0.25);
         setTimeout(() => stopSound(mumble), 1500);
     }
-    
+
     // NPC cevabını belirle
     let answer = question.a;
     if (question.guiltyResponse && guiltyNpcId && question.guiltyResponse[guiltyNpcId]) {
         answer = question.guiltyResponse[guiltyNpcId];
     }
-    
+
     // NPC cevabı (gecikmeli başlat)
     setTimeout(() => {
         const npcMsg = document.createElement('div');
         npcMsg.className = 'npc-talk-message';
-        
+
         const speakerDiv = document.createElement('div');
         speakerDiv.className = 'speaker';
         speakerDiv.textContent = npc.name;
-        
+
         const textDiv = document.createElement('div');
         textDiv.className = 'msg-text';
-        
+
         npcMsg.appendChild(speakerDiv);
         npcMsg.appendChild(textDiv);
         chatArea.appendChild(npcMsg);
-        
+
         // Yazma sırasında scroll'u aşağıda tutmak için bir interval
         const scrollInterval = setInterval(() => {
-            if(isTyping) chatArea.scrollTop = chatArea.scrollHeight;
+            if (isTyping) chatArea.scrollTop = chatArea.scrollHeight;
             else clearInterval(scrollInterval);
         }, 100);
 
@@ -1427,18 +1912,18 @@ function askQuestionBackend(npcId, question) {
                 npcName: npc.name,
                 difficulty: question.difficulty
             });
-            
+
             // Backend'e diyalog kaydı yaz
             logDialog(npcId, question.q, answer, question.difficulty || 1, question.category || 'tanisma');
-            
+
             // Kalan soru sayısını güncelle
             updateQuestionIndicator(npcId);
             saveGameState();
-            
+
             if (btnContainer) btnContainer.style.display = 'grid'; // Grid veya block, loadContextualQuestions hallediyor ama görünür yapalım
             loadContextualQuestions(npcId);
         });
-        
+
     }, 800);
 }
 
@@ -1489,75 +1974,63 @@ function askFreeAiQuestion() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ NpcId: activeNpcId, Question: questionText, GuiltyNpcId: guiltyNpcId })
     })
-    .then(res => res.json())
-    .then(data => {
-        let answer = data.dialogue || "Bu konuda söylenecek bir şey yok.";
-        let emotion = data.emotion || "Sakin";
+        .then(res => res.json())
+        .then(data => {
+            let answer = data.dialogue || "Bu konuda söylenecek bir şey yok.";
+            let emotion = data.emotion || "Sakin";
 
-        // Karakter duygu stili
-        const characterLayer = document.getElementById('npc-talk-character-layer');
-        if (characterLayer) {
-            characterLayer.className = 'npc-talk-character-layer';
-            if (emotion === 'Panik' || emotion === 'Sinirli') {
-                characterLayer.classList.add('emotion-angry');
-            } else if (emotion === 'Tedirgin' || emotion === 'Gergin') {
-                characterLayer.classList.add('emotion-nervous');
-            }
-        }
-
-        const npcMsg = document.createElement('div');
-        npcMsg.className = 'npc-talk-message';
-        const speakerDiv = document.createElement('div');
-        speakerDiv.className = 'speaker';
-        speakerDiv.textContent = npc.name;
-        const textDiv = document.createElement('div');
-        textDiv.className = 'msg-text';
-
-        npcMsg.appendChild(speakerDiv);
-        npcMsg.appendChild(textDiv);
-
-        const saveBtn = document.createElement('button');
-        saveBtn.className = 'save-testimony-btn';
-        saveBtn.innerHTML = '<i class="fa-solid fa-thumbtack"></i>';
-        saveBtn.title = 'İfadeyi Delil Olarak Kaydet (Çapraz Sorgu)';
-        saveBtn.onclick = () => {
-            saveTestimonyToBag(npc.name, answer);
-            saveBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
-            saveBtn.disabled = true;
-        };
-        npcMsg.appendChild(saveBtn);
-
-        chatArea.appendChild(npcMsg);
-        typeWriter(textDiv, answer, 0, () => {
-            const stressInc = data.stressIncrease || 0;
-            if (stressInc > 0) {
-                npcStressLevels[activeNpcId] = Math.min(100, (npcStressLevels[activeNpcId] || 0) + stressInc);
+            // Karakter duygu stili
+            const characterLayer = document.getElementById('npc-talk-character-layer');
+            if (characterLayer) {
+                characterLayer.className = 'npc-talk-character-layer';
+                if (emotion === 'Panik' || emotion === 'Sinirli') {
+                    characterLayer.classList.add('emotion-angry');
+                } else if (emotion === 'Tedirgin' || emotion === 'Gergin') {
+                    characterLayer.classList.add('emotion-nervous');
+                }
             }
 
-            if (data.revealedSecret) {
-                showCinematicHelper(data.revealedSecret, false);
-            }
-            if (!dialogHistory[activeNpcId]) dialogHistory[activeNpcId] = [];
-            dialogHistory[activeNpcId].push({
-                player: questionText,
-                npc: answer,
-                npcName: npc.name,
-                difficulty: 3
+            const npcMsg = document.createElement('div');
+            npcMsg.className = 'npc-talk-message';
+            const speakerDiv = document.createElement('div');
+            speakerDiv.className = 'speaker';
+            speakerDiv.textContent = npc.name;
+            const textDiv = document.createElement('div');
+            textDiv.className = 'msg-text';
+
+            npcMsg.appendChild(speakerDiv);
+            npcMsg.appendChild(textDiv);
+            chatArea.appendChild(npcMsg);
+            typeWriter(textDiv, answer, 0, () => {
+                const stressInc = data.stressIncrease || 0;
+                if (stressInc > 0) {
+                    npcStressLevels[activeNpcId] = Math.min(100, (npcStressLevels[activeNpcId] || 0) + stressInc);
+                }
+
+                if (data.revealedSecret) {
+                    showCinematicHelper(data.revealedSecret, false);
+                }
+                if (!dialogHistory[activeNpcId]) dialogHistory[activeNpcId] = [];
+                dialogHistory[activeNpcId].push({
+                    player: questionText,
+                    npc: answer,
+                    npcName: npc.name,
+                    difficulty: 3
+                });
+                logDialog(activeNpcId, questionText, answer, 3, 'serbest_ai');
+                updateQuestionIndicator(activeNpcId);
+                saveGameState();
+                loadContextualQuestions(activeNpcId);
             });
-            logDialog(activeNpcId, questionText, answer, 3, 'serbest_ai');
+        })
+        .catch(err => {
+            console.error("Yerel AI hatası:", err);
+            const npcMsg = document.createElement('div');
+            npcMsg.className = 'npc-talk-message';
+            npcMsg.innerHTML = `<div class="speaker">${npc.name}</div><div class="msg-text">*Sessizce süzüyor* Ne demek istiyorsun dedektif?</div>`;
+            chatArea.appendChild(npcMsg);
             updateQuestionIndicator(activeNpcId);
-            saveGameState();
-            loadContextualQuestions(activeNpcId);
         });
-    })
-    .catch(err => {
-        console.error("Yerel AI hatası:", err);
-        const npcMsg = document.createElement('div');
-        npcMsg.className = 'npc-talk-message';
-        npcMsg.innerHTML = `<div class="speaker">${npc.name}</div><div class="msg-text">*Sessizce süzüyor* Ne demek istiyorsun dedektif?</div>`;
-        chatArea.appendChild(npcMsg);
-        updateQuestionIndicator(activeNpcId);
-    });
 }
 
 document.getElementById('npc-ai-send-btn')?.addEventListener('click', askFreeAiQuestion);
@@ -1583,20 +2056,25 @@ const detailedClueModal = document.getElementById('detailed-clue-modal');
 function inspectClue(clueId) {
     const clue = currentBag.find(c => c.id === clueId);
     if (!clue) return;
-    
+
     // İşaretle: İncelendi
     clue.inspected = true;
-    
-    // Arayüzü güncelle (Çıkar butonunu disable yap)
-    openBag(); 
-    
-    // Detaylı ekranı aç
-    document.getElementById('detailed-clue-title').textContent = clue.name;
-    document.getElementById('detailed-clue-img').src = clue.img;
-    const detailedText = document.getElementById('detailed-clue-text');
+    openBag();
+
+    // NPC ID'yi bul (Arkaplan için)
+    let clueNpcId = activeNpcId || 1;
+    for (const [npcIdStr, items] of Object.entries(SCENE_OBJECTS)) {
+        if (items.some(i => i.id === clue.id)) {
+            clueNpcId = parseInt(npcIdStr);
+            break;
+        }
+    }
+
+    // Yeni 4D Laboratuvar Ekranını Aç (fromBag = true)
+    openClueInspect(clue, clueNpcId, true);
+
+    const detailedText = document.getElementById('clue-inspect-desc');
     detailedText.innerHTML = '<span style="opacity:0.5;">Yükleniyor...</span>';
-    
-    detailedClueModal.classList.remove('hidden');
 
     // Backend'den dinamik ipucu detayını çek
     fetch(`/api/game/clue-detail/${clue.id}`)
@@ -1611,14 +2089,17 @@ function inspectClue(clueId) {
                     if (i < text.length) {
                         detailedText.innerHTML += text.charAt(i);
                         i++;
-                        setTimeout(type, 30); // 30ms yazma hızı
+                        setTimeout(type, 30);
                     }
                 }
                 type();
+            } else {
+                detailedText.textContent = clue.desc; // Fallback
             }
         })
         .catch(err => {
-            detailedText.textContent = clue.desc; // Fallback
+            console.error(err);
+            detailedText.textContent = clue.desc;
         });
 }
 
@@ -1660,7 +2141,7 @@ function openBag() {
             </div>
         `).join('');
     }
-    
+
     // Not Defterini Yükle
     const notebook = document.getElementById('detective-notes');
     if (notebook) {
@@ -1668,7 +2149,7 @@ function openBag() {
     }
 
     bagModal.classList.remove('hidden');
-    
+
     // Çetin çanta açıldığında tam sayı ve delil isimleri versin
     if (currentBag.length === 0) {
         showCinematicHelper("Amirims, çantamız henüz bomboş (0/5 delil)! Binalardaki nesnelere tıklayarak delilleri toplayın.", false);
@@ -1708,15 +2189,15 @@ document.getElementById('found-close-btn').addEventListener('click', () => {
 function renderFoundScreen() {
     const grid = document.getElementById('found-npc-cards');
     grid.innerHTML = '';
-    
+
     for (let id = 1; id <= 5; id++) {
         const npc = NPC_DATA[id];
         const hasHistory = dialogHistory[id] && dialogHistory[id].length > 0;
         const askedCount = askedQuestionCount[id] || 0;
-        
+
         // Rastgele açı ile dağınık fotoğraf efekti
         const randomRotation = (Math.random() * 10 - 5).toFixed(1);
-        
+
         const card = document.createElement('div');
         card.className = 'found-npc-card';
         card.style.transform = `rotate(${randomRotation}deg)`;
@@ -1735,7 +2216,7 @@ function renderFoundScreen() {
         `;
         grid.appendChild(card);
     }
-    
+
     // NPC görsel tıklanınca konuşma geçmişi
     grid.querySelectorAll('.found-npc-img').forEach(img => {
         img.addEventListener('click', () => {
@@ -1745,12 +2226,12 @@ function renderFoundScreen() {
     });
 }
 
-window.showNpcHistory = function(npcId) {
+window.showNpcHistory = function (npcId) {
     const npc = NPC_DATA[npcId];
     const history = dialogHistory[npcId] || [];
-    
+
     document.getElementById('npc-history-title').innerHTML = `<i class="fa-solid fa-comments"></i> ${npc.name} \u2014 Konu\u015Fma Ge\u00E7mi\u015Fi`;
-    
+
     const content = document.getElementById('npc-history-content');
     if (history.length === 0) {
         content.innerHTML = '<p style="color: var(--text-muted); text-align:center; padding:30px;">Bu NPC ile hen\u00FCz konu\u015Fulmad\u0131.</p>';
@@ -1766,7 +2247,7 @@ window.showNpcHistory = function(npcId) {
             </div>
         `).join('');
     }
-    
+
     npcHistoryModal.classList.remove('hidden');
 }
 
@@ -1775,10 +2256,10 @@ document.getElementById('npc-history-close').addEventListener('click', () => {
 });
 
 // === ACCUSE NPC (BACKEND CHECK) — YENİ HAPİS ANİMASYONU ===
-window.accuseNpc = function(accusedId) {
+window.accuseNpc = function (accusedId) {
     const npc = NPC_DATA[accusedId];
     foundModal.classList.add('hidden');
-    
+
     // YENİ HAPİS GÖRSELLERİNİ KULLAN
     const jailImages = {
         1: 'images/jail_hasan.png',
@@ -1787,15 +2268,15 @@ window.accuseNpc = function(accusedId) {
         4: 'images/jail_gunes.png',
         5: 'images/jail_yahya.png'
     };
-    
+
     // Yeni hapis animasyonu — NPC tam boy parmaklıkların arkasında
     const jailNpcFull = document.getElementById('jail-npc-full');
     const jailNpcName = document.getElementById('jail-npc-name');
     const jailArrestedText = document.getElementById('jail-arrested-text');
-    
+
     if (jailNpcFull) jailNpcFull.src = jailImages[npc.id] || npc.img;
     if (jailNpcName) jailNpcName.textContent = npc.name;
-    
+
     // Animasyonu sıfırla
     if (jailNpcFull) {
         jailNpcFull.style.animation = 'none';
@@ -1807,7 +2288,7 @@ window.accuseNpc = function(accusedId) {
         jailArrestedText.offsetHeight;
         jailArrestedText.style.animation = '';
     }
-    
+
     // Jail bars animasyonu da sıfırla
     const jailBars = document.querySelector('.jail-bars');
     if (jailBars) {
@@ -1815,38 +2296,38 @@ window.accuseNpc = function(accusedId) {
         jailBars.offsetHeight;
         jailBars.style.animation = '';
     }
-    
+
     jailOverlay.classList.remove('hidden');
-    
+
     // Animasyon sırasında API'ye sor
     fetch('/api/game/accuse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ NpcId: accusedId }) 
+        body: JSON.stringify({ NpcId: accusedId })
     })
-    .then(res => res.json())
-    .then(data => {
-        setTimeout(() => {
-            jailOverlay.classList.add('hidden');
-            
-            const resultIcon = document.getElementById('result-icon');
-            const resultTitle = document.getElementById('result-title');
-            const resultMessage = document.getElementById('result-message');
-            const retryBtn = document.getElementById('result-retry-btn');
-            
-            // Gerçek katil ve seçilen kişi bilgileri
-            const realKiller = NPC_DATA[guiltyNpcId];
-            const accusedNpc = NPC_DATA[accusedId];
-            
-            // SUÇLU DOĞRU MU KONTROLÜ
-            const isCorrect = (accusedId === guiltyNpcId);
-            
-            if (isCorrect) {
-                resultIcon.className = 'result-icon success';
-                resultIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
-                resultTitle.textContent = 'TEBRİKLER! KAZANDINIZ!';
-                resultTitle.style.color = 'var(--success)';
-                resultMessage.innerHTML = `
+        .then(res => res.json())
+        .then(data => {
+            setTimeout(() => {
+                jailOverlay.classList.add('hidden');
+
+                const resultIcon = document.getElementById('result-icon');
+                const resultTitle = document.getElementById('result-title');
+                const resultMessage = document.getElementById('result-message');
+                const retryBtn = document.getElementById('result-retry-btn');
+
+                // Gerçek katil ve seçilen kişi bilgileri
+                const realKiller = NPC_DATA[guiltyNpcId];
+                const accusedNpc = NPC_DATA[accusedId];
+
+                // SUÇLU DOĞRU MU KONTROLÜ
+                const isCorrect = (accusedId === guiltyNpcId);
+
+                if (isCorrect) {
+                    resultIcon.className = 'result-icon success';
+                    resultIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
+                    resultTitle.textContent = 'TEBRİKLER! KAZANDINIZ!';
+                    resultTitle.style.color = 'var(--success)';
+                    resultMessage.innerHTML = `
                     <div class="result-verdict">
                         <div class="result-verdict-line"><i class="fa-solid fa-user-check" style="color:var(--success)"></i> Sizin Seçiminiz: <strong>${accusedNpc.name}</strong></div>
                         <div class="result-verdict-line"><i class="fa-solid fa-handcuffs" style="color:var(--accent)"></i> Gerçek Katil: <strong>${realKiller.name}</strong></div>
@@ -1856,14 +2337,14 @@ window.accuseNpc = function(accusedId) {
                         <div class="result-story-header"><i class="fa-solid fa-book-skull"></i> O Gecenin Hikayesi</div>
                         <div class="result-story-text">${realKiller.murderStory}</div>
                     </div>`;
-                retryBtn.innerHTML = '<i class="fa-solid fa-house"></i> Ana Menüye Dön';
-                retryBtn.classList.remove('hidden');
-            } else {
-                resultIcon.className = 'result-icon fail';
-                resultIcon.innerHTML = '<i class="fa-solid fa-skull-crossbones"></i>';
-                resultTitle.textContent = 'KAYBETTİNİZ!';
-                resultTitle.style.color = 'var(--danger)';
-                resultMessage.innerHTML = `
+                    retryBtn.innerHTML = '<i class="fa-solid fa-house"></i> Ana Menüye Dön';
+                    retryBtn.classList.remove('hidden');
+                } else {
+                    resultIcon.className = 'result-icon fail';
+                    resultIcon.innerHTML = '<i class="fa-solid fa-skull-crossbones"></i>';
+                    resultTitle.textContent = 'KAYBETTİNİZ!';
+                    resultTitle.style.color = 'var(--danger)';
+                    resultMessage.innerHTML = `
                     <div class="result-verdict">
                         <div class="result-verdict-line"><i class="fa-solid fa-user-xmark" style="color:var(--danger)"></i> Sizin Seçiminiz: <strong>${accusedNpc.name}</strong> <span style="color:var(--danger)">(MASUM)</span></div>
                         <div class="result-verdict-line"><i class="fa-solid fa-handcuffs" style="color:var(--accent)"></i> Gerçek Katil: <strong>${realKiller.name}</strong></div>
@@ -1873,21 +2354,21 @@ window.accuseNpc = function(accusedId) {
                         <div class="result-story-header"><i class="fa-solid fa-book-skull"></i> O Gecenin Hikayesi</div>
                         <div class="result-story-text">${realKiller.murderStory}</div>
                     </div>`;
-                retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Tekrar Oyna';
-                retryBtn.classList.remove('hidden');
-            }
-            
-            resultModal.classList.remove('hidden');
-        }, 3000);
-    })
-    .catch(err => {
-        console.error('Accuse Error:', err);
-        jailOverlay.classList.add('hidden');
-        alert("Ba\u011Flant\u0131 hatas\u0131!");
-    });
+                    retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Tekrar Oyna';
+                    retryBtn.classList.remove('hidden');
+                }
+
+                resultModal.classList.remove('hidden');
+            }, 3000);
+        })
+        .catch(err => {
+            console.error('Accuse Error:', err);
+            jailOverlay.classList.add('hidden');
+            alert("Ba\u011Flant\u0131 hatas\u0131!");
+        });
 };
 
-window.innocentNpc = function(npcId) {
+window.innocentNpc = function (npcId) {
     const card = document.querySelector(`.found-npc-card .found-npc-img[data-npc-id="${npcId}"]`)?.closest('.found-npc-card');
     if (card) {
         card.style.opacity = '0.3';
@@ -2049,7 +2530,7 @@ function provideBuildingSpecificHint(npcId = activeNpcId) {
     const npc = NPC_DATA[npcId];
     const objects = SCENE_OBJECTS[npcId] || [];
     const clueNames = objects.map(o => `'${o.name}'`).join(', ');
-    
+
     let hintMsg = `Amirims, ${npc.building} binasındayız! Odada incelenebilecek deliller: ${clueNames}. `;
     if (npcId === 1) { // Kasap
         hintMsg += `Tezgaha saplanan Kanlı Satır'daki kan izlerine, Kara Kaplı Defter'e ve Yırtık Önlük'e dikkat et. Şüpheli sırrı: "${npc.secret}"`;
@@ -2121,6 +2602,9 @@ document.getElementById('cinematic-skip-btn')?.addEventListener('click', () => {
             textEl.textContent = currentHelperMessageText;
             textEl.classList.add('typing-done');
         }
+    } else if (currentHelperHistoryIndex < helperMessageHistory.length - 1) {
+        currentHelperHistoryIndex++;
+        showCinematicHelper(helperMessageHistory[currentHelperHistoryIndex], false, '', true);
     }
 });
 
@@ -2174,28 +2658,28 @@ function handleHelperAnalyzeClick() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ClueIds: clueIds })
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            showCinematicHelper(data.analysis, false);
-        } else {
-            showCinematicHelper(`Amirims, çantamızdaki ${currentBag.length} delili inceledim: ${clueNames}. Bunları şüphelilerin ifadeleriyle karşılaştırmanızı öneririm!`, false);
-        }
-    })
-    .catch(() => {
-        // Backend erişilemezse bile çantadaki bilgiyi göster
-        const inspectedCount = currentBag.filter(c => c.inspected).length;
-        let msg = `Amirims, çantamızda toplam ${currentBag.length}/${MAX_BAG_SIZE} delil var: ${clueNames}. `;
-        if (inspectedCount > 0) {
-            msg += `Bunlardan ${inspectedCount} tanesi incelendi. `;
-        }
-        if (currentBag.length < 3) {
-            msg += 'Daha fazla delil toplamak için diğer binaları da ziyaret edin!';
-        } else {
-            msg += 'Deliller katile işaret ediyor olabilir, şüphelilerin ifadeleriyle karşılaştırın!';
-        }
-        showCinematicHelper(msg, false);
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showCinematicHelper(data.analysis, false);
+            } else {
+                showCinematicHelper(`Amirims, çantamızdaki ${currentBag.length} delili inceledim: ${clueNames}. Bunları şüphelilerin ifadeleriyle karşılaştırmanızı öneririm!`, false);
+            }
+        })
+        .catch(() => {
+            // Backend erişilemezse bile çantadaki bilgiyi göster
+            const inspectedCount = currentBag.filter(c => c.inspected).length;
+            let msg = `Amirims, çantamızda toplam ${currentBag.length}/${MAX_BAG_SIZE} delil var: ${clueNames}. `;
+            if (inspectedCount > 0) {
+                msg += `Bunlardan ${inspectedCount} tanesi incelendi. `;
+            }
+            if (currentBag.length < 3) {
+                msg += 'Daha fazla delil toplamak için diğer binaları da ziyaret edin!';
+            } else {
+                msg += 'Deliller katile işaret ediyor olabilir, şüphelilerin ifadeleriyle karşılaştırın!';
+            }
+            showCinematicHelper(msg, false);
+        });
 }
 document.getElementById('cinematic-analyze-btn')?.addEventListener('click', handleHelperAnalyzeClick);
 document.getElementById('helper-analyze-btn')?.addEventListener('click', handleHelperAnalyzeClick);
@@ -2213,7 +2697,7 @@ function logAction(actionType, targetId = null, details = null) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ SessionId: currentSessionId, ActionType: actionType, TargetId: targetId, Details: details })
-    }).catch(() => {}); // Sessizce hata yut
+    }).catch(() => { }); // Sessizce hata yut
 }
 
 /**
@@ -2224,7 +2708,7 @@ function logDialog(npcId, playerQuestion, npcResponse, difficulty = 1, category 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ NpcId: npcId, PlayerQuestion: playerQuestion, NpcResponse: npcResponse, Difficulty: difficulty, Category: category })
-    }).catch(() => {});
+    }).catch(() => { });
 }
 
 /**
@@ -2244,7 +2728,7 @@ function saveGameState() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ SessionId: currentSessionId, StateData: JSON.stringify(state) })
-    }).catch(() => {});
+    }).catch(() => { });
 }
 
 // =============================================================
@@ -2271,7 +2755,7 @@ function checkAndDropClues(npcId, clueIds) {
     clueIds.forEach(clueId => {
         // Zaten çantada var mı?
         if (currentBag.some(c => c.id === clueId)) return;
-        
+
         // Clue bilgisini SCENE_OBJECTS içinden bul
         const clueInfo = npcSceneObjects.find(obj => obj.id === clueId);
         if (clueInfo) {
@@ -2292,9 +2776,9 @@ function saveTestimonyToBag(npcName, testimonyText) {
         alert("Çantanız dolu! (Maksimum 5 delil). Önce eski delilleri Adli Tıp'a göndermelisiniz.");
         return;
     }
-    
+
     // Generate a unique ID for the testimony
-    const testimonyId = 1000 + currentBag.length; 
+    const testimonyId = 1000 + currentBag.length;
     const testimonyClue = {
         id: testimonyId,
         name: `${npcName}'nin İfadesi`,
@@ -2302,7 +2786,7 @@ function saveTestimonyToBag(npcName, testimonyText) {
         img: 'images/helper_avatar.png', // Temporary generic icon or a custom testimony icon
         scene: activeNpcId
     };
-    
+
     currentBag.push(testimonyClue);
     showClueBadge();
     triggerHelperMessage('testimony_saved', `Amirims, ${npcName} karakterinin bu sözünü kaydettim! Diğer şüphelilere bu ifadeyi kanıt olarak sunabilirsiniz.`, true);
@@ -2332,7 +2816,7 @@ function openBagModal() {
     hideClueBadge();
     const bagModal = document.getElementById('bag-modal');
     if (!bagModal) return;
-    
+
     renderBagItems();
     bagModal.classList.remove('hidden');
 }
@@ -2345,14 +2829,14 @@ function closeBagModal() {
 function renderBagItems() {
     const container = document.getElementById('bag-items-list');
     if (!container) return;
-    
+
     container.innerHTML = '';
-    
+
     if (currentBag.length === 0) {
         container.innerHTML = '<p style="color:var(--text-muted); text-align:center;">Henüz hiçbir fiziksel kanıt bulamadınız.</p>';
         return;
     }
-    
+
     currentBag.forEach(item => {
         const itemEl = document.createElement('div');
         itemEl.className = 'bag-item';
@@ -2365,7 +2849,7 @@ function renderBagItems() {
         itemEl.style.marginBottom = '10px';
         itemEl.style.cursor = 'pointer';
         itemEl.style.background = 'rgba(255,255,255,0.05)';
-        
+
         itemEl.innerHTML = `
             <img src="${item.img}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" alt="Kanıt">
             <div>
@@ -2373,85 +2857,18 @@ function renderBagItems() {
                 <div style="font-size: 0.8rem; color: var(--text-muted);">${item.desc.substring(0, 40)}...</div>
             </div>
         `;
-        
+
         itemEl.addEventListener('click', () => showDetailedClue(item));
         container.appendChild(itemEl);
     });
 }
 
 function showDetailedClue(item) {
-    const detailModal = document.getElementById('detailed-clue-modal');
-    if (!detailModal) return;
-    
-    // UI Reset
-    document.getElementById('detailed-clue-img').src = item.img;
-    document.getElementById('detailed-clue-title').textContent = item.name;
-    document.getElementById('detailed-clue-text').textContent = item.desc;
-    
-    const overlay = document.getElementById('detailed-clue-overlay');
-    if (overlay) overlay.className = 'detailed-clue-overlay'; // Tüm eski efektleri temizle
-    
-    const letterText = document.getElementById('detailed-clue-letter-text');
-    if (letterText) {
-        letterText.className = 'detailed-clue-letter-text hidden';
-        letterText.innerHTML = '';
+    if (item.scene) {
+        openClueInspect(item, item.scene, true);
+    } else {
+        openClueInspect(item, activeNpcId || 1, true);
     }
-    
-    const resultBox = document.getElementById('detailed-clue-result');
-    if (resultBox) {
-        resultBox.className = 'detailed-clue-result hidden';
-        resultBox.innerHTML = '';
-    }
-    
-    const actionsBox = document.getElementById('detailed-clue-actions');
-    if (actionsBox) actionsBox.innerHTML = '';
-    
-    // Adli tıp butonlarını oluştur
-    if (item.examineActions && item.examineActions.length > 0 && actionsBox) {
-        item.examineActions.forEach(action => {
-            const btn = document.createElement('button');
-            btn.innerHTML = action.type === 'uv' ? '<i class="fa-solid fa-lightbulb"></i> ' + action.btnText :
-                            action.type === 'powder' ? '<i class="fa-solid fa-fingerprint"></i> ' + action.btnText :
-                            '<i class="fa-solid fa-envelope-open-text"></i> ' + action.btnText;
-            
-            btn.addEventListener('click', () => {
-                // Tıklanınca eski efektleri temizle
-                overlay.className = 'detailed-clue-overlay';
-                letterText.className = 'detailed-clue-letter-text hidden';
-                resultBox.classList.add('hidden');
-                
-                // Efekti uygula
-                if (action.type === 'powder') {
-                    // Siyah pudra dökülme animasyonu
-                    const dust = document.createElement('div');
-                    dust.className = 'powder-dust active';
-                    document.getElementById('detailed-clue-img-wrapper').appendChild(dust);
-                    
-                    // 1 saniye sonra parmak izini çıkar
-                    setTimeout(() => {
-                        overlay.classList.add(action.resultOverlay);
-                        resultBox.textContent = action.resultText;
-                        resultBox.classList.remove('hidden');
-                        setTimeout(() => dust.remove(), 1000); // animasyon bitince DOM'dan sil
-                    }, 1000);
-                } else if (action.type === 'uv') {
-                    overlay.classList.add(action.resultOverlay);
-                    resultBox.textContent = action.resultText;
-                    resultBox.classList.remove('hidden');
-                } else if (action.type === 'read') {
-                    letterText.textContent = action.resultLetter;
-                    letterText.classList.remove('hidden');
-                    // CSS transition tetiklensin diye minik bir gecikme
-                    setTimeout(() => letterText.classList.add('show-text'), 50); 
-                    resultBox.textContent = action.resultText;
-                    resultBox.classList.remove('hidden');
-                }
-            });
-            actionsBox.appendChild(btn);
-        });
-    }
-    
-    detailModal.classList.remove('hidden');
 }
 
 document.getElementById('close-detailed-clue-btn')?.addEventListener('click', () => {

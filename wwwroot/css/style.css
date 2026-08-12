@@ -705,10 +705,28 @@ canvas {
     height: 100vh;
     background-color: #08090d;
     background-size: cover !important;
-    background-position: center center !important;
+    background-position: center 40% !important;
+    /* Varsayılan olarak hafif aşağı kaydır */
     background-repeat: no-repeat !important;
     z-index: 20;
     overflow: hidden;
+}
+
+/* Bina bazlı özel arka plan hizalamaları */
+.full-screen-interior[data-npc-id="2"] {
+    background-position: center 46% !important;
+    /* Eczane: Hafifçe yukarı (40 ile 50 arası) */
+}
+
+.full-screen-interior[data-npc-id="3"] {
+    background-size: 110vw auto !important;
+    /* Muhtarlık: Sağ/sol kenarları merkeze yaklaştırmak için biraz küçültüldü */
+    background-position: center 46% !important;
+}
+
+.full-screen-interior[data-npc-id="4"] {
+    background-position: center center !important;
+    /* Karakol: Eski haline getir */
 }
 
 /* Kenarların ortayla doğal birleşmesi için hafif vignette */
@@ -721,13 +739,12 @@ canvas {
     background: radial-gradient(ellipse 75% 100% at center, transparent 55%, rgba(8, 9, 13, 0.6) 100%);
 }
 
-/* Sol ve sağ panel elementleri artık kullanılmıyor */
 .interior-side-left,
 .interior-side-right {
     display: none !important;
 }
 
-/* Ana iç mekan görseli — ortada net, bozulmadan (contain ile) */
+/* Ana iç mekan görseli — ortada net, şeffaf arkaplan (siyah boşluk yok) */
 .interior-stage-canvas {
     position: absolute;
     inset: 0;
@@ -744,78 +761,37 @@ canvas {
 .world-map-stage-bg,
 .town-map-stage-bg {
     background-image: none !important;
-    /* Çift katman resmi engellendi */
 }
 
 .interior-backdrop-blur {
     display: none !important;
-    /* Tüm blur efektleri silindi */
 }
 
 .talk-corner-btn {
-    position: absolute;
-    bottom: 25px;
-    right: 25px;
-    padding: 12px 26px;
-    background: linear-gradient(135deg, var(--primary), #0b0c10);
-    color: var(--accent);
-    border: 2px solid var(--accent);
-    font-size: 1rem;
-    font-family: var(--font-heading);
-    cursor: pointer;
-    box-shadow: 0 0 20px rgba(69, 243, 255, 0.3);
-    z-index: 100;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    position: fixed !important;
+    bottom: 30px !important;
+    right: 30px !important;
+    padding: 14px 28px !important;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(5, 7, 10, 0.98)) !important;
+    color: var(--accent) !important;
+    border: 2px solid var(--accent) !important;
+    font-size: 1.05rem !important;
+    font-family: var(--font-heading) !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 25px rgba(69, 243, 255, 0.5) !important;
+    z-index: 9999 !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
 }
 
 .talk-corner-btn:hover {
-    background: var(--accent);
-    color: var(--text-dark);
-    box-shadow: 0 0 30px rgba(69, 243, 255, 0.6);
-}
-
-/* HOTSPOT GÖRSELLERİ (HER EKRANA ORANTILI SCALING) */
-.hotspot-img {
-    width: clamp(65px, 6vw, 105px);
-    height: clamp(65px, 6vw, 105px);
-    cursor: pointer;
-    animation: floatUpDown 3s ease-in-out infinite, glowPulse 2s infinite;
-    border-radius: 12px;
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
-    z-index: 50;
-    transition: all 0.3s ease;
-    object-fit: contain;
-}
-
-.hotspot-img:hover {
-    animation: none;
-    transform: scale(1.2);
-    border: 2px solid var(--accent);
-    box-shadow: 0 0 25px rgba(69, 243, 255, 0.5);
-}
-
-.hotspot-label {
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #fff;
-    font-size: 0.85rem;
-    font-family: var(--font-heading);
-    background: rgba(0, 0, 0, 0.9);
-    padding: 4px 12px;
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-}
-
-/* Show label on parent hover */
-.hotspot-wrapper:hover .hotspot-label {
-    opacity: 1;
+    background: var(--accent) !important;
+    color: var(--text-dark) !important;
+    box-shadow: 0 0 35px rgba(69, 243, 255, 0.8) !important;
+    transform: scale(1.04);
 }
 
 /* HOTSPOT GÖRSELLERİ (ORİJİNAL ŞEKİL & BOYUT KORUMASI) */
@@ -823,17 +799,21 @@ canvas {
     width: clamp(60px, 5.5vw, 100px);
     height: clamp(60px, 5.5vw, 100px);
     cursor: pointer;
-    animation: floatUpDown 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite, glowPulse 2.4s ease-in-out infinite alternate;
     border-radius: 12px;
-    filter: drop-shadow(0 0 12px rgba(69, 243, 255, 0.7));
+    mix-blend-mode: screen;
+    /* Siyah arkaplanları şeffaf yapar, karanlık kutuyu yok eder */
     z-index: 50;
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     object-fit: contain;
+    opacity: 0;
+    /* Delilleri tamamen görünmez yap, böylece siyah/kare görünmezler */
 }
 
 .hotspot-img:hover {
-    transform: scale(1.2) translateY(-4px);
-    filter: drop-shadow(0 0 28px rgba(69, 243, 255, 1)) brightness(1.35) contrast(1.1);
+    transform: scale(1.1) translateY(-2px);
+    filter: drop-shadow(0 0 20px rgba(69, 243, 255, 1)) brightness(1.3) contrast(1.1);
+    opacity: 1;
+    /* Sadece mouse gelince görünür (parlak) yap */
 }
 
 .hotspot-label {
@@ -850,11 +830,12 @@ canvas {
     border-radius: 6px;
     white-space: nowrap;
     opacity: 0;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s;
     pointer-events: none;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
 }
 
+/* Show label on parent hover */
 .hotspot-wrapper:hover .hotspot-label {
     opacity: 1;
     transform: translateX(-50%) translateY(-3px);
@@ -904,9 +885,9 @@ canvas {
 .clue-inspect-container {
     display: flex;
     flex-direction: row;
-    width: 90%;
-    max-width: 800px;
-    height: 60vh;
+    width: 95vw;
+    max-width: 1600px;
+    height: 90vh;
     background: var(--bg-glass);
     border: 1px solid var(--border-color);
     border-radius: 12px;
@@ -978,13 +959,59 @@ canvas {
 .clue-inspect-item-img {
     position: relative;
     z-index: 2;
-    max-width: 65%;
-    max-height: 65%;
+    max-width: 85%;
+    max-height: 85%;
     object-fit: contain;
     border-radius: 12px;
-    animation: floatUpDown 4s ease-in-out infinite;
-    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2)) contrast(1.15) brightness(1.1);
+    mix-blend-mode: screen;
+    /* Removes black backgrounds from AI generated 4D images */
+    user-select: none;
+    pointer-events: auto;
 }
+
+/* Forensic Cursors */
+.cursor-uv {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="%23a855f7" d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-4 0V4a2 2 0 0 1 2-2zm0 18a2 2 0 0 1-2-2v-2a2 2 0 0 1 4 0v2a2 2 0 0 1-2 2zM4 12a2 2 0 0 1 2-2h2a2 2 0 0 1 0 4H6a2 2 0 0 1-2-2zm14 0a2 2 0 0 1 2-2h2a2 2 0 0 1 0 4h-2a2 2 0 0 1-2-2zM6.34 6.34a2 2 0 0 1 2.83 0l1.41 1.41a2 2 0 0 1-2.83 2.83L6.34 9.17a2 2 0 0 1 0-2.83zm11.32 11.32a2 2 0 0 1-2.83 0l-1.41-1.41a2 2 0 0 1 2.83-2.83l1.41 1.41a2 2 0 0 1 0 2.83zM6.34 17.66a2 2 0 0 1 0-2.83l1.41-1.41a2 2 0 0 1 2.83 2.83l-1.41 1.41a2 2 0 0 1-2.83 0zm11.32-11.32a2 2 0 0 1 0 2.83l-1.41 1.41a2 2 0 0 1-2.83-2.83l1.41-1.41a2 2 0 0 1 2.83 0z"/></svg>') 16 16, auto;
+}
+
+.cursor-dust {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="%23444" d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>') 16 16, auto;
+}
+
+.cursor-magnify {
+    cursor: none;
+    /* Hide default cursor to show magnifying glass element instead */
+}
+
+.magnifier-lens {
+    position: absolute;
+    border: 4px solid #1a1a1a;
+    border-radius: 50%;
+    pointer-events: none;
+    display: none;
+    z-index: 50;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.8), inset 0 0 25px rgba(255, 255, 255, 0.3);
+    background-repeat: no-repeat;
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(1px);
+    overflow: hidden;
+    /* Simulate spherical glass */
+    mask-image: radial-gradient(circle, black 60%, rgba(0, 0, 0, 0.8) 100%);
+    -webkit-mask-image: radial-gradient(circle, black 60%, rgba(0, 0, 0, 0.8) 100%);
+}
+
+.magnifier-lens::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), transparent 70%);
+    border-radius: 50%;
+}
+
 
 /* ==========================================================================
    6. NPC KONUŞMA TAM EKRAN
@@ -996,9 +1023,9 @@ canvas {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: #050608;
+    background-color: #000000 !important;
     background-size: contain !important;
-    background-position: center !important;
+    background-position: center center !important;
     background-repeat: no-repeat !important;
     overflow: hidden;
     transition: filter 0.5s ease, transform 0.2s ease;
@@ -1014,7 +1041,8 @@ canvas {
     background-size: contain !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
-    z-index: 2; /* Overlay'in ÜSTÜNDE kalsın ki efekti net görebilelim */
+    z-index: 2;
+    /* Overlay'in ÜSTÜNDE kalsın ki efekti net görebilelim */
     transition: filter 0.5s ease, transform 0.2s ease;
 }
 
@@ -1022,13 +1050,15 @@ canvas {
 .npc-talk-character-layer.emotion-angry {
     filter: brightness(1.3) contrast(1.3) saturate(1.5) sepia(0.3) hue-rotate(-20deg) drop-shadow(0 0 20px rgba(255, 0, 0, 0.5)) !important;
     animation: slightShake 0.2s infinite;
-    transform: scale(1.02); /* Hafifçe büyüsün */
+    transform: scale(1.02);
+    /* Hafifçe büyüsün */
 }
 
 .npc-talk-character-layer.emotion-nervous {
     filter: brightness(0.6) contrast(1.2) saturate(0.4) sepia(0.2) hue-rotate(180deg) blur(1px) !important;
     animation: nervousShake 0.1s infinite;
-    transform: scale(0.98); /* Hafifçe küçülsün */
+    transform: scale(0.98);
+    /* Hafifçe küçülsün */
 }
 
 .npc-talk-overlay {
@@ -1133,7 +1163,12 @@ canvas {
     vertical-align: middle;
     margin-left: 2px;
 }
-@keyframes blink { 50% { opacity: 0; } }
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
 
 .npc-talk-buttons-area {
     position: absolute;
@@ -1178,12 +1213,12 @@ canvas {
     font-size: 0.9rem;
     outline: none;
     transition: all 0.3s ease;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .npc-ai-input:focus {
     border-color: #ffd700;
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4), inset 0 2px 5px rgba(0,0,0,0.5);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4), inset 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .npc-ai-input::placeholder {
@@ -1203,7 +1238,7 @@ canvas {
     color: #ffffff;
     cursor: pointer;
     transition: all 0.25s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
 .npc-ai-send-btn:hover {
@@ -1275,12 +1310,14 @@ canvas {
     align-items: center;
     justify-content: center;
 }
+
 .floating-bag-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 5px 25px rgba(69, 243, 255, 0.6);
     background: var(--accent);
     color: #000;
 }
+
 .clue-badge {
     position: absolute;
     top: -5px;
@@ -1297,9 +1334,17 @@ canvas {
     justify-content: center;
     animation: popBounce 1s infinite;
 }
+
 @keyframes popBounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
 }
 
 .bag-card {
@@ -2662,51 +2707,63 @@ canvas {
 }
 
 .autopsy-content {
-    background: #e8e3d3;
-    /* Old paper look */
-    background-image: repeating-linear-gradient(#e8e3d3 0, #e8e3d3 24px, #d5c8a8 25px);
-    width: 650px;
+    background: #1c1815 url('../images/old_paper_texture.png') center/cover;
+    background-blend-mode: multiply;
+    width: 780px;
     max-width: 95%;
-    max-height: 85vh;
-    margin: 5vh auto;
-    padding: 50px;
-    border-radius: 2px;
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), inset 0 0 50px rgba(100, 80, 50, 0.2);
+    max-height: 88vh;
+    margin: 4vh auto;
+    padding: 45px 50px;
+    border-radius: 4px;
+    border: 3px solid #5c4d3c;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95), inset 0 0 80px rgba(10, 8, 6, 0.85);
     position: relative;
-    color: #1a1a1a;
+    color: #2b231b;
     overflow-y: auto;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Special Elite', 'Courier New', Courier, monospace;
+}
+
+.autopsy-clip {
+    position: absolute;
+    top: -15px;
+    left: 45px;
+    width: 60px;
+    height: 30px;
+    background: linear-gradient(135deg, #888, #444, #999);
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+    z-index: 10;
 }
 
 .autopsy-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 3px double #111;
-    padding-bottom: 25px;
-    margin-bottom: 35px;
+    border-bottom: 3px double #8b0000;
+    padding-bottom: 15px;
+    margin-bottom: 22px;
 }
 
 .autopsy-header h2 {
-    font-size: 2.2rem;
-    font-weight: 900;
+    font-size: 1.6rem;
+    font-weight: 700;
     margin: 0;
-    color: #111;
+    color: #8b0000;
     text-transform: uppercase;
-    letter-spacing: 3px;
-    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+    letter-spacing: 2px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
+    font-family: 'Cinzel', 'Special Elite', serif;
 }
 
 .autopsy-header h2 i {
-    color: #800;
+    color: #990000;
 }
 
 .autopsy-header .close-btn {
-    color: #111;
-    font-size: 2.5rem;
+    color: #4a3b2c;
+    font-size: 2.2rem;
     background: none;
     border: none;
     cursor: pointer;
@@ -2714,33 +2771,210 @@ canvas {
 }
 
 .autopsy-header .close-btn:hover {
-    color: #900;
+    color: #b91c1c;
     transform: rotate(90deg);
 }
 
 .autopsy-body {
     position: relative;
-    font-size: 1.3rem;
-    line-height: 1.8;
-    white-space: pre-wrap;
-    font-weight: bold;
+    font-size: 1.05rem;
+    line-height: 1.65;
 }
 
 .autopsy-stamp {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    color: rgba(200, 20, 20, 0.4);
-    font-size: 5rem;
+    top: -5px;
+    right: 15px;
+    color: rgba(185, 28, 28, 0.45);
+    font-size: 3.5rem;
     font-weight: 900;
-    transform: rotate(-12deg);
+    transform: rotate(-14deg);
     pointer-events: none;
-    border: 8px solid rgba(200, 20, 20, 0.4);
-    padding: 10px 25px;
-    border-radius: 5px;
-    letter-spacing: 5px;
+    border: 5px solid rgba(185, 28, 28, 0.45);
+    padding: 4px 18px;
+    border-radius: 6px;
+    letter-spacing: 6px;
     text-transform: uppercase;
-    font-family: Impact, sans-serif;
+    font-family: 'Cinzel', Impact, sans-serif;
+    user-select: none;
+}
+
+.autopsy-stamp-secondary {
+    position: absolute;
+    bottom: 20px;
+    right: 25px;
+    color: rgba(30, 80, 40, 0.4);
+    font-size: 1.4rem;
+    font-weight: 900;
+    transform: rotate(6deg);
+    pointer-events: none;
+    border: 3px dashed rgba(30, 80, 40, 0.4);
+    padding: 4px 12px;
+    border-radius: 4px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-family: 'Special Elite', cursive;
+    user-select: none;
+}
+
+/* OTOPSİ ZENGİN METİN STİLLERİ */
+.autopsy-dossier {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.autopsy-paper-header {
+    background: rgba(139, 0, 0, 0.08);
+    border: 1px solid rgba(139, 0, 0, 0.3);
+    padding: 12px 18px;
+    border-radius: 3px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+
+.autopsy-official-seal {
+    color: #700000;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+}
+
+.autopsy-dossier-no {
+    color: #333;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.9rem;
+    background: #e4d7c0;
+    padding: 3px 8px;
+    border: 1px solid #b8a686;
+}
+
+.autopsy-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 20px;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 14px 18px;
+    border: 1px dashed #7a6b57;
+    border-radius: 2px;
+    font-size: 0.95rem;
+}
+
+.autopsy-meta-item {
+    color: #1a1410;
+}
+
+.autopsy-alert-tag {
+    color: #990000;
+    font-weight: bold;
+}
+
+.autopsy-divider-line {
+    height: 2px;
+    background: linear-gradient(to right, transparent, #8b0000, transparent);
+    margin: 5px 0;
+}
+
+.autopsy-sec-title {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #700000;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid #8b0000;
+    padding-bottom: 6px;
+    font-family: 'Cinzel', serif;
+}
+
+.autopsy-main-finding {
+    background: rgba(255, 255, 255, 0.35);
+    border: 1px solid #b5a386;
+    border-radius: 3px;
+    padding: 18px 22px;
+    font-size: 1.02rem;
+    line-height: 1.8;
+    color: #1c1510;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+}
+
+.autopsy-bullet {
+    margin-bottom: 12px;
+    position: relative;
+    padding-left: 5px;
+}
+
+.bullet-tag {
+    color: #8b0000;
+    font-weight: bold;
+    margin-right: 6px;
+}
+
+.autopsy-findings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.autopsy-finding-card {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 3px;
+    padding: 14px 18px;
+    border-left: 5px solid #555;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.1);
+    color: #1a1a1a;
+}
+
+.autopsy-finding-card.badge-match {
+    border-left-color: #15803d;
+    background: rgba(220, 252, 231, 0.7);
+    color: #14532d;
+}
+
+.autopsy-finding-card.badge-nomatch {
+    border-left-color: #b45309;
+    background: rgba(254, 243, 199, 0.7);
+    color: #78350f;
+}
+
+/* GİZLİ DELİL PARLAMA VE GÖLGELENDİRME STİLLERİ */
+.hotspot-wrapper.hidden-clue {
+    position: absolute;
+    /* Removed filter and animation to keep it truly hidden */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hotspot-wrapper.hidden-clue .hotspot-img {
+    opacity: 0;
+    /* Tamamen görünmez yap */
+}
+
+.hotspot-wrapper.hidden-clue:hover {
+    transform: scale(1.18) translateY(-4px);
+    z-index: 100;
+}
+
+.hotspot-wrapper.hidden-clue:hover .hotspot-img {
+    opacity: 1;
+    /* Mouse gelince görünür yap */
+    filter: drop-shadow(0 0 18px rgba(69, 243, 255, 1)) drop-shadow(0 0 32px rgba(69, 243, 255, 0.8)) brightness(1.3) contrast(1.2);
+    /* Bütün delillerle aynı neon mavi renk */
+}
+
+/* Removed ::before elements for hidden clues */
+
+@keyframes hiddenCluePulse {
+    0% {
+        filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.4)) drop-shadow(0 0 10px rgba(217, 119, 6, 0.3));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.95)) drop-shadow(0 0 25px rgba(245, 158, 11, 0.8));
+    }
 }
 
 /* ========================================================= */
@@ -2787,7 +3021,7 @@ canvas {
 .detailed-clue-overlay.show-fingerprint {
     opacity: 1;
     /* Bizim resmimiz yerine CSS ile sahte bir parmak izi deseni veya karanlık leke */
-    background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.8) 0%, transparent 60%);
+    background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
     /* Parmak izi texture'ı varmış gibi bir filter */
     filter: contrast(1.5) grayscale(1);
 }
@@ -2806,13 +3040,14 @@ canvas {
     width: 80%;
     height: 80%;
     color: #111;
-    font-family: 'Cinzel', serif; /* El yazısı hissi için */
+    font-family: 'Cinzel', serif;
+    /* El yazısı hissi için */
     font-size: 1.2rem;
     line-height: 1.6;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.8);
     padding: 20px;
     border-radius: 5px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
     transform: scale(0.9);
     opacity: 0;
     transition: all 0.5s ease;
@@ -2854,7 +3089,7 @@ canvas {
 .detailed-clue-result {
     margin-top: 15px;
     padding: 10px;
-    background: rgba(0,255,0,0.1);
+    background: rgba(0, 255, 0, 0.1);
     border-left: 3px solid #00ff00;
     color: #00ff00;
     font-size: 0.9rem;
@@ -2865,20 +3100,35 @@ canvas {
 /* Pudra dökme efekti */
 .powder-dust {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><circle cx="50" cy="50" r="1" fill="white"/></svg>');
     opacity: 0;
     pointer-events: none;
     z-index: 10;
 }
+
 .powder-dust.active {
     animation: dusting 2s forwards;
 }
 
 @keyframes dusting {
-    0% { opacity: 0; transform: translateY(-20px); }
-    30% { opacity: 0.8; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(20px); }
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    30% {
+        opacity: 0.8;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
 }
 
 .notification-icon {
@@ -3420,21 +3670,32 @@ canvas {
 /* 12. STRESS BAR AND NEW UI ELEMENTS                        */
 /* ========================================================= */
 .npc-stress-container {
-    width: 100%;
-    margin-bottom: 15px;
-    background: rgba(10, 10, 15, 0.8);
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #333;
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    width: 320px;
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(8px);
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
+
 .npc-stress-label {
     font-size: 0.8rem;
     color: #e0e0e0;
     font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
+
 .npc-stress-track {
     width: 100%;
     height: 8px;
@@ -3442,6 +3703,7 @@ canvas {
     border-radius: 4px;
     overflow: hidden;
 }
+
 .npc-stress-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--accent), var(--danger));
@@ -3459,18 +3721,22 @@ canvas {
     transition: transform 0.1s;
     transform-style: preserve-3d;
 }
+
 .clue-canvas-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* Let clicks pass to wrapper usually */
+    pointer-events: none;
+    /* Let clicks pass to wrapper usually */
 }
+
 .clue-canvas-overlay.active {
     pointer-events: auto;
     cursor: crosshair;
 }
+
 .forensic-tools {
     position: absolute;
     right: 20px;
@@ -3480,6 +3746,7 @@ canvas {
     flex-direction: column;
     gap: 15px;
 }
+
 .forensic-tool-btn {
     background: rgba(20, 20, 25, 0.9);
     border: 1px solid var(--accent);
@@ -3495,7 +3762,9 @@ canvas {
     justify-content: center;
     align-items: center;
 }
-.forensic-tool-btn:hover, .forensic-tool-btn.active {
+
+.forensic-tool-btn:hover,
+.forensic-tool-btn.active {
     background: var(--accent);
     color: #000;
     box-shadow: 0 0 15px var(--accent);
@@ -3514,10 +3783,12 @@ canvas {
     transition: transform 0.2s, color 0.2s;
     opacity: 0.6;
 }
+
 .save-testimony-btn:hover {
     opacity: 1;
     transform: scale(1.2);
 }
+
 .save-testimony-btn:disabled {
     color: #4CAF50;
     opacity: 1;
@@ -3530,14 +3801,703 @@ canvas {
     opacity: 0;
     transition: opacity 0.5s ease;
 }
+
 .hotspot-wrapper.hidden-clue:hover {
     opacity: 0.8;
     filter: drop-shadow(0 0 10px var(--accent)) drop-shadow(0 0 20px var(--accent));
 }
+
 .hotspot-wrapper.hidden-clue .hotspot-label {
     opacity: 0;
     transition: opacity 0.3s;
 }
+
 .hotspot-wrapper.hidden-clue:hover .hotspot-label {
     opacity: 1;
+}
+
+/* 4D Rotate Controls (Thumbnails) */
+.clue-thumbnails {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    z-index: 10;
+}
+
+.clue-thumbnail {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.6);
+    object-fit: contain;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.6;
+}
+
+.clue-thumbnail:hover {
+    opacity: 1;
+    transform: translateY(-5px);
+}
+
+.clue-thumbnail.active {
+    opacity: 1;
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(69, 243, 255, 0.4);
+}
+
+/* ==========================================================================
+   BİNA İÇİ KÜÇÜK İNCELEME MODALI & ADLİ TİP GELECEK EKLENTİLERİ
+   ========================================================================== */
+
+.building-clue-card {
+    background: rgba(18, 20, 26, 0.95);
+    border: 1px solid var(--border-glow);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(69, 243, 255, 0.2);
+    border-radius: 14px;
+    width: min(90vw, 550px);
+    padding: 24px;
+    position: relative;
+    backdrop-filter: blur(15px);
+    color: var(--text-primary);
+    animation: zoomInIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes zoomInIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.building-clue-body {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.building-clue-info-col {
+    flex: 1;
+}
+
+.building-clue-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent);
+    background: rgba(69, 243, 255, 0.1);
+    border: 1px solid rgba(69, 243, 255, 0.3);
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+}
+
+.building-clue-info-col h3 {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    color: var(--text-bright);
+    margin-bottom: 8px;
+}
+
+.building-clue-info-col p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.building-clue-img-col {
+    width: 130px;
+    height: 130px;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.building-clue-img-col img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+.building-clue-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.building-clue-actions button {
+    flex: 1;
+}
+
+/* YEŞİL MÜJDELİ İPUCU KUTUSU & ADLİ TİBBA GÖNDER BUTONU */
+.forensic-finding-box {
+    background: rgba(46, 164, 79, 0.15);
+    border: 1px solid var(--success);
+    color: #40d065;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-top: 15px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 0 15px rgba(46, 164, 79, 0.3);
+    animation: pulseGreen 1.5s infinite alternate;
+}
+
+@keyframes pulseGreen {
+    from {
+        box-shadow: 0 0 10px rgba(46, 164, 79, 0.2);
+    }
+
+    to {
+        box-shadow: 0 0 25px rgba(46, 164, 79, 0.5);
+    }
+}
+
+.btn-send-forensics {
+    background: linear-gradient(135deg, #2ea44f 0%, #1e7035 100%);
+    color: #ffffff;
+    border: 1px solid #40d065;
+    padding: 12px 20px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 12px;
+    width: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(46, 164, 79, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.95rem;
+}
+
+.btn-send-forensics:hover {
+    background: linear-gradient(135deg, #37c25e 0%, #258b43 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 164, 79, 0.6);
+}
+
+.magnifier-lens {
+    position: absolute;
+    border: 3px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+    display: none;
+    z-index: 100;
+    overflow: hidden;
+    background-repeat: no-repeat;
+}
+
+/* ==========================================================================
+   DOCUMENT READER OVERLAY (Detaylı İnceleme)
+   ========================================================================== */
+.document-reader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.95);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.document-reader-header {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+}
+
+.document-reader-content {
+    background: #f4ebd8 url('../images/old_paper_texture.png') center/cover !important;
+    background-blend-mode: multiply !important;
+    color: #0c0a07 !important;
+    width: 90%;
+    max-width: 620px;
+    height: auto;
+    max-height: 85vh;
+    padding: 50px 45px;
+    border-radius: 2px;
+    box-shadow: 0 20px 65px rgba(0, 0, 0, 0.95), inset 0 0 50px rgba(130, 95, 50, 0.35) !important;
+    font-family: 'Kalam', 'Caveat', cursive, sans-serif;
+    font-size: 1.55rem;
+    font-weight: 700;
+    line-height: 1.7;
+    overflow-y: auto !important; /* İnce vintage scrollbar ile tam metin erişimi */
+    position: relative;
+    white-space: pre-wrap;
+    border: 2px solid #8b7d6b !important;
+    outline: 6px solid rgba(244, 235, 216, 0.25);
+}
+
+/* ==========================================================================
+   OTOPSİ RAPORU — OTOPSİ VAKA DOSYASI (KURUMSAL ESKİ KAĞIT)
+   ========================================================================== */
+
+#autopsy-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    background: rgba(5, 7, 10, 0.95);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.autopsy-content {
+    background: #e8e3d3 !important;
+    background-image: repeating-linear-gradient(#e8e3d3 0, #e8e3d3 24px, #d5c8a8 25px) !important;
+    width: 680px;
+    max-width: 95%;
+    max-height: 85vh;
+    margin: 3vh auto;
+    padding: 45px 50px;
+    border-radius: 4px;
+    border: 2px solid #8b7d6b !important;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), inset 0 0 50px rgba(100, 80, 50, 0.2) !important;
+    position: relative;
+    color: #1a1a1a !important;
+    overflow-y: auto !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 1.1rem;
+    line-height: 25px;
+}
+
+/* Vintage İnce Scrollbar (Yazıların kesilmesini önler, kâğıt temasını korur) */
+.document-reader-content::-webkit-scrollbar,
+.autopsy-content::-webkit-scrollbar,
+.open-notebook-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.document-reader-content::-webkit-scrollbar-track,
+.autopsy-content::-webkit-scrollbar-track,
+.open-notebook-wrapper::-webkit-scrollbar-track {
+    background: rgba(120, 100, 75, 0.15);
+    border-radius: 3px;
+}
+
+.document-reader-content::-webkit-scrollbar-thumb,
+.autopsy-content::-webkit-scrollbar-thumb,
+.open-notebook-wrapper::-webkit-scrollbar-thumb {
+    background: #8b7d6b;
+    border-radius: 3px;
+}
+
+.autopsy-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px double #111;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+}
+
+.autopsy-header h2 {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #111;
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+.autopsy-body {
+    position: relative;
+    font-size: 1.1rem;
+    line-height: 25px;
+    color: #1a1a1a;
+}
+
+.autopsy-stamp {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: #b91c1c;
+    border: 4px solid #b91c1c;
+    padding: 6px 18px;
+    font-family: 'Cinzel', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    transform: rotate(-12deg);
+    letter-spacing: 3px;
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.autopsy-stamp-secondary {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: #1e3a8a;
+    border: 3px solid #1e3a8a;
+    padding: 4px 14px;
+    font-family: 'Cinzel', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 900;
+    transform: rotate(6deg);
+    letter-spacing: 2px;
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.document-reader-content.threat-letter {
+    background: #f5eedc url('../images/old_paper_texture.png') center/cover !important;
+    background-blend-mode: multiply !important;
+    font-family: 'Caveat', 'Kalam', cursive !important;
+    font-size: 1.85rem !important;
+    font-weight: 700 !important;
+    color: #0b0907 !important;
+    border: 2px solid #9c8a70 !important;
+    box-shadow: 0 20px 65px rgba(0,0,0,0.95), inset 0 0 45px rgba(140,105,55,0.3) !important;
+    padding: 55px 45px !important;
+}
+
+.threat-letter .letter-header {
+    font-family: 'Cinzel', serif !important;
+    font-size: 1.4rem !important;
+    font-weight: 900 !important;
+    color: #8b0000 !important;
+    border-bottom: 3px double #8b0000 !important;
+    padding-bottom: 14px !important;
+    margin-bottom: 30px !important;
+    letter-spacing: 2px !important;
+    text-align: center !important;
+}
+
+.threat-letter .letter-body {
+    font-family: 'Caveat', cursive !important;
+    font-size: 1.8rem !important;
+    line-height: 1.8 !important;
+    color: #050505 !important;
+}
+
+.threat-letter .letter-signature {
+    margin-top: 35px !important;
+    text-align: right !important;
+    font-family: 'Sedgwick Ave', 'Caveat', cursive !important;
+    font-size: 1.9rem !important;
+    color: #a80000 !important;
+    transform: rotate(-3deg);
+}
+
+.document-reader-content.secret-note {
+    background: #fdf6e2 url('../images/old_paper_texture.png') center/cover !important;
+    background-image: repeating-linear-gradient(transparent, transparent 29px, rgba(140, 160, 200, 0.25) 30px), url('../images/old_paper_texture.png') !important;
+    background-blend-mode: multiply !important;
+    max-width: 480px !important;
+    padding: 45px 40px !important;
+    box-shadow: 0 18px 55px rgba(0,0,0,0.9), inset 0 0 40px rgba(160,130,70,0.25) !important;
+    transform: rotate(-1.5deg);
+    border-left: 3px solid rgba(220, 100, 100, 0.4) !important;
+    border-right: 1px dashed rgba(160, 130, 90, 0.5) !important;
+    clip-path: polygon(
+        0 0, 100% 0, 98% 7%, 100% 14%, 97% 21%, 100% 28%, 98% 35%, 100% 42%, 97% 49%, 100% 56%, 98% 63%, 100% 70%, 97% 77%, 100% 84%, 98% 91%, 100% 100%,
+        0 100%, 2% 93%, 0 86%, 2% 79%, 0 72%, 2% 65%, 0 58%, 2% 51%, 0 44%, 2% 37%, 0 30%, 2% 23%, 0 16%, 2% 9%, 0 0
+    ) !important;
+}
+
+.secret-note .secret-note-title {
+    font-family: 'Kalam', cursive !important;
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    color: #8b0000 !important;
+    border-bottom: 2px dashed #8b0000 !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 25px !important;
+    letter-spacing: 1px !important;
+}
+
+.secret-note p {
+    font-family: 'Caveat', cursive !important;
+    font-size: 1.7rem !important;
+    line-height: 30px !important;
+    color: #050505 !important;
+    margin-bottom: 16px !important;
+}
+
+.secret-note .secret-note-sig {
+    font-family: 'Sedgwick Ave', cursive !important;
+    font-size: 1.9rem !important;
+    color: #7f1d1d !important;
+    text-align: right !important;
+    margin-top: 25px !important;
+}
+
+.document-reader-content.black-book {
+    background: #0a0806;
+    color: #0a0a0a;
+    font-family: 'Kalam', 'Caveat', cursive;
+    border: 12px solid #050403;
+    border-radius: 8px;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.95), 0 20px 60px rgba(0,0,0,0.95);
+    padding: 20px;
+    width: 95%;
+    max-width: 840px;
+}
+
+/* AÇIK İKİ SAYFALI DEFTER YAPISI — YÜKSEK OKUNABİLİRLİK & NETLİK */
+.open-notebook-wrapper {
+    display: flex;
+    position: relative;
+    background: #fffdf5 url('../images/old_paper_texture.png') center/cover;
+    background-blend-mode: multiply;
+    border-radius: 4px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.85);
+    min-height: 480px;
+    border: 2px solid #5a4832;
+    overflow: hidden;
+}
+
+.notebook-spine {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 24px;
+    transform: translateX(-50%);
+    background: linear-gradient(to right, 
+        rgba(0,0,0,0.2) 0%, 
+        rgba(0,0,0,0.03) 30%, 
+        rgba(255,255,255,0.4) 50%, 
+        rgba(0,0,0,0.03) 70%, 
+        rgba(0,0,0,0.2) 100%);
+    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+    z-index: 5;
+}
+
+.notebook-page {
+    flex: 1;
+    padding: 30px 25px;
+    position: relative;
+    background-image: repeating-linear-gradient(transparent, transparent 31px, rgba(120, 100, 80, 0.22) 32px);
+    line-height: 32px;
+}
+
+.notebook-page.left-page {
+    border-right: 1px solid rgba(0,0,0,0.15);
+    padding-right: 35px;
+}
+
+.notebook-page.right-page {
+    padding-left: 35px;
+}
+
+.notebook-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #8b0000;
+    text-align: center;
+    border-bottom: 2px double #8b0000;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    line-height: 1.2;
+}
+
+.notebook-date {
+    font-size: 0.95rem;
+    color: #333333;
+    text-align: right;
+    font-family: 'Special Elite', monospace;
+    font-weight: bold;
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.ledger-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #050505;
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.ledger-name {
+    color: #050505;
+    font-weight: 700;
+}
+
+.ledger-val {
+    color: #043810;
+    font-weight: 800;
+}
+
+.ledger-row.strike-row {
+    position: relative;
+}
+
+.victim-strike,
+.victim-strike-val {
+    color: #d90429 !important;
+    text-decoration: line-through;
+    text-decoration-color: #d90429;
+    text-decoration-thickness: 3px;
+    font-weight: 800;
+}
+
+.handwritten-note {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #050505;
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.red-ink-note {
+    color: #b91c1c;
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-top: 15px;
+    font-family: 'Special Elite', monospace;
+}
+
+.notebook-stamp {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    color: #b91c1c;
+    border: 3px solid #b91c1c;
+    padding: 4px 12px;
+    font-family: 'Cinzel', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    transform: rotate(-8deg);
+    letter-spacing: 2px;
+    pointer-events: none;
+}
+
+.document-reader-content.black-book .victim-name {
+    color: #ff4444;
+    text-decoration: line-through;
+    text-decoration-thickness: 3px;
+    font-weight: bold;
+    font-size: 1.7rem;
+}
+
+.document-reader-content.prescription {
+    background: #f4ead6 url('../images/old_paper_texture.png') center/cover !important;
+    background-blend-mode: multiply !important;
+    border: 3px double #4a3b2b !important;
+    max-width: 580px !important;
+    padding: 45px 40px !important;
+    color: #110e0b !important;
+    box-shadow: 0 18px 55px rgba(0,0,0,0.9), inset 0 0 45px rgba(130,95,40,0.3) !important;
+    font-family: 'Caveat', 'Kalam', cursive !important;
+}
+
+.document-reader-content.prescription .torn-text {
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 100%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 100%);
+    opacity: 0.65;
+    color: #880000;
+}
+
+.document-reader-content.confidential-file {
+    background: #ebdcc3 url('../images/old_paper_texture.png') center/cover !important;
+    background-blend-mode: multiply !important;
+    border: 3px double #6b553b !important;
+    padding: 50px 45px !important;
+    max-width: 650px !important;
+    color: #17120c !important;
+    box-shadow: 0 20px 65px rgba(0,0,0,0.95), inset 0 0 50px rgba(120,85,45,0.35) !important;
+    font-family: 'Courier New', Courier, monospace !important;
+}
+
+.document-reader-content.title-deeds {
+    background: #f0e6d2 url('../images/old_paper_texture.png') center/cover !important;
+    background-blend-mode: multiply !important;
+    border: 4px double #4a3520 !important;
+    padding: 55px 45px !important;
+    max-width: 640px !important;
+    color: #1a140e !important;
+    box-shadow: 0 20px 65px rgba(0,0,0,0.95), inset 0 0 50px rgba(110,80,40,0.35) !important;
+    font-family: 'Courier New', monospace !important;
+}
+
+/* Autopsy Report Noir Theme - Koyu, Yıpranmış Kağıt ve Klasik Daktilo */
+#result-modal .modal-content {
+    background: #d4c8b8 url('../images/vintage_autopsy_bg.png') center/cover;
+    background-blend-mode: multiply;
+    color: #1a1a1a;
+    font-family: 'Courier New', Courier, monospace;
+    border: 1px solid #8b7d6b;
+    border-radius: 2px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 40px rgba(0,0,0,0.5);
+    padding: 40px;
+    max-width: 700px;
+}
+
+#result-modal h2 {
+    color: #000;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 15px;
+    text-shadow: none;
+    font-family: 'Special Elite', 'Courier New', monospace;
+}
+
+#result-modal h2::before {
+    content: 'ÇOK GİZLİ';
+    color: #800;
+    border: 3px solid #800;
+    padding: 2px 8px;
+    margin-right: 15px;
+    font-size: 0.7em;
+    transform: rotate(-5deg);
+    display: inline-block;
+    opacity: 0.8;
+}
+
+/* Adli Tıp Butonu */
+.btn-send-forensics {
+    background: #8b0000;
+    color: #fff;
+    border: 2px solid #5a0000;
+    font-family: 'Special Elite', monospace;
+    transition: all 0.3s ease;
+}
+
+.btn-send-forensics:hover:not([disabled]) {
+    background: #a00000;
+    box-shadow: 0 0 15px #ff0000;
+}
+
+.btn-send-forensics[disabled] {
+    background: #333;
+    color: #777;
+    border-color: #222;
+    box-shadow: none;
 }
