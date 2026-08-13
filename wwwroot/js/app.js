@@ -41,7 +41,7 @@ let visitedBuildings = new Set();
 let dialogHistory = {}; // { npcId: [{player, npc}] }
 let guiltyNpcId = null;
 let npcTalkCompleted = {}; // { npcId: true/false }
-let isMuted = localStorage.getItem('gameMuted') === 'true';
+let isMuted = false;
 let npcQuestionPools = {}; // { npcId: [remaining questions] }
 let askedQuestionCount = {}; // { npcId: count }
 let npcStressLevels = {}; // { npcId: stressPercent }
@@ -82,74 +82,74 @@ const NPC_DATA = {
 };
 
 const SCENE_OBJECTS = {
-    1: [ // Kasap
+    1: [ // Kasap Hasan
         {
             id: 1, name: 'Kanlı Satır', desc: 'Tezgaha sertçe saplanmış, üzerinde taze kan lekeleri olan paslı bir satır.', top: '75%', left: '45%', img: 'images/bloody_cleaver.png',
-            fingerprintSpot: { xRatio: 0.35, yRatio: 0.75 }, bloodSpot: { xRatio: 0.65, yRatio: 0.35 }
+            fingerprintSpot: { xRatio: 0.30, yRatio: 0.72, angle: 0 }, bloodSpot: { xRatio: 0.68, yRatio: 0.28, angle: 0 }
         },
         {
             id: 2, name: 'Kara Kaplı Defter', desc: 'Veresiye listesinde kurbanın isminin üzeri kırmızı kalemle çizilmiş.', top: '65%', left: '30%', img: 'images/black_notebook.png',
-            fingerprintSpot: { xRatio: 0.3, yRatio: 0.3 }, bloodSpot: { xRatio: 0.7, yRatio: 0.7 }
+            fingerprintSpot: { xRatio: 0.26, yRatio: 0.32, angle: 0 }, bloodSpot: null
         },
         {
             id: 3, name: 'Yırtık Önlük', desc: 'Askının arkasında gizlenmiş, kavga izleri taşıyan, yakası kopmuş kasap önlüğü.', top: '40%', left: '10%', img: 'images/torn_apron.png', isHidden: true,
-            fingerprintSpot: { xRatio: 0.4, yRatio: 0.6 }, bloodSpot: { xRatio: 0.55, yRatio: 0.3 }
+            fingerprintSpot: null, bloodSpot: { xRatio: 0.62, yRatio: 0.64, angle: 0 }
         }
     ],
-    2: [ // Eczane
+    2: [ // Eczane (Selma)
         {
             id: 4, name: 'Gizli Zehir Şişesi', desc: 'İlaç raflarının arkasına saklanmış, zehirli olduğu bilinen ağır bir ilacın boş şişesi.', top: '55%', left: '75%', img: 'images/empty_medicine_bottle.png', isHidden: true,
-            fingerprintSpot: { xRatio: 0.5, yRatio: 0.25 }, bloodSpot: { xRatio: 0.5, yRatio: 0.75 }
+            fingerprintSpot: { xRatio: 0.44, yRatio: 0.54, angle: 0 }, bloodSpot: null
         },
         {
             id: 5, name: 'Reçete Defteri', desc: 'Kurbanın adının geçtiği, son sayfaları aceleyle yırtılmış defter.', top: '75%', left: '40%', img: 'images/prescription_notebook.png',
-            fingerprintSpot: { xRatio: 0.25, yRatio: 0.5 }, bloodSpot: { xRatio: 0.75, yRatio: 0.4 }
+            fingerprintSpot: { xRatio: 0.28, yRatio: 0.44, angle: 0 }, bloodSpot: null
         },
         {
             id: 6, name: 'Zehirli Sarmaşık', desc: 'Tezgah altında kurumaya bırakılmış zehirli bir bitki türü.', top: '15%', left: '45%', img: 'images/poison_ivy.png',
-            fingerprintSpot: { xRatio: 0.4, yRatio: 0.6 }, bloodSpot: { xRatio: 0.6, yRatio: 0.4 }
+            fingerprintSpot: null, bloodSpot: null
         }
     ],
-    3: [ // Muhtarlık
+    3: [ // Muhtarlık (Kemal)
         {
             id: 7, name: 'Tehdit Mektubu', desc: 'Muhtarın çekmecesinde kurbana yazılmış, henüz gönderilmemiş mektup.', top: '60%', left: '45%', img: 'images/threat_letter.png',
-            fingerprintSpot: { xRatio: 0.7, yRatio: 0.8 }, bloodSpot: { xRatio: 0.3, yRatio: 0.4 }
+            fingerprintSpot: { xRatio: 0.72, yRatio: 0.22, angle: 0 }, bloodSpot: null
         },
         {
             id: 8, name: 'Kırık Gözlük', desc: 'Kurbana ait olduğu düşünülen, camı kırık bir okuma gözlüğü.', top: '65%', left: '55%', img: 'images/broken_glasses.png',
-            fingerprintSpot: { xRatio: 0.5, yRatio: 0.45 }, bloodSpot: { xRatio: 0.7, yRatio: 0.55 }
+            fingerprintSpot: { xRatio: 0.32, yRatio: 0.48, angle: 0 }, bloodSpot: { xRatio: 0.68, yRatio: 0.42, angle: 0 }
         },
         {
             id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa.', top: '30%', left: '15%', img: 'images/hidden_safe.png', isHidden: true,
-            fingerprintSpot: { xRatio: 0.6, yRatio: 0.5 }, bloodSpot: { xRatio: 0.35, yRatio: 0.5 }
+            fingerprintSpot: { xRatio: 0.62, yRatio: 0.40, angle: 0 }, bloodSpot: null
         }
     ],
-    4: [ // Karakol
+    4: [ // Karakol (Komiser Güneş)
         {
             id: 10, name: 'Polis Rozeti', desc: 'Olay yerinde bulunan, numarası kazınmış bir polis rozeti.', top: '65%', left: '40%', img: 'images/police_badge.png',
-            fingerprintSpot: { xRatio: 0.5, yRatio: 0.4 }, bloodSpot: { xRatio: 0.5, yRatio: 0.7 }
+            fingerprintSpot: { xRatio: 0.50, yRatio: 0.38, angle: 0 }, bloodSpot: null
         },
         {
             id: 11, name: 'Gizli Dosya', desc: 'Kilitli evrak dolabında gizlenmiş "GİZLİ" damgalı bir dosya.', top: '45%', left: '80%', img: 'images/evidence_file.png', isHidden: true,
-            fingerprintSpot: { xRatio: 0.8, yRatio: 0.25 }, bloodSpot: { xRatio: 0.4, yRatio: 0.6 }
+            fingerprintSpot: { xRatio: 0.78, yRatio: 0.25, angle: 0 }, bloodSpot: null
         },
         {
             id: 12, name: 'Kayıp Düğme', desc: 'Pahalı bir paltonun kopmuş düğmesi.', top: '85%', left: '60%', img: 'images/missing_button.png',
-            fingerprintSpot: { xRatio: 0.5, yRatio: 0.5 }, bloodSpot: { xRatio: 0.45, yRatio: 0.45 }
+            fingerprintSpot: { xRatio: 0.42, yRatio: 0.45, angle: 0 }, bloodSpot: { xRatio: 0.58, yRatio: 0.55, angle: 0 }
         }
     ],
-    5: [ // Terzi
+    5: [ // Terzi (Yahya)
         {
             id: 13, name: 'Kanlı İplik Makarası', desc: 'Üzerinde kurumuş kan lekeleri olan iplik makarası.', top: '75%', left: '50%', img: 'images/thread_spool.png',
-            fingerprintSpot: { xRatio: 0.35, yRatio: 0.3 }, bloodSpot: { xRatio: 0.55, yRatio: 0.6 }
+            fingerprintSpot: { xRatio: 0.32, yRatio: 0.35, angle: 0 }, bloodSpot: { xRatio: 0.68, yRatio: 0.62, angle: 0 }
         },
         {
             id: 14, name: 'Yırtık Kumaş', desc: 'Kurbanın ceketinden kopmuş olabilecek kumaş parçası.', top: '80%', left: '40%', img: 'images/torn_fabric.png',
-            fingerprintSpot: { xRatio: 0.3, yRatio: 0.7 }, bloodSpot: { xRatio: 0.65, yRatio: 0.35 }
+            fingerprintSpot: null, bloodSpot: { xRatio: 0.70, yRatio: 0.32, angle: 0 }
         },
         {
             id: 15, name: 'Gizli Cep', desc: 'Mankendeki ceketin astarında saklanmış gizli bir cep.', top: '45%', left: '35%', img: 'images/hidden_pocket.png', isHidden: true,
-            fingerprintSpot: { xRatio: 0.5, yRatio: 0.35 }, bloodSpot: { xRatio: 0.5, yRatio: 0.65 }
+            fingerprintSpot: { xRatio: 0.55, yRatio: 0.35, angle: 0 }, bloodSpot: null
         }
     ]
 };
@@ -379,52 +379,114 @@ function toggleMute() {
     }
 }
 
-// YENİ OTOPSİ SİSTEMİ (SESSİZ ARKA PLAN ZAMANLAYICISI)
+// OTOPSİ VE ADLİ TİP SİSTEMİ (EN AZ 3 BİNA + EN AZ 3 LAB → 60 SANİYE KÖŞE SAYACI)
 let autopsyTimer = null;
-let autopsyTimeLeft = 240; // 4 dakika (240 saniye)
+let autopsyTimeLeft = 60; // 1 dakika (60 saniye)
 let isAutopsyReady = false;
+let isAutopsyTimerStarted = false;
+let submittedForensicCount = 0;
 
-function startAutopsyTimer() {
-    autopsyTimeLeft = 240;
-    isAutopsyReady = false;
+function checkAutopsyConditions() {
+    const buildingCount = visitedBuildings.size;
+    const labCount = submittedForensicCount;
     const container = document.getElementById('autopsy-timer-container');
 
-    // Sayaç süresince buton gizli tutulur (ekranda geri sayım gösterilmez)
-    if (container) {
-        container.classList.add('hidden');
-        container.classList.remove('ready');
+    updateForensicBadge();
+
+    if (!container) return;
+
+    if (isAutopsyReady) {
+        container.classList.remove('hidden', 'pending', 'active-timer');
+        container.classList.add('ready');
+        container.innerHTML = '<i class="fa-solid fa-file-signature"></i> ✓ OTOPSİ RAPORU HAZIR! (TIKLA)';
+        return;
     }
+
+    if (isAutopsyTimerStarted) return;
+
+    // Durumu ekrandaki göstergede göster
+    container.classList.remove('hidden', 'ready', 'active-timer');
+    container.classList.add('pending');
+    container.innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> OTOPSİ: BİNA ${buildingCount}/3 | LAB ${labCount}/3`;
+
+    // En az 3 binaya girilmiş VE en az 3 lab gönderimi yapılmışsa 60 saniyelik GERİ SAYIM BAŞLAR!
+    if (buildingCount >= 3 && labCount >= 3) {
+        start60SecAutopsyCountdown();
+    }
+}
+
+function start60SecAutopsyCountdown() {
+    if (isAutopsyTimerStarted || isAutopsyReady) return;
+    isAutopsyTimerStarted = true;
+    autopsyTimeLeft = 60;
+
+    const container = document.getElementById('autopsy-timer-container');
+    if (container) {
+        container.classList.remove('hidden', 'pending', 'ready');
+        container.classList.add('active-timer');
+        container.innerHTML = `<i class="fa-solid fa-hourglass-half fa-spin"></i> OTOPSİ: 01:00`;
+    }
+
+    showGlobalNotification("BİLGİ", "📋 OTOPSİ RAPORU HAZIRLANIYOR!\n\nEn az 3 bina incelendi ve 3 delil adli tıbba gönderildi. Adli Tıp Kurumu otopsi raporunu hazırlamaya başladı! Ekrandaki 60 saniyelik sayacı takip ediniz.", false);
+    showCinematicHelper("Amirims! 3 bina incelemesi ve 3 lab gönderimi tamamlandı. Adli tıp otopsi raporu hazırlanıyor, ekrandaki 60 saniyelik sayacı takip edebilirsiniz!", false);
 
     if (autopsyTimer) clearInterval(autopsyTimer);
 
     autopsyTimer = setInterval(() => {
         autopsyTimeLeft--;
 
+        const mins = Math.floor(autopsyTimeLeft / 60);
+        const secs = autopsyTimeLeft % 60;
+        const formattedTime = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (container) {
+            container.innerHTML = `<i class="fa-solid fa-hourglass-half fa-spin"></i> OTOPSİ: ${formattedTime}`;
+        }
+
         if (autopsyTimeLeft <= 0) {
             clearInterval(autopsyTimer);
+            autopsyTimer = null;
             isAutopsyReady = true;
 
-            // Rapor hazır olduğunda butonu göster
             if (container) {
-                container.classList.remove('hidden');
+                container.classList.remove('active-timer', 'pending');
                 container.classList.add('ready');
-                container.innerHTML = '<i class="fa-solid fa-file-signature"></i> OTOPSİ RAPORU GELDİ! (TIKLA)';
+                container.innerHTML = '<i class="fa-solid fa-file-signature"></i> ✓ OTOPSİ RAPORU HAZIR! (TIKLA)';
             }
 
-            // Mesaj Bildirimi (Custom Modal)
-            const notifModal = document.getElementById('global-notification-modal');
-            const notifText = document.getElementById('global-notification-text');
-            if (notifText) {
-                notifText.textContent = "📋 OTOPSİ RAPORU VE ADLİ LAB SONUÇLARI GELDİ!\n\nAdli Tıp Kurumu'ndan beklenen detaylı otopsi raporu ve laboratuvar bulguları merkeze ulaştı. Haritadaki 'OTOPSİ RAPORU GELDİ' butonuna tıklayarak hemen inceleyebilirsiniz.";
-            }
-            if (notifModal) {
-                notifModal.classList.remove('hidden');
-            }
-
-            // Çetin Sinematik Balon Otomatik Geri Gelir
-            showCinematicHelper("Amirims! Adli Tıp Merkezi'nden otopsi raporu geldi! Harita ekranındaki 'OTOPSİ RAPORU GELDİ' butonuna tıklayarak hemen inceleyin!", false);
+            showGlobalNotification("BİLGİ", "📋 OTOPSİ RAPORU GELDİ!\n\nAdli Tıp Kurumu'ndan beklenen detaylı otopsi raporu ve laboratuvar analizleri merkeze ulaştı. Haritadaki 'OTOPSİ RAPORU HAZIR' butonuna tıklayarak hemen inceleyebilirsiniz.", false);
+            showCinematicHelper("Amirims! Adli Tıp otopsi raporu hazır! Haritadaki 'OTOPSİ RAPORU HAZIR' butonuna tıklayarak hemen inceleyin!", false);
         }
     }, 1000);
+}
+
+function startAutopsyTimer() {
+    isAutopsyTimerStarted = false;
+    isAutopsyReady = false;
+    autopsyTimeLeft = 60;
+    if (autopsyTimer) clearInterval(autopsyTimer);
+    autopsyTimer = null;
+    checkAutopsyConditions();
+}
+
+function showGlobalNotification(title, text, isWarning = false) {
+    const notifModal = document.getElementById('global-notification-modal');
+    const notifText = document.getElementById('global-notification-text');
+    const notifTitle = document.getElementById('global-notification-title');
+    const notifIcon = document.querySelector('#global-notification-modal .notification-icon');
+
+    if (notifTitle) notifTitle.textContent = title;
+    if (notifText) notifText.textContent = text;
+    if (notifIcon) {
+        if (isWarning) {
+            notifIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            notifIcon.style.color = '#ff4a4a';
+        } else {
+            notifIcon.innerHTML = '<i class="fa-solid fa-envelope-open-text"></i>';
+            notifIcon.style.color = '#38bdf8';
+        }
+    }
+    if (notifModal) notifModal.classList.remove('hidden');
 }
 
 // Global notification modal close event
@@ -432,18 +494,41 @@ document.getElementById('notification-ok-btn')?.addEventListener('click', () => 
     document.getElementById('global-notification-modal').classList.add('hidden');
 });
 
+function updateForensicBadge() {
+    const badge = document.getElementById('forensic-pending-badge');
+    const badgeText = document.getElementById('forensic-badge-text');
+    if (!badge || !badgeText) return;
+
+    if (submittedForensicCount === 0) {
+        badge.className = 'forensic-status-badge badge-pending';
+        badgeText.textContent = '0/3 LAB GEREKLİ';
+    } else if (submittedForensicCount < 3) {
+        badge.className = 'forensic-status-badge badge-pending';
+        badgeText.textContent = `${submittedForensicCount}/3 LAB GÖNDERİLDİ`;
+    } else {
+        badge.className = 'forensic-status-badge badge-ready';
+        badgeText.textContent = `✓ ${submittedForensicCount} LAB GÖNDERİLDİ`;
+    }
+}
+
+document.getElementById('forensic-pending-badge')?.addEventListener('click', () => {
+    showGlobalNotification("BİLGİ", `Adli Tıp Kurumu'na şu ana kadar ${submittedForensicCount} adet delil bulgusu iletildi. (Otopsi raporunun başlaması için en az 3 lab gönderimi gereklidir).`, false);
+});
+
 // Otopsi Tıklama Olayı
 document.getElementById('autopsy-timer-container').addEventListener('click', () => {
-    if (!isAutopsyReady) {
-        // İnceleme henüz tamamlanmadıysa uyarı ver
-        const notifModal = document.getElementById('global-notification-modal');
-        const notifText = document.getElementById('global-notification-text');
-        if (notifText) {
-            notifText.textContent = "Adli Tıp otopsi incelemesi henüz tamamlanmadı. Lütfen kasabadaki binaları incelemeye ve delilleri toplamaya devam edin!";
-        }
-        if (notifModal) {
-            notifModal.classList.remove('hidden');
-        }
+    const buildingCount = visitedBuildings.size;
+    const labCount = submittedForensicCount;
+
+    if (!isAutopsyTimerStarted && !isAutopsyReady) {
+        showGlobalNotification("UYARI", `Otopsi raporunun hazırlanmaya başlaması için en az 3 bina incelenmeli (Şu an: ${buildingCount}/3) ve en az 3 delil adli tıbba gönderilmelidir (Şu an: ${labCount}/3)!`, true);
+        showCinematicHelper(`Amirims! Otopsi raporunun başlaması için en az 3 bina gezilmeli (${buildingCount}/3) ve 3 delil adli tıbba gönderilmeli (${labCount}/3).`, false);
+        return;
+    }
+
+    if (isAutopsyTimerStarted && !isAutopsyReady) {
+        showGlobalNotification("BİLGİ", `Adli Tıp Kurumu otopsi raporunu hazırlıyor! Raporun tamamlanmasına kalan süre: ${autopsyTimeLeft} saniye.`, false);
+        showCinematicHelper(`Amirims! Adli Tıp otopsi raporunu hazırlıyor. Kalan süre: ${autopsyTimeLeft} saniye.`, false);
         return;
     }
 
@@ -458,6 +543,7 @@ document.getElementById('autopsy-timer-container').addEventListener('click', () 
         })
         .then(data => {
             if (data.success) {
+                if (data.guiltyId) guiltyNpcId = data.guiltyId;
                 document.getElementById('autopsy-text').innerHTML = data.report;
                 document.getElementById('autopsy-modal').classList.remove('hidden');
             }
@@ -1052,22 +1138,31 @@ document.getElementById('building-clue-close-btn')?.addEventListener('click', ()
     if (buildingClueModal) buildingClueModal.classList.add('hidden');
 });
 
+let isInspectStartedFromBuilding = false;
+
 // Ana İnceleme Ekranı (Haritadan/Çantadan Erişilen Gerçek Büyüklükteki Lab İnceleme)
 function openClueInspect(obj, npcId, fromBag = false) {
-    // KONTROL: Bina içerisinden laboratuvar inceleme ekranına girmeye çalışılırsa engelle
-    if (activeNpcId !== null && !fromBag) {
-        openBuildingClueModal(obj, npcId);
+    // Gerçek bina içinde olma şartı: interiorScreen görünür VE townMapScreen gizli olmalıdır
+    const isInsideBuilding = (interiorScreen && !interiorScreen.classList.contains('hidden')) && (townMapScreen && townMapScreen.classList.contains('hidden'));
+    isInspectStartedFromBuilding = isInsideBuilding;
+
+    // Harita ekranındaysak (dışarıdaysak) activeNpcId'yi temizle ki kilitlenme/bug olmasın
+    if (!isInsideBuilding) {
+        activeNpcId = null;
+        if (interiorScreen) interiorScreen.classList.add('hidden');
+        if (townMapScreen) townMapScreen.classList.remove('hidden');
+    }
+
+    // KONTROL: Gerçekten bina içindeyken çantadakine tıklanırsa engelle ve UYARI göster
+    if (isInsideBuilding && fromBag) {
+        showGlobalNotification("UYARI", "Bina içlerinden detaylı laboratuvar incelemesi yapılamaz! Önce delili çantaya alıp kasaba haritasına (dışarıya) dönmelisiniz.", true);
+        showCinematicHelper("Amirims! Bina içlerinden detaylı laboratuvar incelemesi yapılamaz! Önce delili çantaya alıp kasaba haritasına dönmelisiniz.", false);
         return;
     }
 
-    if (activeNpcId !== null && fromBag) {
-        const notifModal = document.getElementById('global-notification-modal');
-        const notifText = document.getElementById('global-notification-text');
-        if (notifText) {
-            notifText.textContent = "Bina içlerinden detaylı laboratuvar incelemesi yapılamaz! Önce delili çantaya alıp kasaba haritasına (dışarıya) dönmelisiniz.";
-        }
-        if (notifModal) notifModal.classList.remove('hidden');
-        showCinematicHelper("Amirims! Bina içlerinden detaylı laboratuvar incelemesi yapılamaz! Önce delili çantaya alıp kasaba haritasına dönmelisiniz.", false);
+    // Bina içindeyken sahnedeki nesneye tıklanırsa küçük bina içi modal açılır
+    if (isInsideBuilding && !fromBag) {
+        openBuildingClueModal(obj, npcId);
         return;
     }
 
@@ -1090,21 +1185,46 @@ function openClueInspect(obj, npcId, fromBag = false) {
         }
     }
 
-    // Yeşil İpucu Mesaj Kutusu ve Adli Tıbba Gönder Butonunu Sıfırla
+    // Yeşil İpucu Mesaj Kutusu ve Ayrı Ayrı Adli Tıbba Gönder Butonlarını Sıfırla
     const findingBox = document.getElementById('forensic-finding-box');
-    const sendBtn = document.getElementById('send-forensic-btn');
+    const bloodItem = document.getElementById('forensic-blood-item');
+    const printItem = document.getElementById('forensic-fingerprint-item');
+    const sendBloodBtn = document.getElementById('send-blood-btn');
+    const sendPrintBtn = document.getElementById('send-fingerprint-btn');
+
     if (findingBox) findingBox.classList.add('hidden');
-    if (sendBtn) {
-        sendBtn.classList.add('hidden');
-        if (typeof isAutopsyReady !== 'undefined' && isAutopsyReady) {
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = '<i class="fa-solid fa-ban"></i> ADLİ TIP RAPORU GELDİ';
+    if (bloodItem) bloodItem.classList.add('hidden');
+    if (printItem) printItem.classList.add('hidden');
+
+    if (sendBloodBtn) {
+        if (submittedBloodClueIds.has(obj.id)) {
+            sendBloodBtn.disabled = true;
+            sendBloodBtn.innerHTML = '<i class="fa-solid fa-check"></i> KAN LEKESİ ADLİ TIBBA GÖNDERİLDİ';
+            sendBloodBtn.style.opacity = '0.6';
+            sendBloodBtn.style.cursor = 'not-allowed';
         } else {
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ADLİ TIBBA GÖNDER';
+            sendBloodBtn.disabled = false;
+            sendBloodBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> KAN LEKESİNİ ADLİ TIBBA GÖNDER';
+            sendBloodBtn.style.opacity = '1';
+            sendBloodBtn.style.cursor = 'pointer';
         }
     }
-    window.currentForensicFindingText = "";
+    if (sendPrintBtn) {
+        if (submittedPrintClueIds.has(obj.id)) {
+            sendPrintBtn.disabled = true;
+            sendPrintBtn.innerHTML = '<i class="fa-solid fa-check"></i> PARMAK İZİ ADLİ TIBBA GÖNDERİLDİ';
+            sendPrintBtn.style.opacity = '0.6';
+            sendPrintBtn.style.cursor = 'not-allowed';
+        } else {
+            sendPrintBtn.disabled = false;
+            sendPrintBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> PARMAK İZİNİ ADLİ TIBBA GÖNDER';
+            sendPrintBtn.style.opacity = '1';
+            sendPrintBtn.style.cursor = 'pointer';
+        }
+    }
+
+    window.currentBloodFindingText = "";
+    window.currentFingerprintFindingText = "";
 
     // Fetch dynamic forensic state
     fetch('/api/game/forensic-state')
@@ -1162,14 +1282,25 @@ document.getElementById('clue-take-btn').addEventListener('click', () => {
         // Çetin Çantaya Delil Alındığında Otomatik Konuşsun
         showCinematicHelper(`Harika Amirims! '${currentPendingObject.name}' delilini çantaya attık! (${currentBag.length}/${MAX_BAG_SIZE} delil). Şüphelileri sorgularken bu delili ipucu olarak kullanabiliriz.`, false);
     }
-    document.getElementById('document-reader-overlay')?.classList.add('hidden');
-    clueInspectModal.classList.add('hidden');
+    closeClueInspectAndReturn();
 });
 
-document.getElementById('clue-leave-btn').addEventListener('click', () => {
-    clueInspectModal.classList.add('hidden');
+function closeClueInspectAndReturn() {
+    if (clueInspectModal) clueInspectModal.classList.add('hidden');
     document.getElementById('document-reader-overlay')?.classList.add('hidden');
     if (window.resetForensicTools) window.resetForensicTools();
+
+    if (!isInspectStartedFromBuilding) {
+        activeNpcId = null;
+        if (interiorScreen) interiorScreen.classList.add('hidden');
+        if (townMapScreen) townMapScreen.classList.remove('hidden');
+    } else {
+        if (interiorScreen) interiorScreen.classList.remove('hidden');
+    }
+}
+
+document.getElementById('clue-leave-btn').addEventListener('click', () => {
+    closeClueInspectAndReturn();
 });
 
 document.getElementById('clue-read-btn')?.addEventListener('click', () => {
@@ -1185,22 +1316,20 @@ document.getElementById('clue-read-btn')?.addEventListener('click', () => {
         case 7: // Tehdit Mektubu
             content.classList.add('threat-letter');
             content.innerHTML = `
-                <div class="letter-header">T.C. KASABA MUHTARLIĞI NOTU</div>
+                <div class="letter-header">T.C. KASABA MUHTARLIĞI RESMİ NOTU</div>
                 <div class="letter-body">
                     <p>Osman Bey,</p>
-                    <p>Karanlık sırlar sonsuza dek gizli kalmaz. Arazileri devretmeyi reddetmenin bir bedeli olacak.</p>
-                    <p>Zamanın doldu. Bu gece yaptıklarının hesabını vereceksin!</p>
-                    <div class="letter-signature">Ecelin kapıda...</div>
+                    <p>Karanlık sırlar sonsuza dek gizli kalmaz. Kasaba arazilerini devretmeyi reddetmenin ağır bir bedeli olacak.</p>
+                    <p>Zamanın doldu. Bu gece yaptıklarının hesabını vereceksin.</p>
+                    <div class="letter-signature">Ecelin...</div>
                 </div>
             `;
             break;
-        case 15: // Gizli Cep Notu
+        case 15: // Gizli Cep Notu (Başlıksız Gizli Not)
             content.classList.add('secret-note');
             content.innerHTML = `
-                <div class="secret-note-title">GİZLİ NOT</div>
-                <p>Her şey planlandığı gibi gidiyor.</p>
-                <p>Artık geri dönüş yok. Yarın gece yarısı eski depoda buluşalım.</p>
-                <div class="secret-note-sig">- O.</div>
+                <p>Osman, bugün hava kararınca dükkânıma gel konuşalım. Kimseye görünme, eski defterleri kapatacağız.</p>
+                <div class="secret-note-sig">- Y.</div>
             `;
             break;
         case 2: // Kara Kaplı Defter (Açık İki Sayfalı Veresiye Defteri)
@@ -1242,7 +1371,7 @@ document.getElementById('clue-read-btn')?.addEventListener('click', () => {
                 </div>
             `;
             break;
-        case 5: // Reçete Defteri
+        case 5: // Reçete Defteri (Yırtık Kağıt Görseli Üzerinde Kesik Yazı)
             content.classList.add('prescription');
             content.innerHTML = `
                 <div class="prescription-header">
@@ -1255,16 +1384,16 @@ document.getElementById('clue-read-btn')?.addEventListener('click', () => {
                     <hr>
                     <p><strong>Verilen İlaçlar:</strong></p>
                     <p>1. Diazepam 5mg — Günde 1 Adet (Gece)</p>
-                    <p class="torn-text">2. [BİTKİSEL ZEHİRLİ EKSTRE — SAYFA ACALEYLE YIRTIK]</p>
+                    <p class="torn-edge-text">2. Bitkisel <span class="faded-torn-text">... [Yırtılmış / Silinmiş]</span></p>
                 </div>
             `;
             break;
-        case 9: // Gizli Kasa (Sahte Tapular)
-            content.classList.add('title-deeds');
+        case 9: // Tapu Senedi
+            content.classList.add('title-deed');
             content.innerHTML = `
-                <div class="deed-seal">T.C. TAPU İDARESİ</div>
-                <h3 class="deed-title">KASABA ARAZİ DEVİR SENEDİ</h3>
-                <p><strong>Pafta No:</strong> 14 / <strong>Parsel:</strong> 89</p>
+                <div class="deed-header">T.C. TAPU VE KADASTRO GENEL MÜDÜRLÜĞÜ</div>
+                <div class="deed-title">ARAZİ DEVİR SENEDİ</div>
+                <p><strong>Ada/Parsel:</strong> #404 - Kasaba Meydan Çarşısı</p>
                 <p><strong>Mülk Sahibi:</strong> Osman Bey</p>
                 <p><strong>Devredilen Taraf:</strong> Kasaba Muhtarlığı</p>
                 <div class="deed-warning">[SAHTE İMZA — HÜKÜMSÜZDÜR]</div>
@@ -1285,7 +1414,7 @@ document.getElementById('clue-read-btn')?.addEventListener('click', () => {
 });
 
 document.getElementById('document-reader-close')?.addEventListener('click', () => {
-    document.getElementById('document-reader-overlay')?.classList.add('hidden');
+    closeClueInspectAndReturn();
 });
 
 // =============================================================
@@ -1296,29 +1425,58 @@ let activeForensicTool = null;
 let isDrawing = false;
 let lastX = 0, lastY = 0;
 
-function triggerForensicFinding(findingText) {
-    window.currentForensicFindingText = findingText;
-    const findingBox = document.getElementById('forensic-finding-box');
-    const findingTextEl = document.getElementById('forensic-finding-text');
-    const sendBtn = document.getElementById('send-forensic-btn');
 
-    if (findingTextEl) findingTextEl.textContent = findingText;
-    if (findingBox) findingBox.classList.remove('hidden');
-    if (sendBtn) {
-        sendBtn.classList.remove('hidden');
-        if (typeof isAutopsyReady !== 'undefined' && isAutopsyReady) {
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = '<i class="fa-solid fa-ban"></i> OTOPSİ GELDİ - SÜRE DOLDU';
-        }
+const submittedBloodClueIds = new Set();
+const submittedPrintClueIds = new Set();
+
+function triggerForensicFinding(findingText, findingType) {
+    const findingBox = document.getElementById('forensic-finding-box');
+    if (!findingBox) return;
+
+    findingBox.classList.remove('hidden');
+
+    if (findingType === 'blood') {
+        window.currentBloodFindingText = findingText;
+        const bloodItem = document.getElementById('forensic-blood-item');
+        const bloodText = document.getElementById('forensic-blood-text');
+        const sendBloodBtn = document.getElementById('send-blood-btn');
+        if (bloodText) bloodText.innerHTML = `<i class="fa-solid fa-droplet text-red"></i> ${findingText}`;
+        if (sendBloodBtn) sendBloodBtn.classList.remove('hidden');
+        if (bloodItem) bloodItem.classList.remove('hidden');
+    } else if (findingType === 'blood_clean') {
+        const bloodItem = document.getElementById('forensic-blood-item');
+        const bloodText = document.getElementById('forensic-blood-text');
+        const sendBloodBtn = document.getElementById('send-blood-btn');
+        if (bloodText) bloodText.innerHTML = `<i class="fa-solid fa-shield-halved" style="color: #10b981;"></i> ${findingText}`;
+        if (sendBloodBtn) sendBloodBtn.classList.add('hidden');
+        if (bloodItem) bloodItem.classList.remove('hidden');
+    } else if (findingType === 'fingerprint') {
+        window.currentFingerprintFindingText = findingText;
+        const printItem = document.getElementById('forensic-fingerprint-item');
+        const printText = document.getElementById('forensic-fingerprint-text');
+        const sendPrintBtn = document.getElementById('send-fingerprint-btn');
+        if (printText) printText.innerHTML = `<i class="fa-solid fa-fingerprint text-cyan"></i> ${findingText}`;
+        if (sendPrintBtn) sendPrintBtn.classList.remove('hidden');
+        if (printItem) printItem.classList.remove('hidden');
+    } else if (findingType === 'fingerprint_clean') {
+        const printItem = document.getElementById('forensic-fingerprint-item');
+        const printText = document.getElementById('forensic-fingerprint-text');
+        const sendPrintBtn = document.getElementById('send-fingerprint-btn');
+        if (printText) printText.innerHTML = `<i class="fa-solid fa-shield-halved" style="color: #10b981;"></i> ${findingText}`;
+        if (sendPrintBtn) sendPrintBtn.classList.add('hidden');
+        if (printItem) printItem.classList.remove('hidden');
     }
 }
 
-// Adli Tıbba Gönder Buton Dinleyicisi
+// Adli Tıbba Gönder Buton Dinleyicileri
 document.addEventListener('DOMContentLoaded', () => {
-    const sendBtn = document.getElementById('send-forensic-btn');
-    if (sendBtn) {
-        sendBtn.addEventListener('click', () => {
-            if (!currentPendingObject || !window.currentForensicFindingText) return;
+    const sendBloodBtn = document.getElementById('send-blood-btn');
+    const sendPrintBtn = document.getElementById('send-fingerprint-btn');
+
+    if (sendBloodBtn) {
+        sendBloodBtn.addEventListener('click', () => {
+            if (!currentPendingObject || !window.currentBloodFindingText) return;
+            if (submittedBloodClueIds.has(currentPendingObject.id)) return;
 
             fetch('/api/game/forensic/submit', {
                 method: 'POST',
@@ -1326,18 +1484,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     ClueId: currentPendingObject.id,
                     ClueName: currentPendingObject.name,
-                    FindingText: window.currentForensicFindingText
+                    FindingText: window.currentBloodFindingText
                 })
             })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        sendBtn.disabled = true;
-                        sendBtn.innerHTML = '<i class="fa-solid fa-check"></i> ADLİ TIBBA GÖNDERİLDİ';
-                        sendBtn.disabled = true; // Button disabled after sending
-                        sendBtn.style.opacity = '0.7';
-                        sendBtn.style.cursor = 'default';
-                        showCinematicHelper(`Harika Amirims! '${currentPendingObject.name}' üzerindeki bu bulguyu (${window.currentForensicFindingText}) Adli Tıp Merkezi'ne ilettim. Otopsi raporuna yeni detaylar eklendi!`, false);
+                        submittedBloodClueIds.add(currentPendingObject.id);
+                        sendBloodBtn.disabled = true;
+                        sendBloodBtn.innerHTML = '<i class="fa-solid fa-check"></i> KAN LEKESİ ADLİ TIBBA GÖNDERİLDİ';
+                        sendBloodBtn.style.opacity = '0.6';
+                        sendBloodBtn.style.cursor = 'not-allowed';
+                        submittedForensicCount++;
+                        checkAutopsyConditions();
+                        showCinematicHelper(`Harika Amirims! '${currentPendingObject.name}' üzerindeki KAN LEKESİ bulgusunu Adli Tıp Merkezi'ne ilettim. Otopsi raporuna yeni detaylar eklendi!`, false);
+                    }
+                })
+                .catch(err => console.error("Adli Tıp gönderme hatası:", err));
+        });
+    }
+
+    if (sendPrintBtn) {
+        sendPrintBtn.addEventListener('click', () => {
+            if (!currentPendingObject || !window.currentFingerprintFindingText) return;
+            if (submittedPrintClueIds.has(currentPendingObject.id)) return;
+
+            fetch('/api/game/forensic/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ClueId: currentPendingObject.id,
+                    ClueName: currentPendingObject.name,
+                    FindingText: window.currentFingerprintFindingText
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        submittedPrintClueIds.add(currentPendingObject.id);
+                        sendPrintBtn.disabled = true;
+                        sendPrintBtn.innerHTML = '<i class="fa-solid fa-check"></i> PARMAK İZİ ADLİ TIBBA GÖNDERİLDİ';
+                        sendPrintBtn.style.opacity = '0.6';
+                        sendPrintBtn.style.cursor = 'not-allowed';
+                        submittedForensicCount++;
+                        checkAutopsyConditions();
+                        showCinematicHelper(`Harika Amirims! '${currentPendingObject.name}' üzerindeki PARMAK İZİ bulgusunu Adli Tıp Merkezi'ne ilettim. Otopsi raporuna yeni detaylar eklendi!`, false);
                     }
                 })
                 .catch(err => console.error("Adli Tıp gönderme hatası:", err));
@@ -1348,10 +1539,10 @@ document.addEventListener('DOMContentLoaded', () => {
 let dustAnimationFrame;
 
 const realFingerprint = new Image();
-realFingerprint.src = 'images/real_fingerprint.png';
+realFingerprint.src = 'images/real_fingerprint.png?v=' + Date.now();
 
 const realBloodStain = new Image();
-realBloodStain.src = 'images/real_blood_stain.png';
+realBloodStain.src = 'images/real_blood_stain.png?v=' + Date.now();
 
 function setupForensicTools() {
     const uvBtn = document.getElementById('tool-uv-btn');
@@ -1444,9 +1635,11 @@ function setupForensicTools() {
         uvCanvas.classList.add('active');
         visualArea.classList.add('cursor-uv');
 
+        realBloodStain.src = 'images/real_blood_stain.png?v=' + Date.now();
+
         syncCanvasSize();
         const ctx = uvCanvas.getContext('2d');
-        ctx.fillStyle = 'rgba(10, 5, 20, 0.9)';
+        ctx.fillStyle = 'rgba(8, 5, 20, 0.92)';
         ctx.fillRect(0, 0, uvCanvas.width, uvCanvas.height);
     });
 
@@ -1457,6 +1650,8 @@ function setupForensicTools() {
         dustCanvas.classList.remove('hidden');
         dustCanvas.classList.add('active');
         visualArea.classList.add('cursor-dust');
+
+        realFingerprint.src = 'images/real_fingerprint.png?v=' + Date.now();
 
         syncCanvasSize();
         const ctx = dustCanvas.getContext('2d');
@@ -1528,59 +1723,77 @@ function setupForensicTools() {
             ctx.arc(x, y, 130, 0, Math.PI * 2);
             ctx.fill();
 
-            // Kan lekesi gösterimi (Cinayet aletleri veya kurban dokuları)
-            const isMurderWeapon = currentPendingObject && (
-                (window.currentForensicState && currentPendingObject.id === window.currentForensicState.weaponId) ||
-                [1, 3, 6, 8, 10, 13].includes(currentPendingObject.id)
-            );
+            // Kan lekesi gösterimi — SADECE UV ışığının fener hüzmesi (130px) lekenin TAM üstüne gelirse göster!
+            if (currentPendingObject) {
+                if (currentPendingObject.bloodSpot) {
+                    const spot = currentPendingObject.bloodSpot;
+                    const targetAngle = spot.angle !== undefined ? spot.angle : 0;
 
-            if (isMurderWeapon) {
-                const spot = currentPendingObject.bloodSpot || { xRatio: 0.5, yRatio: 0.5 };
-                const cx = uvCanvas.width * spot.xRatio;
-                const cy = uvCanvas.height * spot.yRatio;
+                    if (currentRotationIndex === targetAngle) {
+                        const imgRect = imgEl.getBoundingClientRect();
+                        const imgOffsetLeft = imgRect.left - wrapperRect.left;
+                        const imgOffsetTop = imgRect.top - wrapperRect.top;
+                        const cx = imgOffsetLeft + imgRect.width * spot.xRatio;
+                        const cy = imgOffsetTop + imgRect.height * spot.yRatio;
 
-                ctx.save();
-                ctx.globalCompositeOperation = 'multiply'; // Beyaz arkaplanı siler, kanı koyu olarak aktarır
-                ctx.globalAlpha = 0.9;
-                ctx.drawImage(realBloodStain, cx - 45, cy - 45, 90, 90);
-                ctx.restore();
+                        const dist = Math.hypot(x - cx, y - cy);
+                        if (dist < 130) {
+                            ctx.save();
+                            ctx.globalCompositeOperation = 'source-over';
+                            ctx.globalAlpha = Math.min(1.0, (130 - dist) / 60 + 0.4);
+                            ctx.shadowColor = 'transparent';
+                            ctx.shadowBlur = 0;
+                            ctx.drawImage(realBloodStain, cx - 40, cy - 40, 80, 80);
+                            ctx.restore();
 
-                if (Math.abs(x - cx) < 130 && Math.abs(y - cy) < 130) {
-                    triggerForensicFinding(`KAN LEKESİ TESPİT EDİLDİ! (${currentPendingObject.name} üzerinde kurbana ait biyolojik kan lekesi)`);
+                            triggerForensicFinding(`KAN LEKESİ TESPİT EDİLDİ! (Biyolojik kan lekesi örneği izole edildi)`, 'blood');
+                        }
+                    }
+                } else {
+                    triggerForensicFinding(`TEMİZ: Nesne üzerinde UV altında tespit edilen bir kan veya biyolojik leke bulunmamaktadır.`, 'blood_clean');
                 }
             }
         } else if (activeForensicTool === 'dust') {
             const ctx = dustCanvas.getContext('2d');
-            ctx.fillStyle = 'rgba(20, 20, 25, 0.85)';
-            ctx.shadowColor = 'rgba(0,0,0,0.9)';
-            ctx.shadowBlur = 4;
-
-            for (let i = 0; i < 20; i++) {
-                const rx = (Math.random() - 0.5) * 40;
-                const ry = (Math.random() - 0.5) * 40;
-                ctx.beginPath();
-                ctx.arc(x + rx, y + ry, Math.random() * 3 + 1, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            ctx.fillStyle = 'rgba(25, 25, 30, 0.85)';
+            ctx.shadowColor = 'transparent';
             ctx.shadowBlur = 0;
 
-            const hasFingerprint = currentPendingObject && (
-                (window.currentForensicState && (currentPendingObject.id === window.currentForensicState.fingerprintId || currentPendingObject.id === window.currentForensicState.weaponId)) ||
-                [1, 2, 4, 7, 8, 9, 12, 14, 15].includes(currentPendingObject.id)
-            );
+            for (let i = 0; i < 18; i++) {
+                const rx = (Math.random() - 0.5) * 36;
+                const ry = (Math.random() - 0.5) * 36;
+                ctx.beginPath();
+                ctx.arc(x + rx, y + ry, Math.random() * 2.5 + 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
 
-            if (hasFingerprint) {
-                const spot = currentPendingObject.fingerprintSpot || { xRatio: 0.5, yRatio: 0.5 };
-                const cx = dustCanvas.width * spot.xRatio;
-                const cy = dustCanvas.height * spot.yRatio;
+            // Parmak izi gösterimi — SADECE tozlama fırçası TAM lekenin üstüne sürülürse göster!
+            if (currentPendingObject) {
+                if (currentPendingObject.fingerprintSpot) {
+                    const spot = currentPendingObject.fingerprintSpot;
+                    const targetAngle = spot.angle !== undefined ? spot.angle : 0;
 
-                if (Math.abs(x - cx) < 130 && Math.abs(y - cy) < 130) {
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'screen'; // Siyah arkaplanı siler, parlayan parmak izini bırakır
-                    ctx.globalAlpha = 0.85;
-                    ctx.drawImage(realFingerprint, cx - 40, cy - 40, 80, 80);
-                    ctx.restore();
-                    triggerForensicFinding(`PARMAK İZİ BULUNDU! (${currentPendingObject.name} üzerinde net şüpheli parmak izi)`);
+                    if (currentRotationIndex === targetAngle) {
+                        const imgRect = imgEl.getBoundingClientRect();
+                        const imgOffsetLeft = imgRect.left - wrapperRect.left;
+                        const imgOffsetTop = imgRect.top - wrapperRect.top;
+                        const cx = imgOffsetLeft + imgRect.width * spot.xRatio;
+                        const cy = imgOffsetTop + imgRect.height * spot.yRatio;
+
+                        const dist = Math.hypot(x - cx, y - cy);
+                        if (dist < 110) {
+                            ctx.save();
+                            ctx.globalCompositeOperation = 'source-over';
+                            ctx.globalAlpha = 0.95;
+                            ctx.shadowColor = 'transparent';
+                            ctx.shadowBlur = 0;
+                            ctx.drawImage(realFingerprint, cx - 35, cy - 35, 70, 70);
+                            ctx.restore();
+                            triggerForensicFinding(`PARMAK İZİ BULUNDU! (Yüzey üstü daktilografik iz numunesi izole edildi)`, 'fingerprint');
+                        }
+                    }
+                } else {
+                    triggerForensicFinding(`TEMİZ: Nesne yüzeyinde adli incelemeye elverişli bir parmak izi bulunmamaktadır.`, 'fingerprint_clean');
                 }
             }
         }
@@ -1625,6 +1838,7 @@ document.getElementById('exit-confirm-btn').addEventListener('click', () => {
         interiorScreen.classList.add('hidden');
         townMapScreen.classList.remove('hidden');
         activeNpcId = null;
+        checkAutopsyConditions();
     });
 });
 
@@ -2315,12 +2529,15 @@ window.accuseNpc = function (accusedId) {
                 const resultMessage = document.getElementById('result-message');
                 const retryBtn = document.getElementById('result-retry-btn');
 
-                // Gerçek katil ve seçilen kişi bilgileri
-                const realKiller = NPC_DATA[guiltyNpcId];
-                const accusedNpc = NPC_DATA[accusedId];
+                // Backend'den dönen resmi katil kimliğini ve başarı sonucunu esas al
+                const serverGuiltyId = data.guiltyNpcId || guiltyNpcId;
+                guiltyNpcId = serverGuiltyId;
 
-                // SUÇLU DOĞRU MU KONTROLÜ
-                const isCorrect = (accusedId === guiltyNpcId);
+                const realKiller = NPC_DATA[serverGuiltyId] || NPC_DATA[1];
+                const accusedNpc = NPC_DATA[accusedId] || NPC_DATA[1];
+
+                // SUÇLU DOĞRU MU KONTROLÜ (Backend API sonucu ile tam uyumlu)
+                const isCorrect = (data.success !== undefined) ? data.success : (accusedId === serverGuiltyId);
 
                 if (isCorrect) {
                     resultIcon.className = 'result-icon success';
@@ -2864,11 +3081,8 @@ function renderBagItems() {
 }
 
 function showDetailedClue(item) {
-    if (item.scene) {
-        openClueInspect(item, item.scene, true);
-    } else {
-        openClueInspect(item, activeNpcId || 1, true);
-    }
+    const itemNpcId = item.scene || item.relatedNpcId || 1;
+    openClueInspect(item, itemNpcId, true);
 }
 
 document.getElementById('close-detailed-clue-btn')?.addEventListener('click', () => {

@@ -1,5 +1,6 @@
 using Dapper;
 using DedektiflikRPG.Models;
+using DedektiflikRPG.Core.Interfaces;
 using Microsoft.Data.Sqlite;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -11,7 +12,7 @@ namespace DedektiflikRPG.Data;
 /// Dapper ile SQLite & SQL Server veritabanı işlemlerini yöneten repository sınıfı.
 /// NPC, ipucu ve diyalog kayıtları üzerinde CRUD ve otopsi/oturum işlemleri gerçekleştirir.
 /// </summary>
-public class DatabaseRepository
+public class DatabaseRepository : IGameRepository
 {
     private readonly string _connectionString;
     private readonly bool _isSqlite;

@@ -147,6 +147,9 @@
         </div>
 
         <button id="exit-game-btn" class="global-exit-btn"><i class="fa-solid fa-door-open"></i> Ana Menü</button>
+        <div id="forensic-pending-badge" class="forensic-status-badge badge-pending" title="Adli Lab Gönderim Durumu">
+            <i class="fa-solid fa-vial"></i> <span id="forensic-badge-text">0/1 LAB GEREKLİ</span>
+        </div>
         <button id="open-bag-btn" class="global-bag-btn"><i class="fa-solid fa-briefcase"></i> Çanta</button>
     </div>
 
@@ -282,13 +285,21 @@
                 <div class="clue-inspect-divider"></div>
                 <p id="clue-inspect-desc" class="clue-inspect-description">Nesne açıklaması...</p>
 
-                <!-- Yeşil İpucu Mesaj Kutusu ve Adli Tıbba Gönder Butonu -->
+                <!-- Yeşil İpucu Mesaj Kutusu ve Ayrı Ayrı Adli Tıbba Gönder Butonları -->
                 <div id="forensic-finding-box" class="forensic-finding-box hidden">
-                    <i class="fa-solid fa-circle-check"></i> <span id="forensic-finding-text">PARMAK İZİ BULUNDU!</span>
+                    <div id="forensic-blood-item" class="forensic-finding-item hidden">
+                        <div id="forensic-blood-text" class="forensic-item-text"><i class="fa-solid fa-droplet text-red"></i> KAN LEKESİ BULUNDU</div>
+                        <button id="send-blood-btn" class="btn btn-send-forensics btn-blood">
+                            <i class="fa-solid fa-paper-plane"></i> KAN LEKESİNİ ADLİ TIBBA GÖNDER
+                        </button>
+                    </div>
+                    <div id="forensic-fingerprint-item" class="forensic-finding-item hidden" style="margin-top: 10px;">
+                        <div id="forensic-fingerprint-text" class="forensic-item-text"><i class="fa-solid fa-fingerprint text-cyan"></i> PARMAK İZİ BULUNDU</div>
+                        <button id="send-fingerprint-btn" class="btn btn-send-forensics btn-fingerprint">
+                            <i class="fa-solid fa-paper-plane"></i> PARMAK İZİNİ ADLİ TIBBA GÖNDER
+                        </button>
+                    </div>
                 </div>
-                <button id="send-forensic-btn" class="btn btn-send-forensics hidden">
-                    <i class="fa-solid fa-paper-plane"></i> ADLİ TIBBA GÖNDER
-                </button>
 
                 <div class="clue-inspect-actions" style="margin-top: auto;">
                     <button id="clue-read-btn" class="btn btn-secondary btn-full hidden"
@@ -504,7 +515,7 @@
     <div id="global-notification-modal" class="modal-backdrop hidden" style="z-index: 9999;">
         <div class="notification-card">
             <div class="notification-icon pulse-anim"><i class="fa-solid fa-envelope-open-text"></i></div>
-            <h3>YENİ BİLGİ!</h3>
+            <h3 id="global-notification-title">YENİ BİLGİ!</h3>
             <p id="global-notification-text">Adli Tıp Merkezi'nden Otopsi Raporu geldi! Harita ekranındaki rapora
                 tıklayarak inceleyebilirsiniz.</p>
             <button id="notification-ok-btn" class="btn btn-primary btn-full"><i class="fa-solid fa-check"></i>

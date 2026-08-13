@@ -1,27 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
-using DedektiflikRPG.Models;
+using System.Threading.Tasks;
+using DedektiflikRPG.Core.Interfaces;
 using DedektiflikRPG.Data;
+using DedektiflikRPG.Models;
 
-namespace DedektiflikRPG.Services;
+namespace DedektiflikRPG.Services.AI;
 
 /// <summary>
-/// %100 Türkçeye Duyarlı, Gelişmiş Senaryo ve Suçlu Psikolojisi Yöneten Türkçe Yapay Zeka Motoru v3.0.
+/// %100 Türkçeye Duyarlı, Gelişmiş Senaryo ve Suçlu Psikolojisi Yöneten Türkçe Yapay Zeka Motoru v4.0.
 /// 
-/// ÖZELLİKLER:
-/// 1. Türkçedeki tüm özel harfleri (ş, ç, ı, ü, ö, ğ, İ, Ş, Ç, Ü, Ö, Ğ) hem orijinal hem esnek haliyle tam işler.
-/// 2. Levenshtein Distance & Fuzzy Match algoritması ile yazım hatalarını kompanse eder.
-/// 3. Doğrudan suçlamalarda katil bile olsa hemen itiraf etmez; aşamalı baskı ve delil mekanizması kullanır.
-/// 4. Çetin'in yapay zeka olduğunu belli etmeden dedektif sezgileriyle amirine bilgi sunmasını sağlar.
-/// 5. Her NPC için masum ve suçlu hallerinde zengin Türkçe replik şablonları barındırır.
+/// KURALLAR:
+/// 1. Hiçbir NPC net olarak "Ben suçluyum" veya "Cinayeti ben işledim" demez.
+/// 2. Hiçbir masum NPC kendisini suçlu göstermez; suçlandığında haklı tepki verir ve masumiyetini korur.
+/// 3. Suçlu NPC doğrudan suçlandığında kıvırır, delil ister, panikler veya başkasını hedef gösterir.
+/// 4. Devrik cümleleri ("sen misin katil", "kim sence katil", "o saatte ne işin vardı orada") başarıyla çözümler.
 /// </summary>
-public class LocalAiEngine
+public class LocalAiEngine : IAIService
 {
     private static readonly Random _random = new Random();
     private static readonly CultureInfo _cultureTr = new CultureInfo("tr-TR");
@@ -58,8 +57,7 @@ public class LocalAiEngine
         int npcCluesInBagCount = clues.Count(c => c.RelatedNPCId == npc.NPCId);
         var history = recentDialogs?.ToList() ?? new List<DialogLog>();
 
-        // 0. CONTEXT MEMORY (Bağlam Hafızası)
-        // Eğer bir önceki cevapta "isim mi duymak istiyorsunuz?" sorulmuşsa ve oyuncu evet/isim dediyse
+        // 0. BAĞLAM HAFIZASI (Context Memory)
         bool isAffirmative = TurkishTextEngine.ContainsAnyConcept(rawTrLower, normalizedAscii, "evet", "tabi", "isim", "soyle", "istiyorum", "ver", "kim");
         if (isAffirmative && history.Any())
         {
@@ -76,11 +74,10 @@ public class LocalAiEngine
         }
 
         // 1. Türkçe Anlamsal / Niyet Analizi (Intent & Concept Detection)
-        // Yeni NLP motoru: Cümleyi köklerine ayır ve sokak ağzını düzelt
         string processedSentence = TurkishTextEngine.PreprocessSentence(normalizedAscii);
 
-        // Neden / Selamlama / Nezaket Kontrolü
-        bool isGreeting = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, 
+        // Selamlama / Nezaket Kontrolü
+        bool isGreeting = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence,
             "merhaba", "selam", "gunaydin", "iyi gunler", "iyi aksamlar", "kolay gelsin", "nasilsin", "nasilsiniz", "hos bulduk", "tesekkur", "saol", "sagol");
 
         if (isGreeting)
@@ -104,19 +101,23 @@ public class LocalAiEngine
             };
         }
 
-        bool isDirectAccusation = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, 
-            "sen yap", "sen oldur", "katil sen", "itiraf et", "suclu sen", "sucu sen", 
-            "kurban sen", "sen kiy", "cinayet sen", "kaza degil", "katil kim");
+        // DEVRİK CÜMLE VE SORGULAMA KATEGORİLERİ
+        bool isOpinionQuery = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence,
+            "suphe", "sence", "baska", "biri", "kusku", "fikir", "dusun", "kim sence", "sence kim");
+
+        bool isDirectAccusation = !isOpinionQuery && TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence,
+            "sen yap", "sen oldur", "katil sen", "itiraf et", "suclu sen", "sucu sen",
+            "kurban sen", "sen kiy", "cinayet sen", "kaza degil", "sen misin katil", "katil sen misin");
 
         bool isAlibiQuery = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence,
-            "nere", "gece", "saat", "evde", "dukkan", "ne yap", "gor", "zaman", "olay");
+            "nere", "gece", "saat", "evde", "dukkan", "ne yap", "gor", "zaman", "olay", "ne isin vardi");
 
         bool isWeaponQuery = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence,
-            "satir", "bicak", "zehir", "sise", "mektup", "gozluk", "kasa", "rozet", "dugme", "iplik", 
+            "satir", "bicak", "zehir", "sise", "mektup", "gozluk", "kasa", "rozet", "dugme", "iplik",
             "kumas", "usb", "cep", "defter", "delil", "kanit", "esya", "kanli", "kirik", "bos", "yirtik", "silah");
 
         bool isMotiveQuery = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence,
-            "borc", "para", "tapu", "arazi", "rusvet", "tehdit", "santaj", "kavga", "tartisma", 
+            "borc", "para", "tapu", "arazi", "rusvet", "tehdit", "santaj", "kavga", "tartisma",
             "neden", "niye", "sebep", "nicin", "hakkinda", "iliski", "dusman", "husumet");
 
         bool mentionsHasan = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "hasan", "kasap");
@@ -125,13 +126,7 @@ public class LocalAiEngine
         bool mentionsGunes = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "gunes", "komiser", "polis");
         bool mentionsYahya = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "yahya", "terzi");
 
-        bool isOpinionQuery = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, 
-            "suphe", "sence", "baska", "biri", "kusku", "fikir", "dusun");
-
-        // 2. Determine Intent Category & Calculate Annoyance Level based on history
         string currentIntent = "none";
-        
-        // Priority: Accusation > Motive > Weapon > Alibi (Motive takes precedence over random weapon fuzzy matches)
         if (isDirectAccusation) currentIntent = "local_ai_accusation";
         else if (isMotiveQuery) currentIntent = "local_ai_motive";
         else if (isWeaponQuery) currentIntent = "local_ai_weapon";
@@ -145,12 +140,12 @@ public class LocalAiEngine
             {
                 string logText = log.PlayerQuestion.ToLower(_cultureTr);
                 string logAscii = TurkishTextEngine.NormalizeToAscii(logText);
-                
-                bool logAcc = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "sen yaptin", "katil sensin", "itiraf et", "sen öldürdün");
+
+                bool logAcc = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "sen yaptin", "katil sensin", "itiraf et", "sen öldürdün", "sen misin katil");
                 bool logAlibi = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "neredeydin", "o gece", "evde miydin", "ne yapiyordun");
                 bool logWeapon = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "satir", "bicak", "zehir", "sise", "gozluk", "rozet", "iplik", "delil");
                 bool logMotive = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "borc", "para", "tapu", "tehdit", "husumet", "sebep");
-                
+
                 string logIntent = "none";
                 if (logAcc) logIntent = "local_ai_accusation";
                 else if (logAlibi) logIntent = "local_ai_alibi";
@@ -168,17 +163,50 @@ public class LocalAiEngine
         int stressIncrease = 0;
         string? revealedSecret = null;
 
-        // 3. Fetch dynamic dialogues from database
+        // 2. DOĞRUDAN SUÇLAMA TEPKİSİ (STRICT RULES: NO CONFESSION EVER, INNOCENT MAINTAINS INNOCENCE)
+        if (isDirectAccusation)
+        {
+            if (isGuilty)
+            {
+                stressIncrease = 25;
+                if (clues.Count >= 2 && annoyanceLevel >= 2)
+                {
+                    emotion = "Gergin";
+                    responseText = GetGuiltyEvadedResponse(npc.NPCId);
+                }
+                else
+                {
+                    emotion = "Savunmacı";
+                    responseText = GetGuiltyDefensiveResponse(npc.NPCId);
+                }
+            }
+            else
+            {
+                stressIncrease = 10;
+                emotion = "Öfkeli";
+                responseText = GetInnocentAccusationResponse(npc.NPCId);
+            }
+
+            return new AIInteractionResponse
+            {
+                Dialogue = responseText,
+                Emotion = emotion,
+                TrustChange = isGuilty ? -5 : -3,
+                StressIncrease = stressIncrease
+            };
+        }
+
+        // 3. VERİTABANI DİYALOG POOL VE SEMANTİK EŞLEŞTİRME
         var dbPool = _repository != null ? (await _repository.GetLocalAIPoolAsync(npc.NPCId)).ToList() : new List<NPCDialogue>();
-        
+
         if (annoyanceLevel >= 3)
         {
             emotion = "Sinirli";
             trustChange = -10;
-            responseText = isGuilty 
-                ? "*Bağırarak* Yeter artık amirim! Aynı şeyi sorup duruyorsunuz! Beni rahat bırakın!" 
-                : "*Bıkkınlıkla* Size bunu daha önce defalarca söyledim. Lütfen aynı soruları tekrarlamayın!";
-            
+            responseText = isGuilty
+                ? "*Terler ve bağırır* Yeter amirim! Sürekli aynı ithamları tekrarlayıp duruyorsunuz! Kanıtınız varsa konuşun!"
+                : "*Bıkkınlıkla* Size bunu daha önce defalarca söyledim. Masum bir insanı darlamayı bırakın amirim!";
+
             if (isGuilty && npcCluesInBagCount > 0 && revealedSecret == null)
             {
                 revealedSecret = $"Amirims, Çetin olarak söylüyorum: {npc.Name} öfkesinden kontrolünü kaybetti ve şu bilgiyi ağzından kaçırdı: '{npc.SecretInfo}'";
@@ -194,70 +222,67 @@ public class LocalAiEngine
             responseText = GetOtherNpcOpinion(npc.NPCId, false, false, false, false, false, guiltyNpcId);
             emotion = "Düşünceli";
         }
+        else if (isAlibiQuery)
+        {
+            responseText = isGuilty ? GetGuiltyAlibiResponse(npc.NPCId) : GetInnocentAlibiResponse(npc.NPCId);
+            emotion = isGuilty ? "Tedirgin" : "Sakin";
+        }
+        else if (isWeaponQuery)
+        {
+            responseText = isGuilty ? GetGuiltyWeaponResponse(npc.NPCId, rawTrLower) : GetInnocentWeaponResponse(npc.NPCId, rawTrLower);
+            emotion = isGuilty ? "Gergin" : "Düşünceli";
+        }
+        else if (isMotiveQuery)
+        {
+            responseText = isGuilty ? GetGuiltyMotiveResponse(npc.NPCId) : GetInnocentMotiveResponse(npc.NPCId);
+            emotion = isGuilty ? "Savunmacı" : "Sakin";
+        }
         else if (dbPool.Any())
         {
             var usedResponses = history.Select(h => h.NPCResponse).ToHashSet();
-            
-            // SEMANTIC SCORING (TF-IDF benzeri Eşleştirme)
-            NPCDialogue bestMatch = null;
+            NPCDialogue? bestMatch = null;
             double highestScore = -1;
-            
+
             foreach (var dialogue in dbPool)
             {
-                // Daha önce kullanılan cevapların puanını kır
                 bool isUsed = usedResponses.Contains(dialogue.NPCResponse);
                 double score = CalculateSemanticScore(normalizedAscii, dialogue.PlayerText, dialogue.Category, currentIntent, npc.NPCId);
-                
-                if (isUsed) score -= 50; // Penaltı
-                
+
+                if (isUsed) score -= 50;
+
                 if (score > highestScore)
                 {
                     highestScore = score;
                     bestMatch = dialogue;
                 }
             }
-            
-            // Eğer en yüksek skor çok düşükse fallback'e düş (Eşiği 10 olarak belirliyoruz)
+
             if (highestScore > 10 && bestMatch != null)
             {
-                var selected = bestMatch;
-
-                if (isGuilty && !string.IsNullOrEmpty(selected.GuiltyResponses))
+                if (isGuilty && !string.IsNullOrEmpty(bestMatch.GuiltyResponses))
                 {
                     try
                     {
-                        var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(selected.GuiltyResponses);
+                        var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(bestMatch.GuiltyResponses);
                         if (dict != null && dict.TryGetValue(npc.NPCId.ToString(), out var gResp))
                         {
                             responseText = gResp;
                             emotion = "Tedirgin";
-                            trustChange = -5;
                         }
                     }
-                    catch { responseText = selected.NPCResponse; }
+                    catch { responseText = bestMatch.NPCResponse; }
                 }
-                
+
                 if (string.IsNullOrEmpty(responseText))
                 {
-                    responseText = selected.NPCResponse;
-                    emotion = isDirectAccusation ? "Gergin" : "Sakin";
+                    responseText = bestMatch.NPCResponse;
+                    emotion = "Sakin";
                 }
             }
             else
             {
-                // Eğer kelime sayısı çok kısaysa (örn: sadece "selam" veya anlamsız) genel cevap ver
-                if (rawTrLower.Length < 10 && !rawTrLower.Contains("kim") && !rawTrLower.Contains("ne"))
-                {
-                    responseText = GetGenericPersonaResponse(npc, isGuilty, userQuestion);
-                }
-                else
-                {
-                    // Dinamik Akıllı Fallback (Manuel Cevaplar)
-                    responseText = GetDynamicFallback(rawTrLower);
-                    emotion = "Düşünceli";
-                    emotion = "Kararsız";
-                    stressIncrease = isGuilty ? 15 : 5; // YZ bilinmeyen soruda suçluysa daha çok streslenir
-                }
+                responseText = GetDynamicFallback(rawTrLower);
+                emotion = "Düşünceli";
             }
         }
         else
@@ -265,16 +290,15 @@ public class LocalAiEngine
             responseText = GetGenericPersonaResponse(npc, isGuilty, userQuestion);
         }
 
-        // Suçluyu darlayan kilit kelimeler stresi artırır
-        if (isGuilty && (rawTrLower.Contains("neden") || rawTrLower.Contains("yalan") || rawTrLower.Contains("saklıyorsun")))
+        if (isGuilty && (rawTrLower.Contains("yalan") || rawTrLower.Contains("saklıyorsun") || rawTrLower.Contains("neden")))
         {
-            stressIncrease += 20;
+            stressIncrease += 15;
             emotion = "Gergin";
         }
 
-        if (isGuilty && npcCluesInBagCount > 0 && _random.Next(100) < 45 && revealedSecret == null)
+        if (isGuilty && npcCluesInBagCount > 0 && _random.Next(100) < 40 && revealedSecret == null)
         {
-            revealedSecret = $"Amirims, Çetin olarak söylüyorum: {npc.Name} konuşurken gözlerini kaçırıyor. Benim hislerime göre şu konuyla ilgisi var: '{npc.SecretInfo}'";
+            revealedSecret = $"Amirims, Çetin olarak söylüyorum: {npc.Name} konuşurken gözlerini kaçırıyor. Şu konuyla ilgisi var: '{npc.SecretInfo}'";
         }
 
         return new AIInteractionResponse
@@ -287,33 +311,17 @@ public class LocalAiEngine
         };
     }
 
-    private static string GetDynamicFallback(string rawTrLower)
-    {
-        if (rawTrLower.Contains("kim")) return "Kimin yaptığını soruyorsanız amirim, bu kasabada herkesin karanlık bir sırrı var. Özel bir isim mi duymak istiyorsunuz?";
-        if (rawTrLower.Contains("nerede") || rawTrLower.Contains("nerde")) return "Mekanı veya yeri soruyorsanız, cinayet gecesi herkesin kendine göre bir mazereti vardı... Detaylandırmanızı rica edeceğim.";
-        if (rawTrLower.Contains("neden") || rawTrLower.Contains("niye") || rawTrLower.Contains("sebep")) return "Cinayetin sebebini arıyorsanız, paranın ve gücün olduğu yerde her zaman bir husumet bulunur. Sizce motif ne olabilir?";
-        if (rawTrLower.Contains("nasil")) return "Nasıl olduğunu ancak adli tıp ve bulduğunuz deliller söyleyebilir amirim. Sadece ipuçlarını takip edin.";
-        if (rawTrLower.Contains("ne zaman")) return "Zamanlamayı soruyorsanız, o gece yağmur çok şiddetliydi, herkes saatler konusunda yalan söylüyor olabilir.";
-        
-        return "Sorduğunuz sorunun bağlamını tam çözemedim. Olay gecesinden mi yoksa somut bir delilden mi bahsediyorsunuz?";
-    }
-
-
-
     private double CalculateSemanticScore(string userQuestion, string playerText, string category, string currentIntent, int npcId)
     {
         double score = 0;
-        
-        // 1. Intent Match Boost (Niyet Eşleşmesi)
         if (category == currentIntent) score += 100;
-        
-        // 2. Exact Word Match (Kelime Eşleşmesi)
+
         string processedUser = TurkishTextEngine.PreprocessSentence(userQuestion);
         string processedPlayer = TurkishTextEngine.PreprocessSentence(playerText);
 
         var userWords = processedUser.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         var playerWords = processedPlayer.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        
+
         foreach (var pWord in playerWords)
         {
             foreach (var uWord in userWords)
@@ -323,64 +331,29 @@ public class LocalAiEngine
                 else if (TurkishTextEngine.LevenshteinDistance(uWord, pWord) <= 1) score += 5;
             }
         }
-        
-        // 3. NPC Specific Lore Boost (Karaktere Özel Anahtar Kelime Uyumu)
-        if (category == "local_ai_weapon")
-        {
-            if (npcId == 1 && userQuestion.Contains("satir")) score += 50;
-            if (npcId == 2 && (userQuestion.Contains("zehir") || userQuestion.Contains("sise"))) score += 50;
-            if (npcId == 3 && (userQuestion.Contains("gozluk") || userQuestion.Contains("kasa") || userQuestion.Contains("mektup"))) score += 50;
-            if (npcId == 4 && (userQuestion.Contains("rozet") || userQuestion.Contains("dugme") || userQuestion.Contains("dosya"))) score += 50;
-            if (npcId == 5 && (userQuestion.Contains("iplik") || userQuestion.Contains("kumas") || userQuestion.Contains("cep") || userQuestion.Contains("usb"))) score += 50;
-        }
-        else if (category == "local_ai_motive")
-        {
-            if (npcId == 1 && (userQuestion.Contains("borc") || userQuestion.Contains("para"))) score += 50;
-            if (npcId == 2 && (userQuestion.Contains("tehdit") || userQuestion.Contains("santaj"))) score += 50;
-            if (npcId == 3 && (userQuestion.Contains("tapu") || userQuestion.Contains("arazi"))) score += 50;
-            if (npcId == 4 && (userQuestion.Contains("rusvet") || userQuestion.Contains("santaj"))) score += 50;
-        }
 
-        // 4. Randomization to avoid exact same answers on ties
         score += _random.NextDouble() * 5;
-        
         return score;
     }
 
-    // --- KATİL SIKIŞTIĞINDA (KÖŞEYE SIKIŞMA - 2+ DELİL VARKEN) ---
-    private static string GetGuiltyCorneredResponse(int npcId)
-    {
-        return npcId switch
-        {
-            1 => "*Gözleri seğirir, elindeki satırı tezgaha fırlatır* Tamam! Yeter amirim, üstüme gelme! O gece Osman'ın evine gittim evet! Borcumu ödemedi, alaycı bir şekilde 'Paran yarın gelecek' dedi... Bir anlık öfke krizine girdim, satırı salladım ama kasten öldürmek istemedim!",
-            2 => "*Yüzü sapsarı kesilir, masadan destek alır* Yerin dibine girsin bu iş! Osman beni aylardır şantajla soyuyordu... O ilaca sarmaşık özünü ekledim evet! Ama kıvranarak değil, acısız ölsün istedim!",
-            3 => "*Kravatını yırtar gibi gevşetir, nefes nefese kalır* Tamam ulan, tamam! Gece yarısı evine sızdım! Sahte tapuları yırtmaya kalktı, bana saldırdı! Bronz mühürü indirdim şakağına... meşru müdafaaydı benimki!",
-            4 => "*Polis copunu masaya bırakır, elini şakaklarına koyar* 15 yıllık mesleğim bitecekti amirim! Osman beni savcılığa ihbar edecekti... O gece gittim, copla vurdum... Rozetim de düğmem de orada koptu. Adalet dedikleri bu mu?!",
-            5 => "*Elleri şiddetle titrer, gözyaşlarını siler* Yeter artık, dayanamıyorum! Dikiş ipliğini boynuna dolayan bendim... Osman bana alay edip 'USB'yi asla alamazsın' dedi, kendimi kaybettim!",
-            _ => "*Panik içinde nefes alıp verir* Her şey kontrolden çıktı amirim..."
-        };
-    }
-
-    // --- KATİL İLK DEFA / ŞÜPHE İLE SUÇLANDIĞINDA (KIVIRMA) ---
     private static string GetGuiltyEvadedResponse(int npcId)
     {
         return npcId switch
         {
-            1 => "*Satırı daha sıkı tutar* Sen ne diyorsun amirim?! O gece dükkândaydım diyorum! Kurbanla sorunumuz vardı ama katillik başka şey! Başkasının oyununa gelmeyin!",
-            2 => "*Gözlerini kaçırır* Ben bir sağlık çalışanıyım amirim! Kurbanın ilacındaki sorunla benim ne ilgim olabilir? Başka birinin tezgahıma girip girmediğini araştırmalısınız!",
-            3 => "*Masayı yumruklar* Beni katillikle mi itham ediyorsunuz?! Arazi anlaşmazlığımız vardı diye cinayeti bana yıkamazsınız! Gidin Kasap Hasan'ı sorgulayın!",
+            1 => "*Satırı tezgaha vurur* Sen ne diyorsun amirim?! O gece dükkândaydım diyorum! Kurbanla sorunumuz vardı ama katillik başka şey! Elinizde ne kanıt var ki beni suçluyorsunuz?!",
+            2 => "*Gözlerini kaçırır* Ben bir eczacıyım amirim! Kurbanın ilacındaki sorunla benim ne ilgim olabilir? Başka birinin dükkânıma girip girmediğini araştırmalısınız!",
+            3 => "*Masayı yumruklar* Beni katillikle mi itham ediyorsunuz?! Arazi anlaşmazlığımız vardı diye cinayeti bana yıkamazsınız! Kanıtınız yoksa muhtarlıktan çıkın!",
             4 => "*Resmi tavrını takınmaya çalışır ama sesi hafif titrer* Ben bu kasabanın komiseriyim amirim! Kanıtınız olmadan bir polise iftira atamazsınız!",
             5 => "*Gözlüklerini siler gibi yapar* Ben dikiş diken yaşlı bir terziyim amirim... Osman ile gizli işlerimiz vardı ama onu öldürmek benim harcım değil!",
-            _ => "Bu ithamı kabul etmiyorum amirim!"
+            _ => "Bu ithamı kesinlikle kabul etmiyorum amirim!"
         };
     }
 
-    // --- KATİL DELİLSİZ SUÇLANDIĞINDA (DİK DURMA & REDDETME) ---
     private static string GetGuiltyDefensiveResponse(int npcId)
     {
         return npcId switch
         {
-            1 => "Ha! Kim söylemiş katil olduğumu?! Benim alacağım vardı Osman'dan, canlısı işime yarardı! Boş iddialarla dükkânımı meşgul etmeyin!",
+            1 => "Ha! Kim söylemiş benim katil olduğumu?! Benim alacağım vardı Osman'dan, canlısı işime yarardı! Boş iddialarla dükkânımı meşgul etmeyin!",
             2 => "Bana katil demeden önce bir durun amirim! Elimde ne bir kanıt var ne bir şahit. Ben insan iyileştiririm, can almam!",
             3 => "Dedektif efendi, muhtarınızla doğru konuşun! Siyasi rakiplerimin uydurmasıyla karşıma çıkıp beni suçlayamazsınız!",
             4 => "Bu resmi bir soruşturma mı yoksa şahsi bir itham mı? Kanıtın varsa getir, yoksa karakolumdan dışarı çık!",
@@ -389,7 +362,6 @@ public class LocalAiEngine
         };
     }
 
-    // --- MASUM NPC SUÇLANDIĞINDA ---
     private static string GetInnocentAccusationResponse(int npcId)
     {
         return npcId switch
@@ -403,14 +375,13 @@ public class LocalAiEngine
         };
     }
 
-    // --- ALİBİ YANITLARI ---
     private static string GetGuiltyAlibiResponse(int npcId)
     {
         return npcId switch
         {
-            1 => "Dükkândaydım diyorum! Et doğruyordum... *gözlerini kaçırır* Yağmur bardaktan boşalıyordu. Kimseyi görmedim... Yani Osman'ın evine sadece borç konuşmaya gittim, o kadar!",
+            1 => "Dükkândaydım diyorum! Et doğruyordum... *gözlerini kaçırır* Yağmur bardaktan boşalıyordu. Yani Osman'ın evine sadece borç konuşmaya gittim, o kadar!",
             2 => "Eczanede envanter sayıyordum. Dışarı çıkmadım... *titrer* Şey, gece yarısı sadece hava almak için Osman'ın sokağına doğru yürümüş olabilirim.",
-            3 => "Evimdeydim, televizyon izliyordum! ...Pekala, gece saat 11 gibi yürüyüşe çıktım. Kurbanın evinin önünden geçtim ama içeri girmedim diyorum!",
+            3 => "Evimdeydim, evrak inceliyordum! ...Gece saat 11 gibi yürüyüşe çıktım. Kurbanın evinin önünden geçtim ama içeri girmedim diyorum!",
             4 => "Karakoldaydım nöbette! ...Olay yerine ihbardan ÖNCE gittiğim yalan! Ben sadece devriye turundaydım!",
             5 => "Atölyemde dikiş dikiyordum. Makine sesi vardı... Bir anlığına sigara içmeye çıktım ama kurbanın evine kadar gitmedim!",
             _ => "O gece kendi yerimdeydim."
@@ -430,12 +401,11 @@ public class LocalAiEngine
         };
     }
 
-    // --- WEAPON YANITLARI ---
     private static string GetGuiltyWeaponResponse(int npcId, string rawTrLower)
     {
         return npcId switch
         {
-            1 => "*Tezgahtaki satıra bakıp terler* O satır... çalınmıştı diyorum size! Birisi dükkânımdan satırımı alıp Osman'a vurmuş, beni yakmak istiyorlar!",
+            1 => "*Tezgahtaki satıra bakıp terler* O satır... dükkânımdan çalınmıştı diyorum size! Birisi benim satırımı alıp Osman'a vurmuş, beni yakmak istiyorlar!",
             2 => "*Zehirli şişeyi görünce elleri titrer* O ilaç reçeteliydi! Şişenin boş olması kurbanın ilacı aşırı dozda içtiğini gösterir, benim suçum ne?!",
             3 => "*Gözlük ve tapuları görünce kızarır* Sahte tapular bir projedir! Kırık gözlük ise kurban bana saldırınca düştü!",
             4 => "*Kopan polis rozetine bakar* O rozet karakoldan çalınmıştı! Olay yerine ben düşürmedim, beni tuzağa düşürüyorlar!",
@@ -457,7 +427,6 @@ public class LocalAiEngine
         };
     }
 
-    // --- MOTİF YANITLARI ---
     private static string GetGuiltyMotiveResponse(int npcId)
     {
         return npcId switch
@@ -484,7 +453,6 @@ public class LocalAiEngine
         };
     }
 
-    // --- DİĞER NPC İÇİN GÖRÜŞ ---
     private static string GetOtherNpcOpinion(int currentNpcId, bool hasan, bool selma, bool kemal, bool gunes, bool yahya, int guiltyId)
     {
         if (hasan && currentNpcId != 1)
@@ -501,14 +469,12 @@ public class LocalAiEngine
         return "Bu kasabada herkes bir şeyler gizliyor amirim. Kimseye gözü kapalı güvenmeyin.";
     }
 
-    // --- RASTGELE/HEDEF ŞÜPHELİ GÖSTERME (CONTEXT MEMORY) ---
     private static string GetRandomSuspectOpinion(int currentNpcId, int guiltyId)
     {
         int targetId = guiltyId;
         if (currentNpcId == guiltyId)
         {
-            // Katil kendisi ise hedef şaşırtır
-            targetId = currentNpcId == 1 ? 2 : (currentNpcId == 2 ? 3 : 1); 
+            targetId = currentNpcId == 1 ? 2 : (currentNpcId == 2 ? 3 : 1);
         }
 
         return targetId switch
@@ -517,12 +483,22 @@ public class LocalAiEngine
             2 => "Eczacı Selma'nın tezgahının altındaki şişeleri incelediniz mi? Çok sessiz bir kadındır ama sessiz sudan korkacaksın.",
             3 => "Muhtar Kemal... Kasabada her taşın altından o çıkar. Siyasi gücünü kullanarak herkesi eziyor.",
             4 => "Komiser Güneş'in üniformasına güvenmeyin amirim. Kendi karakolunda karanlık işler çeviriyor.",
-            5 => "Terzi Yahya... İhtiyar göründüğüne bakmayın, o terzi dükkanı kasabanın tüm dedikodularının ve şantajlarının merkezidir.",
+            5 => "Terzi Yahya... İhtiyar göründüğüne bakmayın, o terzi dükkanı kasabanın tüm dedikodularının merkezidir.",
             _ => "Herkes şüpheli amirim, gözünüzü açık tutun."
         };
     }
 
-    // --- GENEL PERSONA YANITI ---
+    private static string GetDynamicFallback(string rawTrLower)
+    {
+        if (rawTrLower.Contains("kim")) return "Kimin yaptığını soruyorsanız amirim, bu kasabada herkesin karanlık bir sırrı var. Özel bir isim mi duymak istiyorsunuz?";
+        if (rawTrLower.Contains("nerede") || rawTrLower.Contains("nerde")) return "Mekanı veya yeri soruyorsanız, cinayet gecesi herkesin kendine göre bir mazereti vardı... Detaylandırmanızı rica edeceğim.";
+        if (rawTrLower.Contains("neden") || rawTrLower.Contains("niye") || rawTrLower.Contains("sebep")) return "Cinayetin sebebini arıyorsanız, paranın ve gücün olduğu yerde her zaman bir husumet bulunur. Sizce motif ne olabilir?";
+        if (rawTrLower.Contains("nasil")) return "Nasıl olduğunu ancak adli tıp ve bulduğunuz deliller söyleyebilir amirim. Sadece ipuçlarını takip edin.";
+        if (rawTrLower.Contains("ne zaman")) return "Zamanlamayı soruyorsanız, o gece yağmur çok şiddetliydi, herkes saatler konusunda yalan söylüyor olabilir.";
+
+        return "Sorduğunuz sorunun bağlamını tam çözemedim. Olay gecesinden mi yoksa somut bir delilden mi bahsediyorsunuz?";
+    }
+
     private static string GetGenericPersonaResponse(NPC npc, bool isGuilty, string originalQuestion)
     {
         return npc.NPCId switch
@@ -534,195 +510,5 @@ public class LocalAiEngine
             5 => "Hoş geldiniz amirim. Bir sıcak çayımı için, ne merak ediyorsanız sorun laflayalım.",
             _ => "Dinliyorum amirim, buyurun."
         };
-    }
-}
-
-/// <summary>
-/// Türkçe Karakter ve Metin Analiz Motoru (Turkish Text Engine).
-/// ş, ç, ı, ü, ö, ğ, İ, Ş, Ç, Ü, Ö, Ğ harflerini korur ve esnek aramaları destekler.
-/// </summary>
-public static class TurkishTextEngine
-{
-    private static readonly CultureInfo _cultureTr = new CultureInfo("tr-TR");
-
-    public static string NormalizeToAscii(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return "";
-        string s = text.ToLower(_cultureTr);
-        StringBuilder sb = new StringBuilder(s.Length);
-        foreach (char c in s)
-        {
-            switch (c)
-            {
-                case 'ç': sb.Append('c'); break;
-                case 'ğ': sb.Append('g'); break;
-                case 'ı': sb.Append('i'); break;
-                case 'i': sb.Append('i'); break;
-                case 'ö': sb.Append('o'); break;
-                case 'ş': sb.Append('s'); break;
-                case 'ü': sb.Append('u'); break;
-                default:
-                    if (char.IsLetterOrDigit(c) || char.IsWhiteSpace(c))
-                        sb.Append(c);
-                    break;
-            }
-        }
-        return sb.ToString();
-    }
-
-    public static string PreprocessSentence(string text)
-    {
-        string normalized = NormalizeToAscii(text);
-        var tokens = normalized.Split(new[] { ' ', '.', ',', '?', '!' }, StringSplitOptions.RemoveEmptyEntries);
-        var stopWords = new HashSet<string> { "mi", "mu", "var", "yok", "bir", "ve", "ile", "icin", "diye", "bu", "su", "da", "de", "ki", "iste", "ise" };
-        
-        List<string> processed = new List<string>();
-        foreach (var t in tokens)
-        {
-            if (t.Length <= 2 && t != "ne") continue; 
-            if (stopWords.Contains(t)) continue;
-            
-            string stemmed = Stem(t);
-            string mapped = MapSlang(stemmed);
-            processed.Add(mapped);
-        }
-        return string.Join(" ", processed);
-    }
-
-    public static string Stem(string word)
-    {
-        if (word.Length <= 3) return word;
-
-        // Çok kaba bir Türkçe Stemmer: Sık kullanılan çekim ve yapım eklerini atar
-        string[] suffixes = { 
-            "yordu", "yorsun", "yorsunuz", "lerdir", "lardir", "lardan", "lerden", "larina", "lerine", 
-            "misin", "musun", "misiniz", "musunuz", "miyor", "kiyor", "diler", "dilar", "tilar", "tiler",
-            "acak", "ecek", "iyor", "iyor", "iyor", "lar", "ler", "dan", "den", "tan", "ten", "nin", "nun",
-            "yla", "yle", "siz", "suz", "sun", "sunuz", "siniz", "sin", "yim", "dik", "tik", "duk", "tuk",
-            "di", "ti", "du", "tu", "yi", "ya", "ye", "in", "un", "im", "um"
-        };
-
-        foreach (var suffix in suffixes)
-        {
-            if (word.EndsWith(suffix) && word.Length - suffix.Length >= 3)
-            {
-                return word.Substring(0, word.Length - suffix.Length);
-            }
-        }
-        
-        // Tekil harf ekleri (yönelme, iyelik)
-        if ((word.EndsWith("a") || word.EndsWith("e") || word.EndsWith("i") || word.EndsWith("u")) && word.Length >= 4)
-        {
-            return word.Substring(0, word.Length - 1);
-        }
-
-        return word;
-    }
-
-    public static string MapSlang(string word)
-    {
-        return word switch
-        {
-            "kanki" or "kral" or "abi" or "dayi" or "usta" or "aga" or "haci" or "bilader" => "amirim",
-            "sikti" or "kesti" or "deldi" or "cizdi" or "vurdu" or "indirdi" or "deşti" or "kiydi" => "oldur",
-            "para" or "mangir" or "sakal" or "avanta" or "cukka" => "borc",
-            "cirkef" or "pislik" or "kavga" or "gurultu" => "tartisma",
-            "suphe" or "kusku" => "suphe",
-            _ => word
-        };
-    }
-
-    public static bool ContainsAnyConcept(string rawTrLower, string normalizedAscii, params string[] concepts)
-    {
-        var inputTokens = normalizedAscii.Split(new[] { ' ', '.', ',', '?', '!' }, StringSplitOptions.RemoveEmptyEntries);
-        string noSpaceInput = normalizedAscii.Replace(" ", "");
-
-        foreach (var concept in concepts)
-        {
-            string conceptNorm = NormalizeToAscii(concept);
-            string noSpaceConcept = conceptNorm.Replace(" ", "");
-
-            if (rawTrLower.Contains(concept) || normalizedAscii.Contains(conceptNorm) || noSpaceInput.Contains(noSpaceConcept))
-            {
-                return true;
-            }
-
-            var conceptTokens = conceptNorm.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            
-            // Eğer kelimeler bitişik yazıldıysa (örn: senmiyaptn) kaba fuzzy eşleşme
-            if (noSpaceConcept.Length >= 5)
-            {
-                int maxTypos = Math.Max(1, noSpaceConcept.Length / 4); 
-                // Girdinin uzunluğu konsepte yakınsa direkt mesafe ölç
-                if (Math.Abs(noSpaceInput.Length - noSpaceConcept.Length) <= maxTypos + 2)
-                {
-                    int dist = LevenshteinDistance(noSpaceInput, noSpaceConcept);
-                    if (dist <= maxTypos) return true;
-                }
-            }
-
-            // Kelime kelime bulanık (fuzzy) eşleştirme toleransı
-            int matchedTokens = 0;
-            int meaningfulTokens = 0;
-            foreach (var cToken in conceptTokens)
-            {
-                if (cToken.Length <= 2) continue; // mi, mu, de gibi ekleri atla
-                meaningfulTokens++;
-                bool foundToken = false;
-                foreach (var iToken in inputTokens)
-                {
-                    if (iToken.Length > 2)
-                    {
-                        // Kelime diğerinin içinde tam geçiyorsa (örn: 'sen' ile 'senmi' veya 'yaptn' ile 'yaptın')
-                        if (iToken == cToken || iToken.StartsWith(cToken) || iToken.EndsWith(cToken))
-                        {
-                            foundToken = true;
-                            break;
-                        }
-
-                        int dist = LevenshteinDistance(iToken, cToken);
-                        // Harf sayısına göre dinamik tolerans
-                        int maxTypos = cToken.Length >= 6 ? 2 : (cToken.Length >= 4 ? 1 : 0);
-                        if (dist <= maxTypos)
-                        {
-                            foundToken = true;
-                            break;
-                        }
-                    }
-                }
-                if (foundToken) matchedTokens++;
-            }
-            
-            if (meaningfulTokens > 0 && matchedTokens >= meaningfulTokens)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static int LevenshteinDistance(string s, string t)
-    {
-        if (string.IsNullOrEmpty(s)) return string.IsNullOrEmpty(t) ? 0 : t.Length;
-        if (string.IsNullOrEmpty(t)) return s.Length;
-
-        int n = s.Length;
-        int m = t.Length;
-        int[,] d = new int[n + 1, m + 1];
-
-        for (int i = 0; i <= n; d[i, 0] = i++) { }
-        for (int j = 0; j <= m; d[0, j] = j++) { }
-
-        for (int i = 1; i <= n; i++)
-        {
-            for (int j = 1; j <= m; j++)
-            {
-                int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
-                d[i, j] = Math.Min(
-                    Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
-                    d[i - 1, j - 1] + cost);
-            }
-        }
-        return d[n, m];
     }
 }
