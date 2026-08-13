@@ -112,15 +112,15 @@ const SCENE_OBJECTS = {
     ],
     3: [ // Muhtarlık (Kemal)
         {
-            id: 7, name: 'Tehdit Mektubu', desc: 'Muhtarın çekmecesinde kurbana yazılmış, henüz gönderilmemiş mektup.', top: '60%', left: '45%', img: 'images/threat_letter.png',
+            id: 7, name: 'Tehdit Mektubu', desc: 'Muhtarın masa üstünde kurbana yazılmış, henüz gönderilmemiş mektup.', top: '56%', left: '42%', img: 'images/threat_letter.png',
             fingerprintSpot: { xRatio: 0.72, yRatio: 0.22, angle: 0 }, bloodSpot: null
         },
         {
-            id: 8, name: 'Kırık Gözlük', desc: 'Kurbana ait olduğu düşünülen, camı kırık bir okuma gözlüğü.', top: '65%', left: '55%', img: 'images/broken_glasses.png',
+            id: 8, name: 'Kırık Gözlük', desc: 'Kurbana ait olduğu düşünülen, camı kırık bir okuma gözlüğü.', top: '58%', left: '54%', img: 'images/broken_glasses.png',
             fingerprintSpot: { xRatio: 0.32, yRatio: 0.48, angle: 0 }, bloodSpot: { xRatio: 0.68, yRatio: 0.42, angle: 0 }
         },
         {
-            id: 9, name: 'Gizli Kasa', desc: 'Tablonun arkasında şifresi açık unutulmuş para dolu kasa.', top: '30%', left: '15%', img: 'images/hidden_safe.png', isHidden: true,
+            id: 9, name: 'Gizli Kasa', desc: 'Arka köşede şifresi açık unutulmuş demir kasa.', top: '44%', left: '72%', img: 'images/hidden_safe.png', isHidden: true,
             fingerprintSpot: { xRatio: 0.62, yRatio: 0.40, angle: 0 }, bloodSpot: null
         }
     ],
@@ -1008,20 +1008,28 @@ function openBuilding(npcId) {
     const sideLeft = document.getElementById('interior-side-left');
     const sideRight = document.getElementById('interior-side-right');
 
-    // Katman 1: Ana kapsayıcı arkaplanı (Geniş panoramik kaplama - Kesintisiz birleştirici görsel)
+    // Katman 1: Ana kapsayıcı arkaplanı
     if (intScreen) {
         intScreen.setAttribute('data-npc-id', npcId);
         intScreen.style.backgroundImage = wideImgUrl;
         intScreen.style.backgroundSize = 'cover';
-        intScreen.style.backgroundPosition = 'center';
+        intScreen.style.backgroundPosition = 'center center';
+        intScreen.style.backgroundRepeat = 'no-repeat';
     }
 
-    // Katman 2: Ortadaki ana sahne canvas (Şeffaf kapsayıcı - Siyah boşluk yok)
+    // Katman 2: SADECE Muhtarlık (ID 3) için çift katman çakışması olmaması adına canvas arkaplanı temizlenir
+    // Diğer binalar (Kasap, Eczane, Karakol, Terzi) orijinal çift katmanlı yapısında kalır
     if (stageCanvas) {
-        stageCanvas.style.backgroundImage = mainBgUrl;
-        stageCanvas.style.backgroundSize = 'contain';
-        stageCanvas.style.backgroundPosition = 'center';
-        stageCanvas.style.backgroundColor = 'transparent';
+        if (npcId === 3) {
+            stageCanvas.style.backgroundImage = 'none';
+            stageCanvas.style.backgroundColor = 'transparent';
+        } else {
+            stageCanvas.style.backgroundImage = mainBgUrl;
+            stageCanvas.style.backgroundSize = 'contain';
+            stageCanvas.style.backgroundPosition = 'center center';
+            stageCanvas.style.backgroundRepeat = 'no-repeat';
+            stageCanvas.style.backgroundColor = 'transparent';
+        }
     }
 
     // Siyah boşluk ve dikiş izi yaratmaması için yan paneller temizlendi

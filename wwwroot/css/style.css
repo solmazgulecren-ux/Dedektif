@@ -719,14 +719,12 @@ canvas {
 }
 
 .full-screen-interior[data-npc-id="3"] {
-    background-size: 110vw auto !important;
-    /* Muhtarlık: Sağ/sol kenarları merkeze yaklaştırmak için biraz küçültüldü */
-    background-position: center 46% !important;
+    background-size: cover !important;
+    background-position: center center !important;
 }
 
 .full-screen-interior[data-npc-id="4"] {
     background-position: center center !important;
-    /* Karakol: Eski haline getir */
 }
 
 /* Kenarların ortayla doğal birleşmesi için hafif vignette */
@@ -736,7 +734,7 @@ canvas {
     inset: 0;
     z-index: 5;
     pointer-events: none;
-    background: radial-gradient(ellipse 75% 100% at center, transparent 55%, rgba(8, 9, 13, 0.6) 100%);
+    background: radial-gradient(ellipse 85% 100% at center, transparent 65%, rgba(8, 9, 13, 0.5) 100%);
 }
 
 .interior-side-left,
@@ -744,7 +742,7 @@ canvas {
     display: none !important;
 }
 
-/* Ana iç mekan görseli — ortada net, şeffaf arkaplan (siyah boşluk yok) */
+/* Orijinal iç mekan stage canvas stili (Kasap, Eczane, Karakol, Terzi için) */
 .interior-stage-canvas {
     position: absolute;
     inset: 0;
@@ -756,6 +754,11 @@ canvas {
     background-position: center center !important;
     background-repeat: no-repeat !important;
     overflow: hidden;
+}
+
+/* SADECE Muhtarlık (ID 3) için çift katman çakışması olmaması adına canvas resmi kaldırılır */
+.full-screen-interior[data-npc-id="3"] .interior-stage-canvas {
+    background-image: none !important;
 }
 
 .world-map-stage-bg,
