@@ -7,6 +7,7 @@ namespace DedektiflikRPG.Models;
 public class HelperMessage
 {
     public int MessageId { get; set; }
+    public string Speaker { get; set; } = "cetin";             // "cetin" veya "rifat"
     public string Context { get; set; } = string.Empty;       // "splash", "story_end", "map_enter", "building_enter", "bag_open", "clue_inspect", "npc_talk", "autopsy_ready", "accuse"
     public string? BuildingName { get; set; }                  // Bina-bazlı mesajlar için (opsiyonel)
     public string Message { get; set; } = string.Empty;

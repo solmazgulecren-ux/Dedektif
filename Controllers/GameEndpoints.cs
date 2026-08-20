@@ -67,6 +67,41 @@ public static class GameEndpoints
         {
             try
             {
+                // Gölge Şehir NPC'leri (101 - 108)
+                if (request.NpcId >= 100)
+                {
+                    var golgeNpc = await repo.GetGolgeSehirNPCByIdAsync(request.NpcId);
+                    if (golgeNpc == null) return Results.NotFound("Gölge Şehir şüphelisi bulunamadı.");
+
+                    var golgeNPCs = (await repo.GetGolgeSehirNPCsAsync()).ToList();
+                    var guiltyGolge = golgeNPCs.FirstOrDefault(n => n.IsGuilty);
+                    int guiltyIdGolge = guiltyGolge?.NPCId ?? 101;
+
+                    var cluesInBagGolge = await repo.GetCluesInBagAsync();
+                    var recentDialogsGolge = await repo.GetRecentDialogLogsAsync(golgeNpc.NPCId, 5);
+
+                    var responseGolge = await aiService.GenerateResponseAsync(golgeNpc, guiltyIdGolge, request.Question, cluesInBagGolge, recentDialogsGolge);
+
+                    if (responseGolge.TrustChange != 0)
+                    {
+                        await repo.UpdateNPCTrustAsync(golgeNpc.NPCId, responseGolge.TrustChange);
+                    }
+
+                    await repo.LogDialogWithCategoryAsync(golgeNpc.NPCId, request.Question, responseGolge.Dialogue, 1, "golge_local_ai");
+
+                    return Results.Ok(new
+                    {
+                        success = true,
+                        dialogue = responseGolge.Dialogue,
+                        emotion = responseGolge.Emotion,
+                        trustChange = responseGolge.TrustChange,
+                        revealedSecret = responseGolge.RevealedSecret ?? "",
+                        updatedNpc = golgeNpc,
+                        guiltyIdUsed = guiltyIdGolge
+                    });
+                }
+
+                // Gizemli Kasaba NPC'leri (1 - 5)
                 var npc = await repo.GetNPCByIdAsync(request.NpcId);
                 if (npc == null) return Results.NotFound("Şüpheli bulunamadı.");
 
@@ -111,6 +146,28 @@ public static class GameEndpoints
         {
             try
             {
+                // Gölge Şehir Suçlaması
+                if (request.NpcId >= 100)
+                {
+                    var golgeNpc = await repo.GetGolgeSehirNPCByIdAsync(request.NpcId);
+                    if (golgeNpc == null) return Results.NotFound("Gölge Şehir şüphelisi bulunamadı.");
+
+                    var golgeNPCs = (await repo.GetGolgeSehirNPCsAsync()).ToList();
+                    var guiltyGolge = golgeNPCs.FirstOrDefault(n => n.IsGuilty);
+                    var guiltyNameGolge = guiltyGolge?.Name ?? "Bilinmiyor";
+                    var guiltyIdGolge = guiltyGolge?.NPCId ?? 101;
+
+                    if (golgeNpc.IsGuilty)
+                    {
+                        return Results.Ok(new { success = true, message = $"Tebrikler! Gölge Şehir katilinin {golgeNpc.Name} olduğunu kanıtladınız!", accusedName = golgeNpc.Name, guiltyNpcName = guiltyNameGolge, guiltyNpcId = guiltyIdGolge });
+                    }
+                    else
+                    {
+                        return Results.Ok(new { success = false, message = $"{golgeNpc.Name} masum çıktı! Gölge Şehir'in gerçek katili {guiltyNameGolge} idi.", accusedName = golgeNpc.Name, guiltyNpcName = guiltyNameGolge, guiltyNpcId = guiltyIdGolge });
+                    }
+                }
+
+                // Gizemli Kasaba Suçlaması
                 var npc = await repo.GetNPCByIdAsync(request.NpcId);
                 if (npc == null) return Results.NotFound("Şüpheli bulunamadı.");
 
@@ -139,9 +196,13 @@ public static class GameEndpoints
         {
             try
             {
-                var npcs = (await repo.GetAllNPCsAsync()).ToList();
+                bool isGolge = request.ClueId >= 1000;
+                var npcs = isGolge
+                    ? (await repo.GetGolgeSehirNPCsAsync()).ToList()
+                    : (await repo.GetAllNPCsAsync()).ToList();
+
                 var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
-                int guiltyId = guiltyNpc?.NPCId ?? 1;
+                int guiltyId = guiltyNpc?.NPCId ?? (isGolge ? 101 : 1);
 
                 forensicService.SubmitFinding(request.ClueId, request.ClueName, request.FindingText, npcs, guiltyId);
                 return Results.Ok(new { success = true });
@@ -153,13 +214,17 @@ public static class GameEndpoints
         });
 
         // 7. Otopsi Raporu Getir
-        app.MapGet("/api/game/autopsy", async (IGameRepository repo, IForensicService forensicService) =>
+        app.MapGet("/api/game/autopsy", async (string? town, IGameRepository repo, IForensicService forensicService) =>
         {
             try
             {
-                var npcs = (await repo.GetAllNPCsAsync()).ToList();
+                bool isGolge = town == "golge_sehir";
+                var npcs = isGolge
+                    ? (await repo.GetGolgeSehirNPCsAsync()).ToList()
+                    : (await repo.GetAllNPCsAsync()).ToList();
+
                 var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
-                int guiltyId = guiltyNpc?.NPCId ?? 1;
+                int guiltyId = guiltyNpc?.NPCId ?? (isGolge ? 101 : 1);
 
                 string reportHtml = await forensicService.GenerateAutopsyReportAsync(npcs, guiltyId);
                 return Results.Ok(new { success = true, report = reportHtml, guiltyId });
@@ -171,13 +236,17 @@ public static class GameEndpoints
         });
 
         // 8. Adli Lab State
-        app.MapGet("/api/game/forensic-state", async (IGameRepository repo, IForensicService forensicService) =>
+        app.MapGet("/api/game/forensic-state", async (string? town, IGameRepository repo, IForensicService forensicService) =>
         {
             try
             {
-                var npcs = (await repo.GetAllNPCsAsync()).ToList();
+                bool isGolge = town == "golge_sehir";
+                var npcs = isGolge
+                    ? (await repo.GetGolgeSehirNPCsAsync()).ToList()
+                    : (await repo.GetAllNPCsAsync()).ToList();
+
                 var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
-                int guiltyId = guiltyNpc?.NPCId ?? 1;
+                int guiltyId = guiltyNpc?.NPCId ?? (isGolge ? 101 : 1);
 
                 var state = forensicService.GetForensicState(guiltyId);
                 return Results.Ok(state);
@@ -237,10 +306,33 @@ public static class GameEndpoints
         });
 
         // 11. Diyalog Soruları Getir
-        app.MapGet("/api/game/dialogues", (int npcId, string category) =>
+        app.MapGet("/api/game/dialogues", async (int npcId, string category, IGameRepository repo) =>
         {
             try
             {
+                // Gölge Şehir NPC'leri (101 - 108) Veritabanı sorgusu
+                if (npcId >= 100)
+                {
+                    var golgeDialogues = (await repo.GetGolgeSehirDialoguesAsync(npcId, category)).ToList();
+                    if (golgeDialogues.Count == 0)
+                    {
+                        golgeDialogues = (await repo.GetGolgeSehirDialoguesAsync(npcId, null)).ToList();
+                    }
+
+                    var rndG = new Random();
+                    var selectedGolge = golgeDialogues.OrderBy(x => rndG.Next()).Take(4).Select(d => new {
+                        q = d.PlayerText,
+                        a = d.NPCResponse,
+                        response = d.NPCResponse,
+                        type = d.Category,
+                        category = d.Category,
+                        difficulty = d.Difficulty
+                    }).ToList();
+
+                    return Results.Ok(new { success = true, dialogues = selectedGolge });
+                }
+
+                // Gizemli Kasaba NPC'leri (1 - 5)
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "dialogues.json");
                 if (!File.Exists(filePath)) return Results.NotFound("Diyalog dosyası bulunamadı.");
 
@@ -398,6 +490,164 @@ public static class GameEndpoints
             catch (Exception ex)
             {
                 return Results.Ok(new { success = false, error = ex.Message });
+            }
+        });
+
+        // =============================================
+        // GÖLGE ŞEHİR ÖZEL ENDPOINTLERİ
+        // =============================================
+
+        // 1. Gölge Şehir Şüpheli Listesi
+        app.MapGet("/api/golge-sehir/npcs", async (IGameRepository repo) =>
+        {
+            try
+            {
+                var npcs = await repo.GetGolgeSehirNPCsAsync();
+                return Results.Ok(npcs);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // 2. Gölge Şehir İpuçları
+        app.MapGet("/api/golge-sehir/clues", async (IGameRepository repo) =>
+        {
+            try
+            {
+                var clues = await repo.GetGolgeSehirCluesAsync();
+                return Results.Ok(clues);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // 3. Gölge Şehir Diyalog Havuzu (4 Rastgele Soru)
+        app.MapGet("/api/golge-sehir/dialogues", async (int npcId, string? category, IGameRepository repo) =>
+        {
+            try
+            {
+                var pool = (await repo.GetGolgeSehirDialoguesAsync(npcId, category)).ToList();
+                if (!pool.Any())
+                {
+                    pool = (await repo.GetGolgeSehirDialoguesAsync(npcId, null)).ToList();
+                }
+
+                var rnd = new Random();
+                var count = Math.Min(4, pool.Count);
+                var selected = pool.OrderBy(x => rnd.Next()).Take(count).ToList();
+
+                return Results.Ok(new { success = true, dialogues = selected });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // 4. Gölge Şehir Sorgulama (AI / Local Engine)
+        app.MapPost("/api/golge-sehir/interrogate", async (InterrogationRequest request, IGameRepository repo, IAIService aiService) =>
+        {
+            try
+            {
+                var npc = await repo.GetGolgeSehirNPCByIdAsync(request.NpcId);
+                if (npc == null) return Results.NotFound("Gölge Şehir şüphelisi bulunamadı.");
+
+                var npcs = (await repo.GetGolgeSehirNPCsAsync()).ToList();
+                var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
+
+                int guiltyId = (request.GuiltyNpcId.HasValue && request.GuiltyNpcId.Value > 0)
+                    ? request.GuiltyNpcId.Value
+                    : (guiltyNpc?.NPCId ?? 101);
+
+                var cluesInBag = await repo.GetCluesInBagAsync();
+                var recentDialogs = await repo.GetRecentDialogLogsAsync(npc.NPCId, 5);
+
+                var response = await aiService.GenerateResponseAsync(npc, guiltyId, request.Question, cluesInBag, recentDialogs);
+
+                await repo.LogDialogWithCategoryAsync(npc.NPCId, request.Question, response.Dialogue, 1, "golge_ai");
+
+                return Results.Ok(new
+                {
+                    success = true,
+                    dialogue = response.Dialogue,
+                    emotion = response.Emotion,
+                    trustChange = response.TrustChange,
+                    revealedSecret = response.RevealedSecret ?? "",
+                    updatedNpc = npc,
+                    guiltyIdUsed = guiltyId
+                });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // 5. Gölge Şehir Suçlama
+        app.MapPost("/api/golge-sehir/accuse", async (AccuseRequest request, IGameRepository repo) =>
+        {
+            try
+            {
+                var npc = await repo.GetGolgeSehirNPCByIdAsync(request.NpcId);
+                if (npc == null) return Results.NotFound("Gölge Şehir şüphelisi bulunamadı.");
+
+                var npcs = (await repo.GetGolgeSehirNPCsAsync()).ToList();
+                var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
+                var guiltyName = guiltyNpc?.Name ?? "Bilinmiyor";
+                var guiltyId = guiltyNpc?.NPCId ?? 101;
+
+                if (npc.IsGuilty)
+                {
+                    return Results.Ok(new { success = true, message = $"Tebrikler! Gölge Şehir katilinin {npc.Name} olduğunu çözdünüz.", accusedName = npc.Name, guiltyNpcName = guiltyName, guiltyNpcId = guiltyId });
+                }
+                else
+                {
+                    return Results.Ok(new { success = false, message = $"{npc.Name} masum çıktı! Gerçek katil {guiltyName} idi.", accusedName = npc.Name, guiltyNpcName = guiltyName, guiltyNpcId = guiltyId });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        });
+
+        // 6. Gölge Şehir Sıfırla (Rastgele 101-108 Katil Belirle)
+        app.MapPost("/api/golge-sehir/reset", async (IGameRepository repo) =>
+        {
+            try
+            {
+                var rnd = new Random();
+                int guiltyId = rnd.Next(101, 109);
+                await repo.ResetGolgeSehirSessionAsync(guiltyId);
+                return Results.Ok(new { success = true, message = "Gölge Şehir sıfırlandı ve yeni suçlu belirlendi.", guiltyNpcId = guiltyId });
+            }
+            catch (Exception ex)
+            {
+                var fallback = new Random().Next(101, 109);
+                return Results.Ok(new { success = true, message = "Gölge Şehir sıfırlandı (offline mod).", guiltyNpcId = fallback });
+            }
+        });
+
+        // 7. Gölge Şehir Yardımcı Mesajları (Çetin / Bekçi Rıfat)
+        app.MapGet("/api/golge-sehir/helper/tip", async (string context, string? building, IGameRepository repo) =>
+        {
+            try
+            {
+                var messages = (await repo.GetGolgeSehirHelperMessagesAsync(context, building)).ToList();
+                var top = messages.FirstOrDefault();
+                if (top != null)
+                {
+                    return Results.Ok(new { success = true, message = top.Message, speaker = top.Speaker, context = top.Context, priority = top.Priority });
+                }
+                return Results.Ok(new { success = false, message = "", speaker = "cetin", context = context });
+            }
+            catch (Exception ex)
+            {
+                return Results.Ok(new { success = true, message = "Amirims, Gölge Şehir soruşturmasına devam edelim!", speaker = "cetin", context = context });
             }
         });
     }

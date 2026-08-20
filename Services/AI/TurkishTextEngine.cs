@@ -92,10 +92,15 @@ public static class TurkishTextEngine
         return word switch
         {
             "kanki" or "kral" or "abi" or "dayi" or "usta" or "aga" or "haci" or "bilader" or "sef" or "toprak" => "amirim",
-            "sikti" or "kesti" or "deldi" or "cizdi" or "vurdu" or "indirdi" or "desti" or "kiydi" or "gebertti" or "boctu" => "oldur",
+            "sikti" or "kesti" or "deldi" or "cizdi" or "vurdu" or "indirdi" or "desti" or "kiydi" or "gebertti" or "boctu" or "oldurdu" or "yapti" or "ett" => "oldur",
             "para" or "mangir" or "sakal" or "avanta" or "cukka" or "veresiye" => "borc",
-            "cirkef" or "pislik" or "kavga" or "gurultu" or "dalaş" => "tartisma",
+            "cirkef" or "pislik" or "kavga" or "gurultu" or "dalaş" or "husumet" => "tartisma",
             "suphe" or "kusku" or "gizli" => "suphe",
+            "slm" or "s.a" or "sa" or "selamin" or "aleykum" or "selamlar" or "selam" or "selamun" or "hey" or "heyy" => "selam",
+            "mrb" or "meraba" or "mrhb" or "merhaba" or "merhabalar" => "merhaba",
+            "nbr" or "naber" or "naptin" or "napiyosun" or "napiyorsun" or "nabion" or "nasil" or "nasilsin" => "nasilsin",
+            "kim" or "kimdir" or "katil" or "suclu" or "kimyapti" => "kim",
+            "neden" or "niye" or "nicin" or "sebep" => "neden",
             _ => word
         };
     }

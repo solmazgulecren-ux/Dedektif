@@ -13,6 +13,8 @@
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=500">
+    <!-- Gölge Şehir İzole Stil Dosyası -->
+    <link rel="stylesheet" href="css/towns/golge_sehir/golge_sehir.css?v=600">
     <link
         href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@400;700&family=Sedgwick+Ave&display=swap"
         rel="stylesheet">
@@ -511,15 +513,24 @@
         </div>
     </div>
 
-    <!-- 13. GLOBAL NOTIFICATION MODAL -->
+    <!-- 13. GLOBAL NOTIFICATION & CONFIRMATION MESSAGE BOX MODAL -->
     <div id="global-notification-modal" class="modal-backdrop hidden" style="z-index: 9999;">
-        <div class="notification-card">
-            <div class="notification-icon pulse-anim"><i class="fa-solid fa-envelope-open-text"></i></div>
+        <div class="notification-card" id="game-messagebox-card">
+            <div class="notification-icon pulse-anim" id="game-messagebox-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
             <h3 id="global-notification-title">YENİ BİLGİ!</h3>
-            <p id="global-notification-text">Adli Tıp Merkezi'nden Otopsi Raporu geldi! Harita ekranındaki rapora
-                tıklayarak inceleyebilirsiniz.</p>
-            <button id="notification-ok-btn" class="btn btn-primary btn-full"><i class="fa-solid fa-check"></i>
-                Anladım</button>
+            <p id="global-notification-text">Adli Tıp Merkezi'nden Otopsi Raporu geldi! Harita ekranındaki rapora tıklayarak inceleyebilirsiniz.</p>
+            <div id="game-messagebox-actions" style="display:flex; gap:12px; justify-content:center; margin-top:20px;">
+                <button id="messagebox-cancel-btn" class="btn btn-outline hidden" style="flex:1;"><i class="fa-solid fa-xmark"></i> Hayır / İptal</button>
+                <button id="notification-ok-btn" class="btn btn-primary btn-full" style="flex:1;"><i class="fa-solid fa-check"></i> Anladım</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 13.5 KASABALI EVİ (FEHMİ BEY) ÖZEL KAPI VİDEOSU SAHNESİ (GENİŞ SİNEMATİK ÇERÇEVE) -->
+    <div id="fehmi-door-animation-modal" class="modal-backdrop hidden" style="z-index: 9500; background: rgba(5,6,8,0.96); backdrop-filter: blur(8px);">
+        <div class="fehmi-door-stage" style="position:relative; width:1020px; height:820px; max-width:96vw; max-height:92vh; border:4px solid #f59e0b; border-radius:18px; overflow:hidden; box-shadow:0 0 70px rgba(245,158,11,0.6), 0 30px 90px rgba(0,0,0,0.98); background:#000;">
+            <!-- Bunu Video Haline Getir MP4 Dosyası -->
+            <video id="fehmi-door-video" playsinline preload="auto" style="width:100%; height:100%; object-fit:contain; background:#000; display:block;" src="images/towns/golge_sehir/bunu_video_haline_getir.mp4"></video>
         </div>
     </div>
 
@@ -627,7 +638,10 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=500"></script>
+    <!-- Gölge Şehir İzole Modül Dosyaları -->
+    <script src="js/towns/golge_sehir/GolgeSehirConfig.js?v=801?v=800"></script>
+    <script src="js/towns/golge_sehir/GolgeSehirEngine.js?v=801?v=800"></script>
+    <script src="js/app.js?v=801"></script>
 </body>
 
 </html>

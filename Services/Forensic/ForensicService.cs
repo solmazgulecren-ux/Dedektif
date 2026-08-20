@@ -23,13 +23,13 @@ public class ForensicService : IForensicService
     {
         if (string.IsNullOrWhiteSpace(findingText)) return;
 
-        // Clue Owner Mapping (1..15 -> 5 NPCs: 1-3 Kasap, 4-6 Eczacı, 7-9 Muhtar, 10-12 Komiser, 13-15 Terzi)
-        int ownerNpcId = Math.Clamp((clueId - 1) / 3 + 1, 1, 5);
+        bool isGolge = (clueId >= 1000);
+        int ownerNpcId = isGolge ? (clueId / 10) : Math.Clamp((clueId - 1) / 3 + 1, 1, 5);
         bool isGuiltyClue = (ownerNpcId == guiltyId);
         bool isFingerprint = findingText.Contains("PARMAK İZİ", StringComparison.OrdinalIgnoreCase);
         bool isBlood = findingText.Contains("KAN LEKESİ", StringComparison.OrdinalIgnoreCase);
 
-        string sampleCode = clueId switch
+        string sampleCode = isGolge ? $"NUMUNE #{clueId} ({clueName})" : (clueId switch
         {
             1 => "NUMUNE #01 (Masif Çelik Kesici Alet)",
             2 => "NUMUNE #02 (Veresiye Belgesi / Defter)",
@@ -47,7 +47,7 @@ public class ForensicService : IForensicService
             14 => "NUMUNE #14 (Yün Kumaş Parçası)",
             15 => "NUMUNE #15 (Astar İçi Dikiş Bölmesi)",
             _ => $"NUMUNE #{clueId:D2} (Olay Yeri Materyali)"
-        };
+        });
 
         string entry;
 
@@ -66,7 +66,8 @@ public class ForensicService : IForensicService
         {
             if (isGuiltyClue)
             {
-                entry = $"[🧬 SEROLOJİK DNA ANALİZİ - {sampleCode}]: Numunedeki kan lekesi ve DNA serotipi, kurban Osman Bey'in kan profili ile TAM EŞLEŞTİ. (Cinayet anı arbede/temas lekesi kesinleşmiştir).";
+                string victimName = isGolge ? "Ekrem Bey" : "Osman Bey";
+                entry = $"[🧬 SEROLOJİK DNA ANALİZİ - {sampleCode}]: Numunedeki kan lekesi ve DNA serotipi, kurban {victimName}'in kan profili ile TAM EŞLEŞTİ. (Cinayet anı arbede/temas lekesi kesinleşmiştir).";
             }
             else
             {
@@ -91,21 +92,25 @@ public class ForensicService : IForensicService
     {
         var guiltyNpc = npcs.FirstOrDefault(n => n.NPCId == guiltyId);
         string guiltyName = guiltyNpc?.Name ?? "Bilinmiyor";
+        bool isGolge = (guiltyId >= 100);
 
-        string reportHtml = @"
+        string victimName = isGolge ? "Ekrem Bey (62, Erkek)" : "Osman Bey (58, Erkek)";
+        string deathTime = isGolge ? "02:00 - 02:30 (Çam Ormanı Yolu / Göl Kenarı)" : "23:45 - 00:30 (Mantarlaşma & Rigor Mortis)";
+
+        string reportHtml = $@"
         <div class='autopsy-dossier'>
             <div class='autopsy-paper-header'>
                 <div class='autopsy-official-seal'>
                     <i class='fa-solid fa-scale-balanced'></i> T.C. ADLİ TIP KURUMU OTOPSİ VE ADLİ BİLİMLER BAŞKANLIĞI
                 </div>
-                <div class='autopsy-dossier-no'>RESMİ OTOPSİ PROTOKOL DOSYASI #104-B</div>
+                <div class='autopsy-dossier-no'>RESMİ OTOPSİ PROTOKOL DOSYASI #{(isGolge ? "208-G" : "104-B")}</div>
             </div>
             
             <div class='autopsy-meta-grid'>
-                <div class='autopsy-meta-item'><strong>KURBAN:</strong> Osman Bey (58, Erkek)</div>
-                <div class='autopsy-meta-item'><strong>TAHMİNİ ÖLÜM SAATİ:</strong> 23:45 - 00:30 (Mantarlaşma & Rigor Mortis)</div>
+                <div class='autopsy-meta-item'><strong>KURBAN:</strong> {victimName}</div>
+                <div class='autopsy-meta-item'><strong>TAHMİNİ ÖLÜM SAATİ:</strong> {deathTime}</div>
                 <div class='autopsy-meta-item'><strong>OTOPSİ UZMANI:</strong> Dr. Selim Karaca (Adli Tabip)</div>
-                <div class='autopsy-meta-item'><strong>GİZLİLİK DERECESİ:</strong> <span class='autopsy-alert-tag'>🚨 ÇOK GİZLİ / İLE MÜMHÜR</span></div>
+                <div class='autopsy-meta-item'><strong>GİZLİLİK DERECESİ:</strong> <span class='autopsy-alert-tag'>🚨 ÇOK GİZLİ / İL MÜHÜRLÜ</span></div>
             </div>
 
             <div class='autopsy-divider-line'></div>
@@ -113,41 +118,101 @@ public class ForensicService : IForensicService
             <div class='autopsy-sec-title'><i class='fa-solid fa-microscope'></i> OTOPSİ & ADLİ PATOLOJİ BULGULARI</div>
             <div class='autopsy-main-finding'>";
 
-        switch (guiltyId)
+        if (isGolge)
         {
-            case 1: // Kasap Hasan
-                reportHtml += @"
-                <div class='autopsy-bullet'><span class='bullet-tag'>[PATOLOJİK KESİ]</span> Boyun sol karotis arter mevkisinde enlemesine, ağır masif kesici aletle (incisio vulnificus) açılmış 14cm derin yırtıklı yara saptanmıştır.</div>
-                <div class='autopsy-bullet'><span class='bullet-tag'>[MEKANİK ANATOMİ]</span> Darbenin yüksek kas aktivitesi ve kesici/bileyici alet kullanım tecrübesi olan bir şahıs tarafından tek hamlede uygulandığı değerlendirilmiştir.</div>
-                <div class='autopsy-bullet'><span class='bullet-tag'>[EPİDERMAL MİKROSKOBİ]</span> Kurbanın tırnak altında yapılan spektrofotometrik taramada katmanlı deri lifleri ve bileme tozu izole edilmiştir.</div>";
-                break;
-            case 2: // Eczacı Selma
-                reportHtml += @"
-                <div class='autopsy-bullet'><span class='bullet-tag'>[EKSTERN İNCELEME]</span> Post-mortem muayenede gövde üzerinde mekanik arbede veya fiziki darbe izine rastlanmamıştır. Miyokardial paralizi ve siyanoz bulguları sabittir.</div>
-                <div class='autopsy-bullet'><span class='bullet-tag'>[TOKSİKOLOJİK ROL]</span> Kan ve gastrik sıvı örneklerinde nörotoksik kardiyovasküler felce neden olan fitotoksin glikozit bileşeni tespit edilmiştir.</div>
-                <div class='autopsy-bullet'><span class='bullet-tag'>[POZOLOJİK UYGULAMA]</span> Toksik ajanın kurbanın düzenli tükettiği reçeteli sedatif solüsyona hassas mikro dozajda enjekte edildiği anlaşılmıştır.</div>";
-                break;
-            case 3: // Muhtar Kemal
-                reportHtml += @"
-                <div class='autopsy-bullet'><span class='bullet-tag'>[TRAVMA ANALİZİ]</span> Kafatasının sağ parietal osteo-sutur bölgesinde ağır metalli nesne soketi ile uyumlu oval çökme kırığı (fractura depressa) saptanmıştır.</div>
-                <div class='autopsy-bullet'><span class='bullet-tag'>[DOKU SPEKTROSKOBİSİ]</span> Göğüs lezyonlarında selülozik kağıt lifleri, kırık optik polimer mikro-kıymıkları ve kalsiyum karbonat tespit edilmiştir.</div>
-                <div class='autopsy-bullet'><span class='bullet-tag'>[PİGMENT KANITI]</span> Elbise astarları ve tırnak aralarında kırmızı pigmentli baskı mürekkebi (Rubrum Impressio) kalıntıları izole edilmiştir.</div>";
-                break;
-            case 4: // Komiser Güneş
-                reportHtml += @"
-                <div class='autopsy-bullet'><span class='bullet-tag'>[DOĞRUSAL TRAVMA]</span> Sırt ve thorakal kaburga mevkisinde 32mm silindirik esnek teçhizata ait doğrusal ezik izleri (contusio rectilinearis) saptanmıştır.</div>
-                <div class='autopsy-bullet'><span class='bullet-tag'>[ASFİKSİ BULGUSU]</span> Boyun hyoid kemik çevresinde aksiller kıskac altında subkonjonktival asphyxia hematomu mevcuttur.</div>
-                <div class='autopsy-bullet'><span class='bullet-tag'>[KİMYASAL ANOMALİ]</span> Olay yerinde ve kurban elbisesinde adli incelemeyi engellemeye yönelik profesyonel endüstriyel solvent solüsyonu kalıntıları tespit edilmiştir.</div>";
-                break;
-            case 5: // Terzi Yahya
-                reportHtml += @"
-                <div class='autopsy-bullet'><span class='bullet-tag'>[LİGATÜR BOĞULMA]</span> Boyun anterior larynx bölgesinde 0.4mm çapında çok ince, yüksek tensil mukavemetli sentetik lif (sulcus strangulationis) saptanmıştır.</div>
-                <div class='autopsy-bullet'><span class='bullet-tag'>[LİF PATOLOJİSİ]</span> Kurbanın posterior ceket astarlarında keskin lezyon ve iç astar dikişlerinden dökülen mikronize yün lifleri izole edilmiştir.</div>
-                <div class='autopsy-bullet'><span class='bullet-tag'>[POSTÜRAL ANALİZ]</span> Saldırının kurbanın beklemediği bir anda arka açıdan dairesel traksiyon hamlesiyle gerçekleştirildiği kesinleşmiştir.</div>";
-                break;
-            default:
-                reportHtml += "<div class='autopsy-bullet'>• Otopsi ve laboratuvar analizleri devam ediyor.</div>";
-                break;
+            switch (guiltyId)
+            {
+                case 101: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[PATOLOJİK KESİ]</span> Kafatasının sol frontal bölgesinde ağır masif kesici aletle açılmış 16cm derin yarıklı darbe lezyonu saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[MEKANİK ANATOMİ]</span> Darbenin yüksek kuvvetle ve dikey açıyla uygulandığı, kemik dokuda derin çatlaklar bıraktığı saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[EPİDERMAL MİKROSKOBİ]</span> Kurbanın ense kısmında mikronize bitkisel reçine ve odunsu kalıntılar tespit edilmiştir.</div>";
+                    break;
+                case 102: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[PENETRASYON TRAVMASI]</span> Göğüs anterior mediastinal bölgesinde keskin tek kenarlı alet girişiyle (vulnus punctum) oluşan ölümcül yara saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[İÇ PERFÜZYON]</span> Kesi çevresinde organik asit kalıntıları ile uyumlu eser miktarda asidik biyokimyasal izole edilmiştir.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[DOKU PATOLOJİSİ]</span> Kurbanın ceket liflerinde koyu renkli sentetik olmayan mikro-iplikler saptanmıştır.</div>";
+                    break;
+                case 103: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[TRAVMA ANALİZİ]</span> Oksipital kemikte sıcak/kızgın silindirik sert cisim darbesi ile uyumlu dairesel yanık lezyonlu kırık saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[METALOGRAFİK ANALİZ]</span> Darbe soketinde mikroskobik ölçekte inorganik metalik toz ve kömür kalıntıları saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[PİGMENT KANITI]</span> Saç diplerinde yüksek ısı kaynağına maruziyetten kaynaklanan is ve endüstriyel yağ lekesi izole edilmiştir.</div>";
+                    break;
+                case 104: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[İÇ TOKSİKOLOJİ]</span> Akut pulmoner ödem ve solunum depresyonu bulguları sabittir. Mekanik darbe izine rastlanmamıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[TOKSİKOLOJİK PATOLOJİ]</span> Kurbanın gastrik sıvısında ve bronş çeperlerinde yüksek konsantrasyonda arsenik bazlı inorganik toksin tortuları izole edilmiştir.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[KİMYASAL BULGU]</span> Maktulün ağız içi mukozasında zehir karıştırılmış kurutulmuş bitki yaprağı lifleri tespit edilmiştir.</div>";
+                    break;
+                case 105: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[EKSTERN BİLGİ]</span> Miyokardiyal aritmi ve kardiyovasküler felç bulguları saptanmıştır. Herhangi bir fiziki darbe veya penetrasyon saptanmamıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[TOKSİKOLOJİK ROL]</span> Kan ve idrar tahlillerinde atropin ve skopolamin alkaloid bileşenleri izole edilmiştir.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[POZOLOJİK UYGULAMA]</span> Zehrin kurbanın günlük olarak tükettiği farmakolojik bir karışıma enjekte edildiği anlaşılmıştır.</div>";
+                    break;
+                case 106: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[TRAVMA DETAYI]</span> Kafatasının temporal mevkisinde ağır pürüzsüz metal cisim darbesiyle oluşan çökme kırığı saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[EPİDERMAL MİKROSKOBİ]</span> Kurbanın tırnak aralarında inorganik kırmızı balmumu (Rubrum Cera) pigmentleri saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[KANTİTATİF ANALİZ]</span> Bel bölgesinde dekoratif halı lifleri ve optik polimer cam kıymıkları izole edilmiştir.</div>";
+                    break;
+                case 107: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[POSTÜRAL TRAVMA]</span> Oksipital kemikte sert bir yapıya çarpmasıyla uyumlu doğrusal kırılma (fractura linearis) ve beyin kanaması saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[MEKANİK ANALİZ]</span> Kurbanın elbisesinde saat 02:14 sularında durmuş olan mekanik bir aksama ait pirinç zincir halkası saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[DOKU ANALİZİ]</span> Olay yerinde ve kurban elbiselerinde yüksek nem oranına sahip toprak yapısı ve petrokimyasal aydınlatma yakıtı kalıntıları izole edilmiştir.</div>";
+                    break;
+                case 108: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[ASFİKSİ ANOMALİSİ]</span> Boyun trakeal kıkırdak çevresinde 0.4mm kalınlığında dayanıklı sentetik sicimle (ligatür boğulma) oluşan derin strangülasyon çizgisi saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[MİKROSKOBİK TESPİT]</span> Strangülasyon çizgisinde izolasyon materyali (mumlu kaplama) ve endüstriyel yapıştırıcı kalıntıları izole edilmiştir.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[İZ ANALİZİ]</span> Kurbanın ceket omuzunda 42 ebatlarında organik dokulu ağır ayakkabı tabanı izi saptanmıştır.</div>";
+                    break;
+                default:
+                    reportHtml += "<div class='autopsy-bullet'>• Otopsi ve laboratuvar analizleri devam ediyor.</div>";
+                    break;
+            }
+        }
+        else
+        {
+            switch (guiltyId)
+            {
+                case 1: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[PATOLOJİK KESİ]</span> Boyun sol karotis arter mevkisinde enlemesine, geniş ağızlı masif kesici aletle (incisio vulnificus) açılmış 14cm derin yırtıklı yara saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[MEKANİK ANATOMİ]</span> Darbenin yüksek kas aktivitesi ve kesici/bileyici alet kullanım tecrübesi olan bir şahıs tarafından tek hamlede uygulandığı değerlendirilmiştir.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[EPİDERMAL MİKROSKOBİ]</span> Kurbanın tırnak altında yapılan spektrofotometrik taramada inorganik bileme tozu izole edilmiştir.</div>";
+                    break;
+                case 2: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[EKSTERN İNCELEME]</span> Post-mortem muayenede gövde üzerinde mekanik arbede veya fiziki darbe izine rastlanmamıştır. Miyokardial paralizi ve siyanoz bulguları sabittir.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[TOKSİKOLOJİK ROL]</span> Kan ve gastrik sıvı örneklerinde nörotoksik kardiyovasküler felce neden olan fitotoksin glikozit bileşeni tespit edilmiştir.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[POZOLOJİK UYGULAMA]</span> Toksik ajanın kurbanın düzenli tükettiği farmakolojik bir solüsyona enjekte edildiği anlaşılmıştır.</div>";
+                    break;
+                case 3: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[TRAVMA ANALİZİ]</span> Kafatasının sağ parietal osteo-sutur bölgesinde ağır metalli nesne soketi ile uyumlu oval çökme kırığı (fractura depressa) saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[DOKU SPEKTROSKOBİSİ]</span> Göğüs lezyonlarında selülozik kağıt lifleri, kırık optik polimer mikro-kıymıkları ve kalsiyum karbonat tespit edilmiştir.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[PİGMENT KANITI]</span> Elbise astarları ve tırnak aralarında kırmızı pigmentli baskı materyali (Rubrum Impressio) kalıntıları izole edilmiştir.</div>";
+                    break;
+                case 4: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[DOĞRUSAL TRAVMA]</span> Sırt ve thorakal kaburga mevkisinde 32mm silindirik esnek yapılı bir aksesuara ait doğrusal ezik izleri (contusio rectilinearis) saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[ASFİKSİ BULGUSU]</span> Boyun hyoid kemik çevresinde aksiller kıskac altında subkonjonktival asphyxia hematomu mevcuttur.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[KİMYASAL ANOMALİ]</span> Olay yerinde ve kurban elbisesinde adli incelemeyi engellemeye yönelik profesyonel endüstriyel solvent solüsyonu kalıntıları tespit edilmiştir.</div>";
+                    break;
+                case 5: 
+                    reportHtml += @"
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[LİGATÜR BOĞULMA]</span> Boyun anterior larynx bölgesinde 0.4mm çapında çok ince, yüksek tensil mukavemetli sentetik lif (sulcus strangulationis) saptanmıştır.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[LİF PATOLOJİSİ]</span> Kurbanın posterior ceket astarlarında keskin lezyon ve organik dokulu mikronize yün lifleri izole edilmiştir.</div>
+                    <div class='autopsy-bullet'><span class='bullet-tag'>[POSTÜRAL ANALİZ]</span> Saldırının kurbanın beklemediği bir anda arka açıdan dairesel traksiyon hamlesiyle gerçekleştirildiği kesinleşmiştir.</div>";
+                    break;
+                default:
+                    reportHtml += "<div class='autopsy-bullet'>• Otopsi ve laboratuvar analizleri devam ediyor.</div>";
+                    break;
+            }
         }
 
         reportHtml += "</div>";
@@ -197,13 +262,30 @@ public class ForensicService : IForensicService
         int weaponId = 0;
         int fingerprintId = 0;
 
-        switch (guiltyId)
+        if (guiltyId >= 100)
         {
-            case 1: weaponId = 1; fingerprintId = 2; break; // Kasap (Satır, Defter)
-            case 2: weaponId = 6; fingerprintId = 4; break; // Eczacı (Sarmaşık, Şişe)
-            case 3: weaponId = 8; fingerprintId = 7; break; // Muhtar (Gözlük, Mektup)
-            case 4: weaponId = 10; fingerprintId = 12; break; // Komiser (Rozet, Düğme)
-            case 5: weaponId = 13; fingerprintId = 14; break; // Terzi (Makara, Kumaş)
+            switch (guiltyId)
+            {
+                case 101: weaponId = 1011; fingerprintId = 1013; break; // Oduncu
+                case 102: weaponId = 1023; fingerprintId = 1021; break; // Manav
+                case 103: weaponId = 1031; fingerprintId = 1033; break; // Demirci
+                case 104: weaponId = 1043; fingerprintId = 1042; break; // Bakkal
+                case 105: weaponId = 1051; fingerprintId = 1054; break; // Hekim
+                case 106: weaponId = 1064; fingerprintId = 1062; break; // Muhtar
+                case 107: weaponId = 1073; fingerprintId = 1071; break; // Fehmi
+                case 108: weaponId = 1084; fingerprintId = 1081; break; // Kunduracı
+            }
+        }
+        else
+        {
+            switch (guiltyId)
+            {
+                case 1: weaponId = 1; fingerprintId = 2; break; // Kasap
+                case 2: weaponId = 6; fingerprintId = 4; break; // Eczacı
+                case 3: weaponId = 8; fingerprintId = 7; break; // Muhtar
+                case 4: weaponId = 10; fingerprintId = 12; break; // Komiser
+                case 5: weaponId = 13; fingerprintId = 14; break; // Terzi
+            }
         }
 
         return new { success = true, guiltyId, weaponId, fingerprintId };

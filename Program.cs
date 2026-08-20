@@ -45,6 +45,14 @@ class Program
             {
                 await repository.EnsureHelperTablesAsync();
                 await repository.SeedHelperMessagesAsync();
+                await repository.EnsureGolgeSehirTablesAsync();
+                
+                // Force AI reseed for Golge Sehir
+                using var db = repository.CreateConnection();
+                await Dapper.SqlMapper.ExecuteAsync(db, "DELETE FROM NPCDialogues");
+                
+                var seeder = new AISeeder(repository);
+                await seeder.Seed1000PlusDialoguesAsync();
             }
             catch (Exception ex)
             {

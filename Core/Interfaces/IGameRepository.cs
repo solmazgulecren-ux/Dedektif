@@ -35,4 +35,15 @@ public interface IGameRepository
     Task LogPlayerActionAsync(int sessionId, string actionType, int? targetId, string? details);
     Task SaveGameStateAsync(int sessionId, string stateData);
     Task<string?> LoadGameStateAsync(int sessionId);
+
+    // =============================================
+    // Gölge Şehir Özel Metotları
+    // =============================================
+    Task EnsureGolgeSehirTablesAsync();
+    Task<IEnumerable<NPC>> GetGolgeSehirNPCsAsync();
+    Task<NPC?> GetGolgeSehirNPCByIdAsync(int id);
+    Task<IEnumerable<Clue>> GetGolgeSehirCluesAsync();
+    Task<IEnumerable<NPCDialogue>> GetGolgeSehirDialoguesAsync(int npcId, string? category = null);
+    Task<IEnumerable<HelperMessage>> GetGolgeSehirHelperMessagesAsync(string context, string? building = null);
+    Task ResetGolgeSehirSessionAsync(int guiltyNpcId);
 }

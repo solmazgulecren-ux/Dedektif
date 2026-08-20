@@ -22,6 +22,12 @@ obj/
 appsettings.json
 appsettings.Development.json
 
+# SQLite Yerel Veritabanı
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+
 # OS dosyaları
 Thumbs.db
 .DS_Store

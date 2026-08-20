@@ -226,8 +226,14 @@ public class DatabaseRepository : IGameRepository
     public async Task<IEnumerable<NPCDialogue>> GetLocalAIPoolAsync(int npcId)
     {
         using var db = CreateConnection();
+        if (npcId >= 100)
+        {
+            return await db.QueryAsync<NPCDialogue>(
+                "SELECT DialogueId, NPCId, Difficulty, Category, QuestionText AS PlayerText, ResponseText AS NPCResponse, GuiltyResponseText AS GuiltyResponses FROM GolgeSehirNPCDialogues WHERE NPCId = @NPCId",
+                new { NPCId = npcId });
+        }
         return await db.QueryAsync<NPCDialogue>(
-            "SELECT * FROM NPCDialogues WHERE NPCId = @NPCId AND Category LIKE 'local_ai_%'",
+            "SELECT * FROM NPCDialogues WHERE NPCId = @NPCId",
             new { NPCId = npcId });
     }
 
@@ -254,6 +260,9 @@ public class DatabaseRepository : IGameRepository
             // Gelişmiş yapay zeka hafıza verilerini yükle (1000+ Cümle)
             var aiSeeder = new AISeeder(this);
             await aiSeeder.Seed1000PlusDialoguesAsync();
+
+            // Gölge Şehir Tablolarını ve Verilerini Yükle
+            await EnsureGolgeSehirTablesAsync();
         }
         catch (Exception ex)
         {
@@ -564,6 +573,156 @@ public class DatabaseRepository : IGameRepository
             return await db.ExecuteScalarAsync<int>(query, new { GuiltyNPCId = guiltyNpcId, StartedAt = DateTime.UtcNow.ToString("O") });
         }
         catch { return 1; }
+    }
+
+    // =============================================
+    // Gölge Şehir Özel Metotları
+    // =============================================
+
+    public async Task EnsureGolgeSehirTablesAsync()
+    {
+        using var db = CreateConnection();
+        try
+        {
+            var schemaPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "schema_golge_sehir.sql");
+            if (File.Exists(schemaPath))
+            {
+                var sql = await File.ReadAllTextAsync(schemaPath);
+                await db.ExecuteAsync(sql);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ⚠️ EnsureGolgeSehirTablesAsync hatası: {ex.Message}");
+        }
+    }
+
+    public async Task<IEnumerable<NPC>> GetGolgeSehirNPCsAsync()
+    {
+        using var db = CreateConnection();
+        try
+        {
+            return await db.QueryAsync<NPC>("SELECT * FROM GolgeSehirNPCs ORDER BY NPCId");
+        }
+        catch
+        {
+            return Enumerable.Empty<NPC>();
+        }
+    }
+
+    public async Task<NPC?> GetGolgeSehirNPCByIdAsync(int id)
+    {
+        using var db = CreateConnection();
+        try
+        {
+            return await db.QueryFirstOrDefaultAsync<NPC>("SELECT * FROM GolgeSehirNPCs WHERE NPCId = @NPCId", new { NPCId = id });
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<IEnumerable<Clue>> GetGolgeSehirCluesAsync()
+    {
+        using var db = CreateConnection();
+        try
+        {
+            var rows = await db.QueryAsync<dynamic>("SELECT * FROM GolgeSehirClues ORDER BY ClueId");
+            return rows.Select(r => new Clue
+            {
+                ClueId = (int)r.ClueId,
+                Title = (string)r.Name,
+                Description = (string)r.Description,
+                RelatedNPCId = (int)r.NPCId,
+                Status = (string)(r.Status ?? "Pending")
+            });
+        }
+        catch
+        {
+            return Enumerable.Empty<Clue>();
+        }
+    }
+
+    public async Task<IEnumerable<NPCDialogue>> GetGolgeSehirDialoguesAsync(int npcId, string? category = null)
+    {
+        using var db = CreateConnection();
+        try
+        {
+            if (string.IsNullOrEmpty(category))
+            {
+                var rows = await db.QueryAsync<dynamic>("SELECT * FROM GolgeSehirNPCDialogues WHERE NPCId = @NPCId", new { NPCId = npcId });
+                return rows.Select(r => new NPCDialogue
+                {
+                    DialogueId = (int)r.DialogueId,
+                    NPCId = (int)r.NPCId,
+                    PlayerText = (string)r.QuestionText,
+                    NPCResponse = (string)r.ResponseText,
+                    GuiltyResponses = (string)r.GuiltyResponseText,
+                    Difficulty = (int)(r.Difficulty ?? 1),
+                    Category = (string)(r.Category ?? "tanisma")
+                });
+            }
+            else
+            {
+                var rows = await db.QueryAsync<dynamic>("SELECT * FROM GolgeSehirNPCDialogues WHERE NPCId = @NPCId AND Category = @Category", new { NPCId = npcId, Category = category });
+                return rows.Select(r => new NPCDialogue
+                {
+                    DialogueId = (int)r.DialogueId,
+                    NPCId = (int)r.NPCId,
+                    PlayerText = (string)r.QuestionText,
+                    NPCResponse = (string)r.ResponseText,
+                    GuiltyResponses = (string)r.GuiltyResponseText,
+                    Difficulty = (int)(r.Difficulty ?? 1),
+                    Category = (string)(r.Category ?? "tanisma")
+                });
+            }
+        }
+        catch
+        {
+            return Enumerable.Empty<NPCDialogue>();
+        }
+    }
+
+    public async Task<IEnumerable<HelperMessage>> GetGolgeSehirHelperMessagesAsync(string context, string? building = null)
+    {
+        using var db = CreateConnection();
+        try
+        {
+            if (!string.IsNullOrEmpty(building))
+            {
+                return await db.QueryAsync<HelperMessage>(@"
+                    SELECT * FROM GolgeSehirHelperMessages 
+                    WHERE Context = @Context AND (BuildingName = @BuildingName OR BuildingName IS NULL)
+                    ORDER BY Priority DESC",
+                    new { Context = context, BuildingName = building });
+            }
+            return await db.QueryAsync<HelperMessage>(@"
+                SELECT * FROM GolgeSehirHelperMessages WHERE Context = @Context ORDER BY Priority DESC",
+                new { Context = context });
+        }
+        catch
+        {
+            return Enumerable.Empty<HelperMessage>();
+        }
+    }
+
+    public async Task ResetGolgeSehirSessionAsync(int guiltyNpcId)
+    {
+        using var db = CreateConnection();
+        try
+        {
+            await db.ExecuteAsync(@"
+                UPDATE GolgeSehirNPCs 
+                SET IsGuilty = CASE WHEN NPCId = @GuiltyId THEN 1 ELSE 0 END,
+                    TrustLevel = 50,
+                    FearLevel = 30",
+                new { GuiltyId = guiltyNpcId });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ⚠️ ResetGolgeSehirSessionAsync hatası: {ex.Message}");
+        }
     }
 
 }

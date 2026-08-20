@@ -1,0 +1,1124 @@
+/* ==========================================================================
+   GÖLGE ŞEHİR (SHADOW CITY) ISOLATED CSS STYLESHEET v8.0
+   Noir Zarf, Gizli Delil Hotspotları, Ayakta Bekçi Widget'ı & Sarı Neon Tema
+   ========================================================================== */
+
+/* Active Gölge Şehir Map Container Override */
+#town-map-screen.golge-sehir-active,
+#town-map-stage.golge-sehir-active {
+    background-image: url('/images/towns/golge_sehir/golge_sehir_map.png') !important;
+    background-size: 100% 100% !important;
+    background-position: center bottom !important;
+    background-repeat: no-repeat !important;
+}
+
+/* ==========================================================================
+   GÖLGE ŞEHİR HİKAYE EKRANI (SARI / ALTIN NEON NOİR TEMA)
+   ========================================================================== */
+.golge-sehir-theme .story-intro-screen {
+    background: radial-gradient(circle at center, rgba(30, 20, 5, 0.45) 0%, rgba(10, 7, 2, 0.92) 100%),
+        url('/images/towns/golge_sehir/golge_sehir_map.png') no-repeat center center !important;
+    background-size: cover !important;
+}
+
+.golge-sehir-theme .story-text-box {
+    background: rgba(12, 10, 6, 0.78) !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    border-left: 3px solid #f59e0b !important;
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.25), inset 0 0 20px rgba(245, 158, 11, 0.08) !important;
+    border-radius: 8px !important;
+    backdrop-filter: blur(14px) !important;
+}
+
+.golge-sehir-theme .story-badge {
+    color: #fbbf24 !important;
+    text-shadow: 0 0 12px rgba(245, 158, 11, 0.8) !important;
+    letter-spacing: 3px !important;
+}
+
+.golge-sehir-theme .story-text-box .typewriter-text {
+    color: #fef3c7 !important;
+    font-family: var(--font-typewriter) !important;
+    line-height: 1.95 !important;
+}
+
+.golge-sehir-theme .story-cursor {
+    color: #f59e0b !important;
+    text-shadow: 0 0 10px #f59e0b !important;
+}
+
+.golge-sehir-theme #story-continue-btn {
+    background-color: transparent !important;
+    color: #fbbf24 !important;
+    border: 1px solid #f59e0b !important;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4) !important;
+    animation: golgePulseGlow 2s infinite alternate !important;
+}
+
+.golge-sehir-theme #story-continue-btn:hover {
+    background-color: #f59e0b !important;
+    color: #1c0d02 !important;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.85) !important;
+}
+
+.golge-sehir-theme #skip-story-btn {
+    border-color: rgba(245, 158, 11, 0.4) !important;
+    color: #fde68a !important;
+}
+
+.golge-sehir-theme #skip-story-btn:hover {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+}
+
+@keyframes golgePulseGlow {
+    0% {
+        box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 25px rgba(245, 158, 11, 0.75);
+    }
+}
+
+/* Gölge Şehir Building Hotspot Marker Base Styles */
+.map-building[class*="building-golge-"] {
+    position: absolute;
+    cursor: pointer;
+    border: 2px dashed rgba(245, 158, 11, 0.4);
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 20;
+}
+
+.map-building[class*="building-golge-"]:hover {
+    border-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.2);
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.7), inset 0 0 15px rgba(245, 158, 11, 0.25);
+    transform: scale(1.03);
+}
+
+.map-building[class*="building-golge-"].visited {
+    border-color: rgba(148, 163, 184, 0.4) !important;
+    background: rgba(15, 23, 42, 0.75) !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.65 !important;
+    pointer-events: none !important;
+    filter: grayscale(0.7);
+}
+
+/* Building Hover Tag Styling (Sarı Neon) */
+.map-building[class*="building-golge-"] .building-hover-tag {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.92);
+    color: #fbbf24;
+    border: 1px solid #f59e0b;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0.95;
+    transition: all 0.25s ease;
+    z-index: 30;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8), 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.map-building[class*="building-golge-"]:hover .building-hover-tag {
+    opacity: 1;
+    color: #ffffff;
+    background: #b45309;
+    border-color: #fbbf24;
+    transform: translateX(-50%) translateY(-4px) scale(1.05);
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.8);
+}
+
+.golge-bekci-widget:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+}
+
+/* YALNIZCA GÖLGE ŞEHİR AÇIKKEN BEKÇİ YARDIMCISI GÖRÜNSÜN */
+body:not(.golge-sehir-theme) #bekci-quick-tip-btn {
+    display: none !important;
+}
+
+/* ==========================================================================
+   GÖLGE ŞEHİR GİZLİ DELİL HOTSPOTLARI (VARSAYILAN OLARAK GİZLİ, HOVER'DA ORTAYA ÇIKAR)
+   ========================================================================== */
+.golge-clue-hotspot {
+    position: absolute;
+    cursor: pointer;
+    border-radius: 12px;
+    opacity: 0.9;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+}
+
+.golge-clue-hotspot:hover {
+    opacity: 1 !important;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, rgba(245, 158, 11, 0.05) 70%) !important;
+    box-shadow: 0 0 35px #f59e0b, inset 0 0 15px rgba(245, 158, 11, 0.6) !important;
+    border: 2px solid #fbbf24 !important;
+    transform: scale(1.15) !important;
+}
+
+.golge-clue-hotspot img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8));
+    transition: filter 0.3s ease;
+}
+
+.golge-clue-hotspot:hover img {
+    filter: drop-shadow(0 0 12px #f59e0b);
+}
+
+/* DELİLİN ALTINDA ÇIKAN SARI NEON İSİM ETİKETİ (SADECE HOVER'DA GÖRÜNÜR) */
+.golge-clue-label {
+    position: absolute;
+    bottom: -32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    background: rgba(15, 23, 42, 0.98);
+    color: #fbbf24;
+    border: 1px solid #f59e0b;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.9), 0 0 12px rgba(245, 158, 11, 0.5);
+    opacity: 0;
+    transition: all 0.25s ease;
+}
+
+.golge-clue-hotspot:hover .golge-clue-label {
+    opacity: 1 !important;
+    color: #ffffff;
+    background: #b45309;
+    border-color: #fbbf24;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================================
+   3D ANİMASYONLU ESKİ KARANLIK NOİR DEDEKTİF TEBRİK VE GÖREV ZARFI
+   ========================================================================== */
+.envelope-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, rgba(15, 23, 42, 0.96) 0%, rgba(2, 6, 23, 0.99) 100%);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    perspective: 1200px;
+}
+
+.envelope-scene {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.envelope-wrapper {
+    width: 500px;
+    height: 330px;
+    position: relative;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+}
+
+.envelope-wrapper:hover {
+    transform: scale(1.02);
+}
+
+.envelope-base {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #1c0d02, #0d0601);
+    border: 3px solid #78350f;
+    border-radius: 12px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(180, 83, 9, 0.3);
+    overflow: visible;
+}
+
+.envelope-top-flap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 165px;
+    background: linear-gradient(180deg, #451a03, #1c0d02);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 5;
+    border-top: 2px solid #b45309;
+}
+
+.envelope-top-flap.opened {
+    transform: rotateX(180deg);
+    z-index: 1;
+}
+
+.envelope-pocket {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 205px;
+    background: linear-gradient(0deg, #180901 0%, #291202 100%);
+    clip-path: polygon(0 100%, 100% 100%, 100% 0, 50% 60%, 0 0);
+    z-index: 4;
+    border-bottom: 2px solid #78350f;
+}
+
+/* ESKİ NOİR PARŞÖMEN GÖREV KARTU */
+.envelope-letter-card {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 460px;
+    background: linear-gradient(145deg, #ede0cf, #d4c3a3);
+    color: #1c0d02;
+    border: 2px solid #92400e;
+    border-radius: 8px;
+    padding: 28px 24px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+    font-family: 'Cinzel', serif;
+    text-align: center;
+    z-index: 3;
+    transition: all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: translateY(0) scale(0.9);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.envelope-letter-card.slid-out {
+    transform: translateY(-200px) scale(1.06);
+    opacity: 1;
+    z-index: 10;
+    pointer-events: auto;
+    box-shadow: 0 30px 75px rgba(0, 0, 0, 0.95), 0 0 50px rgba(245, 158, 11, 0.6);
+}
+
+.envelope-stamp-badge {
+    background: #78350f;
+    color: #fef3c7;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 4px;
+    display: inline-block;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    border: 1px solid #b45309;
+}
+
+.letter-title {
+    color: #451a03;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: 1.5px;
+}
+
+.letter-subtitle {
+    color: #78350f;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+}
+
+.letter-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #78350f, transparent);
+    margin: 14px 0;
+}
+
+.letter-body {
+    font-size: 0.94rem;
+    line-height: 1.55;
+    color: #291202;
+    margin-bottom: 20px;
+}
+
+.letter-accept-btn {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    color: #ffffff;
+    border: 1px solid #f59e0b;
+    padding: 12px 26px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(217, 119, 6, 0.6);
+    transition: all 0.25s ease;
+}
+
+.letter-accept-btn:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.9);
+    transform: scale(1.05);
+}
+
+/* KOYU KIRMIZI BALMUMU MÜHÜR */
+.wax-seal {
+    position: absolute;
+    top: 140px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 76px;
+    height: 76px;
+    background: radial-gradient(circle, #991b1b 0%, #7f1d1d 70%, #450a0a 100%);
+    border: 3px solid #dc2626;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fef2f2;
+    font-weight: 700;
+    font-size: 0.75rem;
+    box-shadow: 0 0 25px rgba(153, 27, 27, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    z-index: 6;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.wax-seal:hover {
+    transform: translate(-50%, -50%) scale(1.15);
+    box-shadow: 0 0 35px rgba(220, 38, 38, 1);
+}
+
+.wax-seal.broken {
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.envelope-prompt-text {
+    margin-top: 25px;
+    color: #fbbf24;
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
+    animation: promptPulse 1.8s infinite alternate ease-in-out;
+}
+
+/* ==========================================================================
+   AYAKTA DURAN BEKÇİ RIFAT YARDIMCI WIDGET'I (ŞEFFAF, BÜYÜK & BADGE)
+   ========================================================================== */
+#bekci-quick-tip-btn.golge-bekci-widget {
+    display: none;
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 25px !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: 120 !important;
+    width: 170px !important;
+    height: 220px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+body.golge-sehir-theme #bekci-quick-tip-btn.golge-bekci-widget {
+    display: flex !important;
+}
+
+#bekci-quick-tip-btn.golge-bekci-widget:hover {
+    transform: scale(1.12) translateY(-8px) !important;
+}
+
+#bekci-quick-tip-btn.golge-bekci-widget .helper-detective-img {
+    width: 155px;
+    height: 190px;
+    object-fit: contain;
+    filter: drop-shadow(0 12px 25px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 20px rgba(245, 158, 11, 0.65));
+}
+
+#bekci-quick-tip-btn.golge-bekci-widget .helper-detective-badge {
+    background: rgba(15, 23, 42, 0.98);
+    color: #fbbf24;
+    border: 2px solid #f59e0b;
+    padding: 5px 14px;
+    border-radius: 14px;
+    font-family: 'Cinzel', serif;
+    font-weight: 800;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    margin-top: -15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.9), 0 0 15px rgba(245, 158, 11, 0.5);
+    z-index: 2;
+}
+
+/* ==========================================================================
+   İÇ MEKÂN "NPC İLE KONUŞ" BUTONU — BEKÇİ YARDIMCISININ ÜSTÜNDE
+   ========================================================================== */
+body.golge-sehir-theme #talk-npc-btn,
+body.golge-sehir-theme .talk-npc-btn {
+    position: fixed !important;
+    bottom: 210px !important;
+    right: 25px !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: 130 !important;
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    border: 2px solid #f59e0b !important;
+    color: #ffffff !important;
+    padding: 13px 26px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-family: 'Cinzel', serif !important;
+    font-size: 1.05rem !important;
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.75) !important;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+body.golge-sehir-theme #talk-npc-btn:hover,
+body.golge-sehir-theme .talk-npc-btn:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.95) !important;
+    transform: scale(1.06) !important;
+}
+
+/* ==========================================================================
+   BULDUM BUTONU — ALT-ORTA SARI/ALTIN NEON
+   ========================================================================== */
+body.golge-sehir-theme #found-btn,
+body.golge-sehir-theme .found-btn,
+body.golge-sehir-theme .btn-found {
+    position: absolute !important;
+    bottom: 25px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    top: auto !important;
+    right: auto !important;
+    z-index: 100 !important;
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    border: 2px solid #f59e0b !important;
+    color: #ffffff !important;
+    padding: 12px 28px !important;
+    border-radius: 24px !important;
+    font-weight: 700 !important;
+    font-family: 'Cinzel', serif !important;
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.75) !important;
+    letter-spacing: 1.5px;
+    font-size: 1.1rem;
+}
+
+body.golge-sehir-theme #found-btn:hover,
+body.golge-sehir-theme .found-btn:hover,
+body.golge-sehir-theme .btn-found:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.95) !important;
+    transform: translateX(-50%) scale(1.06) !important;
+}
+
+/* ==========================================================================
+   GÖLGE ŞEHİR ÇANTA VE TÜM İNCELEME MODALLERİ SARI/ALTIN TEMA
+   ========================================================================== */
+body.golge-sehir-theme #open-bag-floating-btn,
+body.golge-sehir-theme #open-bag-btn,
+body.golge-sehir-theme #interior-bag-btn,
+body.golge-sehir-theme .global-bag-btn {
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.7), inset 0 0 10px rgba(245, 158, 11, 0.4) !important;
+    color: #ffffff !important;
+}
+
+body.golge-sehir-theme #open-bag-floating-btn:hover,
+body.golge-sehir-theme #open-bag-btn:hover,
+body.golge-sehir-theme #interior-bag-btn:hover,
+body.golge-sehir-theme .global-bag-btn:hover {
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.9), inset 0 0 15px rgba(245, 158, 11, 0.6) !important;
+    transform: scale(1.08);
+}
+
+/* Çanta ve İnceleme Modalleri Sarı Neon Kenarlıklar ve Butonlar */
+body.golge-sehir-theme #bag-modal .modal-content,
+body.golge-sehir-theme #clue-inspect-modal .modal-content,
+body.golge-sehir-theme #detailed-clue-modal .modal-content,
+body.golge-sehir-theme #autopsy-modal .modal-content {
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 0 45px rgba(245, 158, 11, 0.5) !important;
+}
+
+body.golge-sehir-theme .tool-btn.active,
+body.golge-sehir-theme .btn-primary,
+body.golge-sehir-theme .btn-inspect,
+body.golge-sehir-theme .lab-send-btn {
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.6) !important;
+}
+
+/* ==========================================================================
+   ÇİFT YARDIMCI BALONU STİLLERİ
+   ========================================================================== */
+.cinematic-helper-box.rifat-speaking {
+    border-color: #f59e0b !important;
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(45, 25, 0, 0.95)) !important;
+    box-shadow: 0 0 40px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(245, 158, 11, 0.2) !important;
+}
+
+.cinematic-helper-box.rifat-speaking .cinematic-helper-name {
+    color: #fbbf24 !important;
+    font-family: 'Cinzel', serif !important;
+    text-shadow: 0 0 12px rgba(245, 158, 11, 0.9) !important;
+    letter-spacing: 1px !important;
+}
+
+.cinematic-helper-box.rifat-speaking .cinematic-helper-msg {
+    color: #fef3c7 !important;
+    font-family: 'Cinzel', serif !important;
+    text-shadow: 0 0 5px rgba(245, 158, 11, 0.3) !important;
+}
+
+.cinematic-helper-box.cetin-speaking {
+    border-color: #38bdf8 !important;
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(12, 74, 110, 0.95)) !important;
+    box-shadow: 0 0 40px rgba(56, 189, 248, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.2) !important;
+}
+
+.cinematic-helper-box.cetin-speaking .cinematic-helper-name {
+    color: #38bdf8 !important;
+    font-family: 'Cinzel', serif !important;
+    text-shadow: 0 0 12px rgba(56, 189, 248, 0.9) !important;
+    letter-spacing: 1px !important;
+}
+
+/* ==========================================================================
+   GÖLGE ŞEHİR NARRATION SCREEN & STORY OVERRIDES (SARI/ALTIN NEON)
+   ========================================================================== */
+body.golge-sehir-theme .story-text-box {
+    border-color: #f59e0b !important;
+    background: rgba(15, 23, 42, 0.95) !important;
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.4) !important;
+}
+body.golge-sehir-theme .story-text-box h1,
+body.golge-sehir-theme .story-text-box h2,
+body.golge-sehir-theme .story-text-box p,
+body.golge-sehir-theme #typewriter-text {
+    color: #fef3c7 !important;
+}
+body.golge-sehir-theme .story-badge {
+    background: #b45309 !important;
+    color: #ffffff !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.6) !important;
+}
+body.golge-sehir-theme .story-cursor {
+    color: #f59e0b !important;
+    text-shadow: 0 0 10px #f59e0b !important;
+}
+body.golge-sehir-theme #story-continue-btn {
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.6) !important;
+}
+body.golge-sehir-theme #story-continue-btn:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.9) !important;
+}
+
+/* ==========================================================================
+   BEKÇİ RIFAT FENER YÜRÜYÜŞÜ (ANIMATED BACKGROUND CUTSCENE)
+   ========================================================================== */
+.bekci-walk-cutscene {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: #020617;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.bekci-walk-bg {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('../../../images/towns/golge_sehir/npcler/bekci_fener_walk.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    animation: bekciWalkForward 5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    filter: brightness(0.85) contrast(1.15);
+}
+.bekci-lantern-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 60%, rgba(245, 158, 11, 0.45) 0%, rgba(217, 119, 6, 0.15) 30%, transparent 60%);
+    mix-blend-mode: screen;
+    animation: lanternFlicker 0.2s infinite alternate, lanternSway 2.5s ease-in-out infinite alternate;
+    z-index: 2;
+}
+@keyframes bekciWalkForward {
+    0% {
+        opacity: 1;
+        transform: scale(0.95) translateY(15px);
+        filter: brightness(0.65) blur(1px);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.04) translateY(-4px);
+    }
+    60% {
+        transform: scale(1.12) translateY(6px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.22) translateY(-2px);
+        filter: brightness(0.95) blur(0px);
+    }
+}
+@keyframes lanternSway {
+    0% { transform: translate(-10px, -5px) scale(0.95); }
+    100% { transform: translate(15px, 5px) scale(1.08); }
+}
+@keyframes lanternFlicker {
+    0% { opacity: 0.85; }
+    100% { opacity: 1; }
+}
+
+/* ==========================================================================
+   DYNAMIC HELPER BUBBLE COLORING (SPEAKER THEMES)
+   ========================================================================== */
+.cinematic-helper-box.rifat-speaking .cinematic-helper-actions button {
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4) !important;
+}
+.cinematic-helper-box.rifat-speaking .cinematic-helper-actions button:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.7) !important;
+}
+.cinematic-helper-box.cetin-speaking .cinematic-helper-actions button {
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    border-color: #38bdf8 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4) !important;
+}
+.cinematic-helper-box.cetin-speaking .cinematic-helper-actions button:hover {
+    background: linear-gradient(135deg, #38bdf8, #0284c7) !important;
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.7) !important;
+}
+
+/* ==========================================================================
+   FOUND / ACCUSATION POLAROID SUSPECTS 4x2 GRID
+   ========================================================================== */
+body.golge-sehir-theme #found-npc-cards {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 15px !important;
+    justify-content: center !important;
+    padding: 10px !important;
+    width: 100% !important;
+}
+
+/* ==========================================================================
+   GİZLİ DELİL (HOTSPOT) STİLLERİ - HOVER İLE AÇILAN DELİLLER
+   ========================================================================== */
+.golge-clue-hotspot {
+    position: absolute;
+    cursor: pointer;
+    z-index: 100;
+}
+
+.golge-clue-hotspot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.golge-clue-hotspot:hover img {
+    opacity: 1;
+    filter: drop-shadow(0 0 15px #f59e0b) brightness(1.2);
+}
+
+.golge-clue-label {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid #f59e0b;
+    color: #fbbf24;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    font-family: 'Cinzel', serif;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.golge-clue-hotspot:hover .golge-clue-label {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   3D CLUE ROTATION & PERSPECTIVE STYLING FOR GÖLGE ŞEHİR DELİLLERİ
+   ========================================================================== */
+.cinematic-helper-box.cetin-speaking {
+    border-color: #38bdf8 !important;
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(12, 74, 110, 0.95)) !important;
+    box-shadow: 0 0 40px rgba(56, 189, 248, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.2) !important;
+}
+
+.cinematic-helper-box.cetin-speaking .cinematic-helper-name {
+    color: #38bdf8 !important;
+    font-family: 'Cinzel', serif !important;
+    text-shadow: 0 0 12px rgba(56, 189, 248, 0.9) !important;
+    letter-spacing: 1px !important;
+}
+
+/* ==========================================================================
+   GÖLGE ŞEHİR NARRATION SCREEN & STORY OVERRIDES (SARI/ALTIN NEON)
+   ========================================================================== */
+body.golge-sehir-theme .story-text-box {
+    border-color: #f59e0b !important;
+    background: rgba(15, 23, 42, 0.95) !important;
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.4) !important;
+}
+body.golge-sehir-theme .story-text-box h1,
+body.golge-sehir-theme .story-text-box h2,
+body.golge-sehir-theme .story-text-box p,
+body.golge-sehir-theme #typewriter-text {
+    color: #fef3c7 !important;
+}
+body.golge-sehir-theme .story-badge {
+    background: #b45309 !important;
+    color: #ffffff !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.6) !important;
+}
+body.golge-sehir-theme .story-cursor {
+    color: #f59e0b !important;
+    text-shadow: 0 0 10px #f59e0b !important;
+}
+body.golge-sehir-theme #story-continue-btn {
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.6) !important;
+}
+body.golge-sehir-theme #story-continue-btn:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.9) !important;
+}
+
+/* ==========================================================================
+   BEKÇİ RIFAT FENER YÜRÜYÜŞÜ (ANIMATED BACKGROUND CUTSCENE)
+   ========================================================================== */
+.bekci-walk-cutscene {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: #020617;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.bekci-walk-bg {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('../../../images/towns/golge_sehir/npcler/bekci_fener_walk.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    animation: bekciWalkForward 5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    filter: brightness(0.85) contrast(1.15);
+}
+.bekci-lantern-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 60%, rgba(245, 158, 11, 0.45) 0%, rgba(217, 119, 6, 0.15) 30%, transparent 60%);
+    mix-blend-mode: screen;
+    animation: lanternFlicker 0.2s infinite alternate, lanternSway 2.5s ease-in-out infinite alternate;
+    z-index: 2;
+}
+@keyframes bekciWalkForward {
+    0% {
+        opacity: 1;
+        transform: scale(0.95) translateY(15px);
+        filter: brightness(0.65) blur(1px);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.04) translateY(-4px);
+    }
+    60% {
+        transform: scale(1.12) translateY(6px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.22) translateY(-2px);
+        filter: brightness(0.95) blur(0px);
+    }
+}
+@keyframes lanternSway {
+    0% { transform: translate(-10px, -5px) scale(0.95); }
+    100% { transform: translate(15px, 5px) scale(1.08); }
+}
+@keyframes lanternFlicker {
+    0% { opacity: 0.85; }
+    100% { opacity: 1; }
+}
+
+/* ==========================================================================
+   DYNAMIC HELPER BUBBLE COLORING (SPEAKER THEMES)
+   ========================================================================== */
+.cinematic-helper-box.rifat-speaking .cinematic-helper-actions button {
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4) !important;
+}
+.cinematic-helper-box.rifat-speaking .cinematic-helper-actions button:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.7) !important;
+}
+.cinematic-helper-box.cetin-speaking .cinematic-helper-actions button {
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    border-color: #38bdf8 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4) !important;
+}
+.cinematic-helper-box.cetin-speaking .cinematic-helper-actions button:hover {
+    background: linear-gradient(135deg, #38bdf8, #0284c7) !important;
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.7) !important;
+}
+
+/* ==========================================================================
+   FOUND / ACCUSATION POLAROID SUSPECTS 4x2 GRID
+   ========================================================================== */
+body.golge-sehir-theme #found-npc-cards {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 15px !important;
+    justify-content: center !important;
+    padding: 10px !important;
+    width: 100% !important;
+}
+
+/* ==========================================================================
+   GİZLİ DELİL (HOTSPOT) STİLLERİ - HOVER İLE AÇILAN DELİLLER
+   ========================================================================== */
+.golge-clue-hotspot {
+    position: absolute;
+    cursor: pointer;
+    z-index: 100;
+}
+
+.golge-clue-hotspot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.golge-clue-hotspot:hover img {
+    opacity: 1;
+    filter: drop-shadow(0 0 15px #f59e0b) brightness(1.2);
+}
+
+.golge-clue-label {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid #f59e0b;
+    color: #fbbf24;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    font-family: 'Cinzel', serif;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.golge-clue-hotspot:hover .golge-clue-label {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   3D CLUE ROTATION & PERSPECTIVE STYLING FOR GÖLGE ŞEHİR DELİLLERİ
+   ========================================================================== */
+.clue-3d-wrapper {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+.clue-inspect-item-img {
+    filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 20px rgba(245, 158, 11, 0.35));
+    transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.clue-thumbnail {
+    border: 2px solid rgba(245, 158, 11, 0.4);
+    background: rgba(15, 23, 42, 0.85);
+    border-radius: 8px;
+    transition: all 0.25s ease;
+}
+
+.clue-thumbnail:hover, .clue-thumbnail.active {
+    border-color: #fbbf24;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+    transform: scale(1.1);
+}
+
+/* ==========================================================================
+   BULDUM EKRANI 4-KOLONLU GRID (GÖLGE ŞEHİR)
+   ========================================================================== */
+.golge-sehir-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+    width: 100% !important;
+    padding: 20px !important;
+}
+
+@media (max-width: 1024px) {
+    .golge-sehir-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .golge-sehir-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ==========================================================================
+   FEHMİ BEY (KASABALI EVİ) ÖZEL KAPI ANİMASYONU VE SİNEMATİK VİDEO STİLLERİ
+   ========================================================================== */
+.fehmi-door-stage {
+    position: relative;
+    width: 1020px;
+    height: 820px;
+    max-width: 96vw;
+    max-height: 92vh;
+    border: 4px solid #f59e0b;
+    border-radius: 18px;
+    background: #000;
+    overflow: hidden;
+    box-shadow: 0 0 70px rgba(245, 158, 11, 0.6), 0 30px 90px rgba(0,0,0,0.98);
+    perspective: 1200px;
+}
+
+.fehmi-door-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+    z-index: 50;
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+}
+
+.fehmi-door-background {
+    position: absolute;
+    inset: 0;
+    background: #000;
+}
+
+.fehmi-door-leaf {
+    position: absolute;
+    inset: 0;
+    background: url('../../../images/door_transition.png') center/cover no-repeat;
+    border-right: 4px solid #000;
+    transform-origin: left center;
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 10;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+}
+
+.fehmi-knocking-hand {
+    position: absolute;
+    top: 45%;
+    left: 45%;
+    font-size: 3.8rem;
+    color: #fef08a;
+    filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.9));
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.fehmi-knocking-hand.knock-active {
+    opacity: 1;
+    animation: knockMotion 0.35s ease 3;
+}
+
+@keyframes knockMotion {
+    0% { transform: scale(0.8) translate(0, 0); }
+    50% { transform: scale(1.15) translate(-10px, -5px); }
+    100% { transform: scale(0.9) translate(0, 0); }
+}
+
+.fehmi-door-leaf.door-half-open {
+    transform: rotateY(-65deg);
+}
+
+.fehmi-door-leaf.door-slammed {
+    transform: rotateY(0deg) !important;
+    transition: transform 0.15s cubic-bezier(0.8, 0, 1, 1) !important;
+}

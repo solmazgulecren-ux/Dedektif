@@ -76,19 +76,71 @@ public class LocalAiEngine : IAIService
         // 1. Türkçe Anlamsal / Niyet Analizi (Intent & Concept Detection)
         string processedSentence = TurkishTextEngine.PreprocessSentence(normalizedAscii);
 
-        // Selamlama / Nezaket Kontrolü
-        bool isGreeting = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence,
+        // Selamlama / Nezaket Kontrolü (Orijinal Türkçe, Normalize ASCII ve Kök İşlenmiş Cümle Kontrolü)
+        bool isGreeting = TurkishTextEngine.ContainsAnyConcept(rawTrLower, normalizedAscii,
+            "merhaba", "selam", "selamlar", "slm", "sa", "merhabalar", "gunaydin", "iyi gunler", "iyi aksamlar", "kolay gelsin", "nasilsin", "nasilsiniz", "hos bulduk", "tesekkur", "saol", "sagol", "hey", "meraba")
+            || TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence,
             "merhaba", "selam", "gunaydin", "iyi gunler", "iyi aksamlar", "kolay gelsin", "nasilsin", "nasilsiniz", "hos bulduk", "tesekkur", "saol", "sagol");
 
         if (isGreeting)
         {
-            string greetingResponse = npc.NPCId switch
+            int greetingCount = history.Count(h => TurkishTextEngine.ContainsAnyConcept(h.PlayerQuestion.ToLower(_cultureTr), TurkishTextEngine.NormalizeToAscii(h.PlayerQuestion), "selam", "merhaba", "gunaydin", "iyi gunler", "iyi aksamlar", "kolay gelsin"));
+
+            string greetingResponse = (npc.NPCId, greetingCount % 3) switch
             {
-                1 => "Aleykümselam amirim, dükkânıma hoş geldiniz. Buyurun, cinayet soruşturmasında size nasıl yardımcı olabilirim?",
-                2 => "Merhaba amirim, şifa dükkânıma hoş geldiniz. İnşallah bu acı olayı kısa sürede aydınlatırsınız. Dinliyorum amirim.",
-                3 => "Selamlar amirim, muhtarlık makamımıza safalar getirdiniz. Kasabamızın huzuru için ne gerekiyorsa sormaktan çekinmeyin.",
-                4 => "Merhaba amirim, kolay gelsin. Karakolumuz ve tüm imkânlarımız emrinizdedir, buyurun.",
-                5 => "Hoş geldiniz amirim, sefalar getirdiniz. Şöyle oturun, bir sıcak çayımı için... Sorularınızı dinliyorum.",
+                (1, 0) => "Aleykümselam amirim, dükkânıma hoş geldiniz. Buyurun, cinayet soruşturmasında size nasıl yardımcı olabilirim?",
+                (1, 1) => "Tekrar selamlar dedektif. Kasap dükkanım açık, buyurun sorunuzu dinliyorum.",
+                (1, _) => "Selamınızı aldım amirim, etleri doğrarken kulaklarım sizde. Ne sormak istiyorsanız çekinmeden sorun.",
+
+                (2, 0) => "Merhaba amirim, şifa dükkânıma hoş geldiniz. İnşallah bu acı olayı kısa sürede aydınlatırsınız. Dinliyorum amirim.",
+                (2, 1) => "Merhaba dedektif bey. Eczanede her şey emrinizde, nasıl yardımcı olabilirim?",
+                (2, _) => "Size de merhaba amirim. İlaç şişelerini düzenliyorum, buyurun sizi dinliyorum.",
+
+                (3, 0) => "Selamlar amirim, muhtarlık makamımıza safalar getirdiniz. Kasabamızın huzuru için ne gerekiyorsa sormaktan çekinmeyin.",
+                (3, 1) => "Aleykümselam dedektif. Kasabanın muhtarı olarak her türlü sorunuza açığım.",
+                (3, _) => "Yine merhaba amirim. Kasaba meydanındaki sükuneti sağlamaya çalışıyoruz, buyurun.",
+
+                (4, 0) => "Merhaba amirim, kolay gelsin. Karakolumuz ve tüm imkânlarımız emrinizdedir, buyurun.",
+                (4, 1) => "Selamlar meslektaşım. Karakol arşivimiz ve tüm tutanaklar hazır, ne öğrenmek istiyorsunuz?",
+                (4, _) => "Merhaba amirim. Nöbetçi polislerimiz teyakkuzda, buyurun dinliyorum.",
+
+                (5, 0) => "Hoş geldiniz amirim, sefalar getirdiniz. Şöyle oturun, bir sıcak çayımı için... Sorularınızı dinliyorum.",
+                (5, 1) => "Aleykümselam amirim. Terzi dükkanımda çayım her zaman sıcaktır, buyurun.",
+                (5, _) => "Merhaba evladım. İğne ipliği bıraktım, sizi dinliyorum.",
+
+                // Gölge Şehir NPC'leri (101 - 108)
+                (101, 0) => "Ormandan gelen taze çam kokusu gibisi yoktur amirim... Ama bu gece orman bir garip sesler çıkarıyordu. Buyurun, ne sormak istiyorsanız sorun.",
+                (101, 1) => "Selam dedektif! Odunları yarmayı bitirdim, Ekrem Bey cinayeti hakkında ne bilmek istiyorsunuz?",
+                (101, _) => "Aleykümselam amirim. Baltam tezgâhta durur, orman hakkında istediğinizi sorun.",
+
+                (102, 0) => "Hoş geldiniz amirim, taze meyvelerim gibi temiz bir kasabayız aslında! Ekrem Bey vakası hepimizi sarstı, buyurun ne öğrenmek istersiniz?",
+                (102, 1) => "Merhaba dedektif bey! Tezgâhın başındayım, kasabadaki dedikoduları mı yoksa cinayet gecesini mi soracaksınız?",
+                (102, _) => "Selamlar amirim. Buyurun çekinmeyin, Manav Ayşe'ye her şeyi sorabilirsiniz.",
+
+                (103, 0) => "Kızgın demir döverken laf dinlemek zordur amirim... Sorunuzu çabuk sorun, ocağın ateşi sönmesin.",
+                (103, 1) => "Selam. Demir tavında dövülür dedektif, sorunuz neyse söyleyin çabucak.",
+                (103, _) => "Aleykümselam. Çekiç sesinden rahatsız olmazsanız buyurun dinliyorum.",
+
+                (104, 0) => "Aaa amirim hoş geldiniz sefalar getirdiniz! Gölge Şehir'in tüm havadisleri bakkaldan geçer, Ekrem Bey meselesini de dinleyin benden!",
+                (104, 1) => "Merhaba dedektifim! Bakkal defterini kapattım, buyurun ne sormak istiyorsanız sorun.",
+                (104, _) => "Selamlar amirim! Bakkal dükkanım emrinize amadedir, buyurun.",
+
+                (105, 0) => "Hekimlik yeminim sır saklamayı gerektirir amirim... Ama bu cinayet kasabanın dengesini bozdu. Tıbbi veya şahsi ne sormak istersiniz?",
+                (105, 1) => "Merhaba dedektif. Şifalı bitkilerimi ayıklıyordum, Ekrem Bey'in zehirlenme şüphesi mi var?",
+                (105, _) => "Selam amirim. Tıbbi açıdan merak ettiğiniz bir konu varsa yanıtlayabilirim.",
+
+                (106, 0) => "Gölge Şehir sakin bir yerdir dedektif bey. Bu talihsiz olayı çabuk çözüp kasabanın adını lekelemeden kapatmalıyız. Sorun bakalım.",
+                (106, 1) => "Selamlar amirim. Muhtarlık evraklarını inceliyordum, kasabayla ilgili ne öğrenmek istersiniz?",
+                (106, _) => "Merhaba dedektif. Kasaba halkının güvenliği için buradayım, buyurun.",
+
+                (107, 0) => "Penceremin önünde oturup gaz lambasında kitap okurdum evladım... O gece ayak sesleri tam penceremin altından geçti. Dinliyorum sizi.",
+                (107, 1) => "Merhaba evladım... Emekli bir muallim olarak kasabanın geçmişini iyi bilirim. Ne sormak istersin?",
+                (107, _) => "Aleykümselam dedektif bey. Gözlüğümü taktım, buyurun sizi dinliyorum.",
+
+                (108, 0) => "Ayakkabı çamurundan insanın nereye gittiğini anlarım amirim... O gece gelen çizmelerdeki çamur göl kenarındandı! Ne öğrenmek istiyorsunuz?",
+                (108, 1) => "Selam dedektif. Köseleleri dikiyorum, çamurlu ayakkabı izlerini mi soracaksınız?",
+                (108, _) => "Aleykümselam amirim. Kundura atölyemde sorularınızı dinliyorum.",
+
                 _ => "Merhaba amirim, hoş geldiniz. Dinliyorum sizi."
             };
 
@@ -126,8 +178,23 @@ public class LocalAiEngine : IAIService
         bool mentionsGunes = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "gunes", "komiser", "polis");
         bool mentionsYahya = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "yahya", "terzi");
 
+        // Gölge Şehir Şüpheli Algılama
+        bool mentionsTahsin = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "tahsin", "oduncu");
+        bool mentionsAyse = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "ayse", "manav");
+        bool mentionsKazim = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "kazim", "demirci");
+        bool mentionsNaciye = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "naciye", "bakkal");
+        bool mentionsSevgi = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "sevgi", "hekim", "doktor");
+        bool mentionsCevdet = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "cevdet", "muhtar");
+        bool mentionsFehmi = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "fehmi", "muallim", "ogretmen");
+        bool mentionsRasim = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "rasim", "kunduraci", "ayakkabici");
+        bool mentionsEkrem = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence, "ekrem", "tuccar", "kurban", "maktul");
+
+        bool isLieAccusation = TurkishTextEngine.ContainsAnyConcept(rawTrLower, processedSentence,
+            "yalan", "celiski", "demin", "az once", "baska sey", "farkli soyledin", "inkar", "dogru soyle", "gercegi anlat");
+
         string currentIntent = "none";
         if (isDirectAccusation) currentIntent = "local_ai_accusation";
+        else if (isLieAccusation) currentIntent = "local_ai_lie";
         else if (isMotiveQuery) currentIntent = "local_ai_motive";
         else if (isWeaponQuery) currentIntent = "local_ai_weapon";
         else if (isAlibiQuery) currentIntent = "local_ai_alibi";
@@ -143,8 +210,8 @@ public class LocalAiEngine : IAIService
 
                 bool logAcc = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "sen yaptin", "katil sensin", "itiraf et", "sen öldürdün", "sen misin katil");
                 bool logAlibi = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "neredeydin", "o gece", "evde miydin", "ne yapiyordun");
-                bool logWeapon = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "satir", "bicak", "zehir", "sise", "gozluk", "rozet", "iplik", "delil");
-                bool logMotive = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "borc", "para", "tapu", "tehdit", "husumet", "sebep");
+                bool logWeapon = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "satir", "bicak", "zehir", "sise", "gozluk", "rozet", "iplik", "balta", "cizme", "defter", "delil");
+                bool logMotive = TurkishTextEngine.ContainsAnyConcept(logText, logAscii, "borc", "para", "tapu", "tehdit", "husumet", "sebep", "santaj");
 
                 string logIntent = "none";
                 if (logAcc) logIntent = "local_ai_accusation";
@@ -162,6 +229,36 @@ public class LocalAiEngine : IAIService
         int trustChange = 0;
         int stressIncrease = 0;
         string? revealedSecret = null;
+
+        // 1.5 ÇELİŞKİ / YALAN YAKALAMA TEPKİSİ
+        if (isLieAccusation)
+        {
+            if (isGuilty)
+            {
+                stressIncrease = 30;
+                emotion = "Panik";
+                trustChange = -5;
+                responseText = (npc.NPCId >= 101)
+                    ? "*Yüzü bembeyaz kesilir ve elleri titrer* B-ben öyle demek istemedim amirim! Olay gecesinin şokuyla dilim sürçtü sadece... Beni köşeye sıkıştırmaya çalışmayın!"
+                    : "*Gözlerini kaçırarak kekeler* Ş-şey... hafızam beni yanıltıyor olabilir amirim! O gece çok karanlıktı, kafam karışıktı diyorum size!";
+            }
+            else
+            {
+                stressIncrease = 5;
+                emotion = "Ciddi";
+                responseText = (npc.NPCId >= 101)
+                    ? "Benim sözümde çelişki falan yok amirim. Ne gördüysem, ne yaşadıysam onu söyledim. İfademin arkasındayım."
+                    : "Ben ne söylediysem dürüstçe söyledim amirim. Lafımı çarpıtmayın lütfen, ben doğruyu konuşuyorum.";
+            }
+
+            return new AIInteractionResponse
+            {
+                Dialogue = responseText,
+                Emotion = emotion,
+                TrustChange = trustChange,
+                StressIncrease = stressIncrease
+            };
+        }
 
         // 2. DOĞRUDAN SUÇLAMA TEPKİSİ (STRICT RULES: NO CONFESSION EVER, INNOCENT MAINTAINS INNOCENCE)
         if (isDirectAccusation)
@@ -212,6 +309,11 @@ public class LocalAiEngine : IAIService
                 revealedSecret = $"Amirims, Çetin olarak söylüyorum: {npc.Name} öfkesinden kontrolünü kaybetti ve şu bilgiyi ağzından kaçırdı: '{npc.SecretInfo}'";
             }
         }
+        else if (npc.NPCId >= 101 && (mentionsTahsin || mentionsAyse || mentionsKazim || mentionsNaciye || mentionsSevgi || mentionsCevdet || mentionsFehmi || mentionsRasim || mentionsEkrem))
+        {
+            responseText = GetGolgeNpcOpinion(npc.NPCId, mentionsTahsin, mentionsAyse, mentionsKazim, mentionsNaciye, mentionsSevgi, mentionsCevdet, mentionsFehmi, mentionsRasim, mentionsEkrem, guiltyNpcId);
+            emotion = "Düşünceli";
+        }
         else if (mentionsHasan || mentionsSelma || mentionsKemal || mentionsGunes || mentionsYahya)
         {
             responseText = GetOtherNpcOpinion(npc.NPCId, mentionsHasan, mentionsSelma, mentionsKemal, mentionsGunes, mentionsYahya, guiltyNpcId);
@@ -219,7 +321,9 @@ public class LocalAiEngine : IAIService
         }
         else if (isOpinionQuery)
         {
-            responseText = GetOtherNpcOpinion(npc.NPCId, false, false, false, false, false, guiltyNpcId);
+            responseText = (npc.NPCId >= 101) 
+                ? GetRandomGolgeSuspectOpinion(npc.NPCId, guiltyNpcId)
+                : GetOtherNpcOpinion(npc.NPCId, false, false, false, false, false, guiltyNpcId);
             emotion = "Düşünceli";
         }
         else if (isAlibiQuery)
@@ -281,7 +385,7 @@ public class LocalAiEngine : IAIService
             }
             else
             {
-                responseText = GetDynamicFallback(rawTrLower);
+                responseText = GetDynamicFallback(rawTrLower, npc, isGuilty);
                 emotion = "Düşünceli";
             }
         }
@@ -345,6 +449,17 @@ public class LocalAiEngine : IAIService
             3 => "*Masayı yumruklar* Beni katillikle mi itham ediyorsunuz?! Arazi anlaşmazlığımız vardı diye cinayeti bana yıkamazsınız! Kanıtınız yoksa muhtarlıktan çıkın!",
             4 => "*Resmi tavrını takınmaya çalışır ama sesi hafif titrer* Ben bu kasabanın komiseriyim amirim! Kanıtınız olmadan bir polise iftira atamazsınız!",
             5 => "*Gözlüklerini siler gibi yapar* Ben dikiş diken yaşlı bir terziyim amirim... Osman ile gizli işlerimiz vardı ama onu öldürmek benim harcım değil!",
+            
+            // Gölge Şehir Suçlu Kıvırma Tepkileri
+            101 => "*Baltasını sıkar ve sertçe bakar* Ne diyorsun amirim sen?! Ormanda kaçak kereste kestim diye katil mi oldum? Elinizde kanıtınız yoksa baltamın yanından uzak durun!",
+            102 => "*Neşesi birden kaybolur* Hahaha... amirim siz de şakacısınız! Borcum vardı diye adam mı öldürülür? Kasaların altına bakın, meyveden başka ne bulacaksınız?!",
+            103 => "*Örsün üzerine çekici fırlatır* Ağzınızdan çıkanı kulağınız duysun amirim! Çelik kilit dövdüm diye katil mi ilan edildim? Kanıtınız varsa konuşun!",
+            104 => "*Panikle ellerini ovuşturur* Aaa tövbeler olsun amirim! Bakkal Naciye bir karıncayı bile incitmez! Veresiye borcunu ödemedi diye fare zehriyle adam öldürülür mü hiç?!",
+            105 => "*Sinir krizi eşiğinde titrer* Ben bir tıp adamıyım amirim! Banotu reçetelerim hastaları iyileştirmek içindir! Bana iftira atacağınıza sokaktaki serserileri arayın!",
+            106 => "*Masasından kalkıp kurnazca gülümser* Sayın dedektif, makamıma saygısızlık ediyorsunuz. Sahte tapu iddialarınızla cinayeti bana yıkamazsınız!",
+            107 => "*Köstekli saatini saklayıp hüzünle bakar* Ben 40 yıllık öğretmenim evladım... Saatimi geri istedim sadece, Ekrem'in ölümünü bana nasıl yakıştırırsınız?",
+            108 => "*Çizme bıçağını tezgaha saplar* Huysuzum diye katil mi oldum amirim?! Çamurlu ayak izi kasabanın yarısında var! Kanıtınız yoksa dükkânımı terk edin!",
+            
             _ => "Bu ithamı kesinlikle kabul etmiyorum amirim!"
         };
     }
@@ -358,6 +473,16 @@ public class LocalAiEngine : IAIService
             3 => "Dedektif efendi, muhtarınızla doğru konuşun! Siyasi rakiplerimin uydurmasıyla karşıma çıkıp beni suçlayamazsınız!",
             4 => "Bu resmi bir soruşturma mı yoksa şahsi bir itham mı? Kanıtın varsa getir, yoksa karakolumdan dışarı çık!",
             5 => "Ceket dikmekten başka bir şey yapmadım ben. Yaşlı adama iftira atmak kolay tabii...",
+            
+            101 => "Oduncuyum ben, cinayetle işim olmaz amirim. Boş iddialarla beni oyalamayın!",
+            102 => "Manav dükkânında katil aramak da yeni moda oldu galiba amirim!",
+            103 => "Demir döverim, laf dövmem. Suçlamalarınız havada kalıyor.",
+            104 => "Bakkal Naciye'yi tüm Gölge Şehir tanır! Bana katil demek büyük günahtır amirim!",
+            105 => "Tıbbi teşhislerim kanuna uygundur. Boşuna şüphe üretmeyin!",
+            106 => "Gölge Şehir Muhtarı olarak bu kasabada adaleti ben temsil ederim dedektif bey!",
+            107 => "Yaşlı bir öğretmene iftira atmak hiç yakışmıyor amirim...",
+            108 => "Kunduracı deriyi keser, canı değil! Lafınızı bilin de konuşun!",
+            
             _ => "İddialarınız tamamen asılsız amirim!"
         };
     }
@@ -371,6 +496,16 @@ public class LocalAiEngine : IAIService
             3 => "Haddinizi bilin amirim! Ben bu kasabanın seçilmiş muhtarıyım! Elinizde hiçbir kanıt yokken bana çamur atamazsınız!",
             4 => "Bir polise katil demek ağır bir iddiadır amirim! Kanıtın olmadan konuşma, resmi soruşturmayı engellemekten hakkında işlem yaparım!",
             5 => "Ben 70 yaşında dikiş diken bir adamım... Kıymayın bana amirim, günahımı almayın!",
+            
+            101 => "Ben masum bir oduncuyum amirim! Ekrem Bey'le aram iyi değildi ama ona kıymadım! Ormana gidin, asıl katil orada saklanıyor!",
+            102 => "Bana iftira atmayın amirim! Ben dükkânımda neşeyle çalışan bir manavım. Gidin hekimin zehirli şişelerine bakın!",
+            103 => "Masum insanlara çamur atmayın amirim. Örsümün başındaydım o gece. Katil arıyorsanız muhtarlığa gidin!",
+            104 => "Aman amirim tövbe deyin! Bakkal adam katil olur mu? Kunduracının çizmelerine bakın, göl çamuru orada!",
+            105 => "Bana bu hakareti edemezsiniz! Ben hayat kurtaran bir hekimim. Katil demircinin örsünden çıkan bıçağı kullandı!",
+            106 => "Haddinizi aşmayın dedektif! Gölge Şehir halkının oylarıyla seçilmiş muhtara iftira atamazsınız!",
+            107 => "Evladım ben emekli muallimim, tüm kasaba benim talebem sayılır. Bana bu kötülüğü nasıl kondurursunuz?",
+            108 => "Yahu huysuzuz dediysek katil mi olduk?! Masum insanları darlamayı bırakın da gerçek katili bulun!",
+            
             _ => "Masum insanlara çamur atmayı bırakın da gerçek faili bulun!"
         };
     }
@@ -384,6 +519,16 @@ public class LocalAiEngine : IAIService
             3 => "Evimdeydim, evrak inceliyordum! ...Gece saat 11 gibi yürüyüşe çıktım. Kurbanın evinin önünden geçtim ama içeri girmedim diyorum!",
             4 => "Karakoldaydım nöbette! ...Olay yerine ihbardan ÖNCE gittiğim yalan! Ben sadece devriye turundaydım!",
             5 => "Atölyemde dikiş dikiyordum. Makine sesi vardı... Bir anlığına sigara içmeye çıktım ama kurbanın evine kadar gitmedim!",
+            
+            101 => "Kulübede kereste istifliyordum... *terler* Sadece bir ara feneri alıp orman patikasına çıktım, Ekrem'in evine kadar gitmedim!",
+            102 => "Dükkânı erken kapattım... *gözlerini kaçırır* Gece yarısı pelerinimi alıp sadece hava almak için göl kenarına yürümüştüm.",
+            103 => "Ocakta demir dövüyordum... *sessizleşir* Gece yarısı fener sönünce dükkândan kısa süreliğine ayrıldım.",
+            104 => "Erken uyudum amirim... *elleri titrer* Dükkânın arkasında lambayı yaktım ama sadece tütün sarıyordum!",
+            105 => "Muayenehanede ilaç hazırlıyordum... *sinirle* Gece Ekrem'in sokağından geçmiş olabilirim ama sadece hastaya gidiyordum!",
+            106 => "Ofiste tapu inceliyordum... *kurnazca* Gece 2 gibi kısa bir teftiş yürüyüşü yaptım, hepsi bu.",
+            107 => "Penceremde kitap okuyordum... *hüzünle* Saat 02:14'te kapıya çıktım ama sadece temiz hava için.",
+            108 => "Dükkânda çizme dikiyordum... *homurdanır* Çamurlu çizmeleri giyip dışarı çıktım ama göl kenarına uğramadım!",
+            
             _ => "O gece kendi yerimdeydim."
         };
     }
@@ -397,6 +542,16 @@ public class LocalAiEngine : IAIService
             3 => "Muhtarlık binasındaydım, evrak işlerini yetiştirmeye çalışıyordum. Cinayet saatinde kasaba caddesi tamamen sakindi.",
             4 => "Devriye gezisindeydim amirim. Karakoldaki nöbetçi polis memurları da çıkış ve giriş saatimi onaylar.",
             5 => "Dükkânımda son diktiğim ceketin astarlarını dikiyordum. Yaşlı gözlerim yorulunca çay demleyip sokak lambasını izledim.",
+            
+            101 => "Orman kulübemdeydim amirim. Yağmur başlayınca keresteleri içeri taşıdım ve erkenden yattım.",
+            102 => "Akşam üzeri manavı kapattım, komşum Naciye ile biraz laflayıp evime çekildim.",
+            103 => "Demirci ocağını akşam söndürdüm, yorgunluktan erkenden uyuyakalmışım.",
+            104 => "Bakkalın kepengini indirip evime geçtim. Gece bekçisi Rıfat amca da beni pencerede görmüştür.",
+            105 => "Muayenehanemde tıp kitaplarımı inceliyordum. Gece boyunca kapım çalmadı.",
+            106 => "Muhtarlık makamında köy meclisi kararlarını yazıyordum. Işığım gece boyu yanıktı.",
+            107 => "Gaz lambasının ışığında polisiye romanımı okuyordum. 02:14'teki sesleri de o yüzden net duydum.",
+            108 => "Kundura tezgâhımda sipariş çizmeleri kalıba alıyordum. Gece dışarı adım atmadım.",
+            
             _ => "Kendi mekânımdaydım amirim."
         };
     }
@@ -410,6 +565,16 @@ public class LocalAiEngine : IAIService
             3 => "*Gözlük ve tapuları görünce kızarır* Sahte tapular bir projedir! Kırık gözlük ise kurban bana saldırınca düştü!",
             4 => "*Kopan polis rozetine bakar* O rozet karakoldan çalınmıştı! Olay yerine ben düşürmedim, beni tuzağa düşürüyorlar!",
             5 => "*İplik makarasını cebine saklar* O iplik sağlamdır evet... Ben terziyim amirim, dükkânımda bin tane makara var!",
+            
+            101 => "*Baltasını arkasına saklar* Baltamdaki lekeler çam reçinesidir amirim! Kanla reçineyi ayırt edemiyor musunuz?!",
+            102 => "*Pelerin parçasını görünce yutkunur* O kumaş her tezgâhta var! Pelerinimi çiviler yırttı, olay yeriyle ilgisi yok!",
+            103 => "*Örsteki kilit ve bıçağa bakar* O bıçak benim örsümden çıktı ama ben satmadım! Çalınmış olabilir!",
+            104 => "*Veresiye defterini kapatır* Yırtık sayfada sadece borç notları vardı! Zehir formülü falan yoktu!",
+            105 => "*Mor şişeyi titreyen ellerle tutar* Bu şişedeki banotu özü tıbbi deneyler içindi! Kurbana ben içirmedim!",
+            106 => "*Sahte tapuları masanın altına iter* Bu belgeler resmi taslaklardı! Kırık altın gözlük ise bana hediye gelmişti!",
+            107 => "*Köstekli saate bakar* Saat babamın emanetiydi... Olay yerinde düştüyse Ekrem çalmıştı demektir!",
+            108 => "*Mumlu ipi çeker* Bu ip sadece taban dikmek içindir! Boğulma izleriyle eşleşmesi tamamen tesadüf!",
+            
             _ => "O bahsettiğiniz nesneyle benim ilgim yok!"
         };
     }
@@ -423,6 +588,16 @@ public class LocalAiEngine : IAIService
             3 => "Resmi belgeler ve tapular belediye arşivindedir. Delil dedikleriniz sahtekârların işi olabilir.",
             4 => "Polis delil toplar, karartmaz. O nesne adli laboratuvara gönderilmeli.",
             5 => "O dikiş malzemesi her terzinin tezgahında bulunur. Önemli olan o malzemeyi kimin kullandığıdır.",
+            
+            101 => "Ormandaki balta ve aletler iş gereğidir. Olay yerindeki delilleri adli laboratuvarda inceleyin amirim.",
+            102 => "Meyve kasaları ve kantar normal dükkân eşyası. Şüpheli bir şey varsa araştırın tabii.",
+            103 => "Örsümdeki ay damgasını herkes bilir. Bıçak yaparım ama kime satıldığını defterim yazar.",
+            104 => "Veresiye defterim herkese açıktır. Delil arıyorsanız dükkânımı didik didik edebilirsiniz.",
+            105 => "Banotu zehirli bir bitkidir evet, ama ben hekimim. Zehirle cinayet işleyecek kadar gözü dönmüş biri değilim.",
+            106 => "Muhtarlık mührü resmi evraklara basılır. Sahte evrak varsa arkasındaki çeteyi ortaya çıkarın.",
+            107 => "Köstekli saatim eski bir antika. Cinayet aletiyle uzaktan yakından ilgisi olamaz evladım.",
+            108 => "Mumlu ip ve kundura kalıbı her ayakkabıcıda bulunur. Katili kalıbın numarasından bulabilirsiniz.",
+            
             _ => "Bu delili dikkatle incelemenizi tavsiye ederim amirim."
         };
     }
@@ -436,6 +611,16 @@ public class LocalAiEngine : IAIService
             3 => "O arsa belediyenin geleceğiydi! Osman bencillik yapıp vermiyordu. Kasabanın kalkınmasını engelliyordu!",
             4 => "Beni rüşvet almakla suçlayıp savcılığa gidecekti. Şantaj yapıyordu bana! 15 yıllık şerefimi karartacaktı!",
             5 => "O gizli cebe koyduğu USB bellekte tüm ortaklık sırları vardı. Osman beni saf dışı bırakıp servetime el koyacaktı!",
+            
+            101 => "Ekrem ormandaki kaçak kereste işimi öğrendi! Beni ihbar etmekle tehdit edip haraç istiyordu!",
+            102 => "Tüm dükkânımı borç karşılığı elimden alacaktı! Çocuklarımın rızkını o tefeciye yediremezdim!",
+            103 => "Gizli çelik kasanın sırrını bana yıktı! İşlediği kaçakçılığın faturasını benim ocağıma çıkaracaktı!",
+            104 => "Veresiye borcu 5 bin lirayı bulmuştu! 'Dükkânını yakarım' diye tehdit etti beni!",
+            105 => "Geçmişteki tıbbi hatamı kullanarak beni şantajla zehir üretmeye zorluyordu! Dayanamadım artık!",
+            106 => "Çam ormanı arazisini ucuza kapatıp beni makamımdan edecekti! Gölge Şehir'in geleceğini ona bırakamazdım!",
+            107 => "Babamdan kalan tek hatırayı, o altın köstekli saati zorla elimden aldı! Gururumla oynadı!",
+            108 => "Kaçak deri sevkiyatımı öğrenip beni polise vermekle tehdit etti! Yaşlı kunduracıyı köle yapacaktı!",
+            
             _ => "Herkesin kendine göre nedenleri vardır."
         };
     }
@@ -449,6 +634,16 @@ public class LocalAiEngine : IAIService
             3 => "Siyasette herkesle anlaşamazsınız. Osman'la fikir ayrılıklarımız oldu ama ben kanunlara inanan bir muhtarım.",
             4 => "Polis ile vatandaş arasındaki ilişki neyse bizimki de oydu. Görevimi yaptım, husumetim yoktu.",
             5 => "Osman iyi bir müşterimdi. Diktirdiğim kıyafetlerin parasını zamanında öderdi. Neden ona kıyayım?",
+            
+            101 => "Ekrem Bey kereste alırdı benden. Fiyat konusunda pazarlık ederdik ama cinayet sebebi olacak bir husumetimiz yoktu.",
+            102 => "Meyve sebze alırdı, parasını da gecikmeli olsa öderdi. Müşterimi neden öldüreyim amirim?",
+            103 => "Kasa kilidi siparişi vermişti, parasını da peşin ödedi. Aramızda husumet yoktu.",
+            104 => "Veresiye yazdırırdı ama zengin adamdı, eninde sonunda kapatırdı. Husumetim yoktu.",
+            105 => "Hastamdı, kalp ilacı yazardım. Hekim hastasına düşmanlık beslemez amirim.",
+            106 => "Kasabanın önde gelen tüccarıydı. Fikir ayrılıklarımız oldu ama hepsi resmi çerçevedeydi.",
+            107 => "Kitap koleksiyoncusuydu, eski romanları tartışırdık. Kültürlü bir adamdı, aramız iyiydi.",
+            108 => "Çizmelerini bana tamir ettirirdi. Huysuzluğum ona özel değildi, herkese karşı böyleyim.",
+            
             _ => "Benim kimseyle husumetim yok amirim."
         };
     }
@@ -469,13 +664,53 @@ public class LocalAiEngine : IAIService
         return "Bu kasabada herkes bir şeyler gizliyor amirim. Kimseye gözü kapalı güvenmeyin.";
     }
 
+    private static string GetGolgeNpcOpinion(int currentNpcId, bool tahsin, bool ayse, bool kazim, bool naciye, bool sevgi, bool cevdet, bool fehmi, bool rasim, bool ekrem, int guiltyId)
+    {
+        if (tahsin && currentNpcId != 101)
+            return "Oduncu Tahsin ormanın derinliklerinde kaçak işler çevirirdi. Ekrem Bey ile kereste konusunda şiddetli kavga ettiklerini duydum.";
+        if (ayse && currentNpcId != 102)
+            return "Manav Ayşe'nin dükkânı Ekrem'e ipotekliydi. Cinayet gecesi peleriniyle telaş içinde koştuğunu görenler olmuş.";
+        if (kazim && currentNpcId != 103)
+            return "Demirci Kazım çok az konuşur ama Ekrem için özel şifreli çelik kasa kilidi dövmüştü. Ocağın arkasında sırlar saklıyor olabilir.";
+        if (naciye && currentNpcId != 104)
+            return "Bakkal Naciye kasabadaki tüm borç ve para trafiğini bilir. Ekrem'in veresiye sayfasını yırttığı söyleniyor.";
+        if (sevgi && currentNpcId != 105)
+            return "Hekim Sevgi şifalı otlar hazırlar ama banotu gibi ölümcül zehirleri de çok iyi bilir. Ekrem'in vücudundaki lekeler şüpheli.";
+        if (cevdet && currentNpcId != 106)
+            return "Muhtar Cevdet çam ormanı arazisini ele geçirmek için sahte tapu düzenletmişti. Ekrem bunu ifşa etmekle tehdit ediyordu.";
+        if (fehmi && currentNpcId != 107)
+            return "Fehmi Bey emekli muallimdir, Ekrem onun babasından kalan değerli köstekli saatini gasp etmişti. O gece penceresinden sesler duymuş.";
+        if (rasim && currentNpcId != 108)
+            return "Kunduracı Rasim kaçak deri işinde Ekrem'e borçluydu. Göl kenarındaki 42 numara çamurlu çizme izleri doğrudan onun atölyesine çıkıyor.";
+        if (ekrem)
+            return "Tüccar Ekrem Bey kasabanın en zenginiydi ama herkesi borçla ve şantajla köşeye sıkıştırırdı. Sonunda birinin canına tak etti...";
+
+        return "Gölge Şehir'de herkesin Ekrem Bey ile karanlık bir hesabı vardı amirim. Kimseye gözü kapalı güvenmeyin.";
+    }
+
+    private static string GetRandomGolgeSuspectOpinion(int currentNpcId, int guiltyId)
+    {
+        var possibleIds = Enumerable.Range(101, 8).Where(id => id != currentNpcId).ToList();
+        int targetId = possibleIds[_random.Next(possibleIds.Count)];
+
+        return targetId switch
+        {
+            101 => "Oduncu Tahsin'in baltasındaki reçine ve koyu lekelere dikkat edin amirim. Ormanda kaçak işler çevirirdi.",
+            102 => "Manav Ayşe dükkânını Ekrem'e kaptırmamak için her şeyi yapabilirdi. Pelerinli hali o gece sokaktaydı.",
+            103 => "Demirci Kazım usta Ekrem'in gizli kasasının kilidini yapan adamdır. Ocağının arkasını iyi araştırın.",
+            104 => "Bakkal Naciye'nin veresiye defterindeki yırtık sayfaya ve sakladığı fare zehirlerine bakın amirim.",
+            105 => "Hekim Sevgi'nin serasındaki mor banotu zehirlerini inceleyin. Ekrem'in tırnaklarındaki morluklar tesadüf değil.",
+            106 => "Muhtar Cevdet'in kasasındaki sahte çam ormanı tapusuna ve resmi mühürlü tehdit mektubuna bakın.",
+            107 => "Fehmi Bey'in durmuş köstekli saatini ve o gece 02:14'te duyduğu sesleri sorgulayın.",
+            108 => "Kunduracı Rasim'in atölyesindeki mumlu ayakkabı iplerini ve 42 numara çamurlu çizmelerini kontrol edin.",
+            _ => "Gölge Şehir'de 8 şüphelinin her biri potansiyel katildir amirim. İpuçlarını birleştirin."
+        };
+    }
+
     private static string GetRandomSuspectOpinion(int currentNpcId, int guiltyId)
     {
-        int targetId = guiltyId;
-        if (currentNpcId == guiltyId)
-        {
-            targetId = currentNpcId == 1 ? 2 : (currentNpcId == 2 ? 3 : 1);
-        }
+        var possibleIds = Enumerable.Range(1, 5).Where(id => id != currentNpcId).ToList();
+        int targetId = possibleIds[_random.Next(possibleIds.Count)];
 
         return targetId switch
         {
@@ -488,27 +723,38 @@ public class LocalAiEngine : IAIService
         };
     }
 
-    private static string GetDynamicFallback(string rawTrLower)
+    private static string GetDynamicFallback(string rawTrLower, NPC npc, bool isGuilty)
     {
-        if (rawTrLower.Contains("kim")) return "Kimin yaptığını soruyorsanız amirim, bu kasabada herkesin karanlık bir sırrı var. Özel bir isim mi duymak istiyorsunuz?";
-        if (rawTrLower.Contains("nerede") || rawTrLower.Contains("nerde")) return "Mekanı veya yeri soruyorsanız, cinayet gecesi herkesin kendine göre bir mazereti vardı... Detaylandırmanızı rica edeceğim.";
-        if (rawTrLower.Contains("neden") || rawTrLower.Contains("niye") || rawTrLower.Contains("sebep")) return "Cinayetin sebebini arıyorsanız, paranın ve gücün olduğu yerde her zaman bir husumet bulunur. Sizce motif ne olabilir?";
-        if (rawTrLower.Contains("nasil")) return "Nasıl olduğunu ancak adli tıp ve bulduğunuz deliller söyleyebilir amirim. Sadece ipuçlarını takip edin.";
-        if (rawTrLower.Contains("ne zaman")) return "Zamanlamayı soruyorsanız, o gece yağmur çok şiddetliydi, herkes saatler konusunda yalan söylüyor olabilir.";
+        bool isGolge = npc.NPCId >= 100;
+        string victimName = isGolge ? "Ekrem Bey" : "Osman Bey";
 
-        return "Sorduğunuz sorunun bağlamını tam çözemedim. Olay gecesinden mi yoksa somut bir delilden mi bahsediyorsunuz?";
+        if (rawTrLower.Contains("kim")) return $"Kimin yaptığını soruyorsanız amirim, {npc.Name} olarak bu kasabada herkesin karanlık bir hesabı olduğunu söyleyebilirim. Şüphelendiğiniz özel bir isim mi var?";
+        if (rawTrLower.Contains("nerede") || rawTrLower.Contains("nerde")) return "Olay yerini veya cinayet saatini soruyorsanız, o gece yağmur ve sis her yeri kaplamıştı. Çamurlu ayak izlerini ve dükkânları incelemelisiniz.";
+        if (rawTrLower.Contains("neden") || rawTrLower.Contains("niye") || rawTrLower.Contains("sebep") || rawTrLower.Contains("motif")) return $"{victimName}'in arkasında bıraktığı borçlar, sahte tapular ve tehditler herkesi şüpheli yapıyor amirim. Cinayetin sebebi bu sırlar olabilir.";
+        if (rawTrLower.Contains("nasil")) return "Nasıl öldürüldüğünü öğrenmek için olay yerindeki delilleri Adli Tıbba göndermeli ve otopsi raporunu beklemelisiniz amirim.";
+        if (rawTrLower.Contains("saat") || rawTrLower.Contains("zaman")) return isGolge ? "Cinayet gecesi saat 02:00 ile 02:30 arasında çam ormanı girişinde ve sokaklarda hareketlilik vardı. Fehmi Bey'in penceresinden gelen seslere bakın." : "Cinayet gecesi saat 23:00 ile 00:30 arasında meydanda ve dükkânların önünde hareketlilik vardı.";
+
+        return npc.NPCId switch
+        {
+            1 => "*Satırını bilerken size ters bir bakış atar* O gece ben dükkanımı temizliyordum amirim. Kimin ne halt ettiği beni ilgilendirmez.",
+            2 => "*Gözlüğünü düzelterek kısık sesle konuşur* Osman Bey'in kalbi hastaydı, bunu herkes biliyor... Ama sırlar bazen ölümcüldür amirim.",
+            3 => "*Makam koltuğunda geriye yaslanır* Ben bu kasabanın muhtarıyım dedektif! Kanunsuz iş yapan kimse, onu bulmak sizin göreviniz.",
+            4 => "*Polis rozetini parlatır* Karakolumuzda faili meçhul cinayetlere yer yoktur amirim. Kendi teşkilatınız kadar bize de güvenmelisiniz.",
+            5 => "*Ceket astarlarını dikmeye devam eder* Ah amirim... Kimin nerede ne kadar kumaşı yırtıldığını sadece biz terziler ve Allah bilir.",
+            101 => "*Baltasını tezgaha dayar* Ormanda o gece fırtına vardı amirim... Sorduğunuz konuda bildiğim tek şey, o gece göl kenarından aceleyle geçen biri olduğudur.",
+            102 => "*Tezgahı silerek etrafına bakınır* Ekrem Bey ile olan borç meselemi kurcalamayın amirim... Ama o gece Demirci ile Muhtar'ın tartıştığını duydum!",
+            103 => "*Çekici örse vurur* Soruşturmanızı anlıyorum amirim. Ekrem Bey için özel çelik kilit yapmıştım, o kilit açılmışsa katil anahtarı olan biridir!",
+            104 => "*Veresiye defterini kapatır* Bakkal Naciye her şeyi duyar derler ama o gece kasaba mezarlık gibi sessizdi... Tek bildiğim Hekim'in gece yarısı dışarıda olduğudur.",
+            105 => "*İlaç şişelerini düzenler* Tıbbi açıdan Ekrem Bey'in zehirlenmiş olabileceğini düşünüyorsanız, tırnaklarındaki morluklara ve Adli Tıp raporuna odaklanın.",
+            106 => "*Resmi evrakları toplar* Muhtarlık olarak kasabanın huzurunu sağlamak görevim. Şüphelendiğiniz bir delil varsa Adli Tıbba gönderin dedektif bey.",
+            107 => "*Köstekli saatini kontrol eder* Evladım, yaşlı bir muallim olarak şunu bilirim: O gece tam 02:14'te penceremin altından sert çizmeli biri geçti.",
+            108 => "*Deri bıçağını bırakır* Çamurlu çizmeleri soruyorsanız kasabanın yarısı göl kenarındaydı. Gidin asıl delillere ve ayak numaralarına bakın!",
+            _ => "*Gözlerini kısarak sizi süzer* Sorduğunuz konuyu tam olarak açarsanız, soruşturmanıza daha net bir cevap verebilirim amirim."
+        };
     }
 
     private static string GetGenericPersonaResponse(NPC npc, bool isGuilty, string originalQuestion)
     {
-        return npc.NPCId switch
-        {
-            1 => "Buyur amirim. Kasap dükkânında cinayet mi çözülür bilmem ama aklıma gelen ne varsa yardımcı olurum.",
-            2 => "Hoş geldiniz amirim. Tıbbi konular, reçeteler veya kurban Osman Bey hakkında ne öğrenmek istersiniz?",
-            3 => "Buyrun amirim, muhtarlık kapısı devletimizin her temsilcisine açıktır. Sorularınızı dinliyorum.",
-            4 => "Amirim, emniyet mensubu olarak soruşturmanızda her türlü kolaylığı sağlamaya hazırım. Dinliyorum.",
-            5 => "Hoş geldiniz amirim. Bir sıcak çayımı için, ne merak ediyorsanız sorun laflayalım.",
-            _ => "Dinliyorum amirim, buyurun."
-        };
+        return GetDynamicFallback(originalQuestion.ToLower(_cultureTr), npc, isGuilty);
     }
 }
