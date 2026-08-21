@@ -611,8 +611,8 @@ document.getElementById('autopsy-timer-container').addEventListener('click', () 
     const reqBuildings = isGolge ? 4 : 3;
     const reqLabs = isGolge ? 4 : 3;
 
-    const buildingCount = (window.visitedBuildings ? window.visitedBuildings.size : 0) + 
-                          ((window.GolgeSehirEngine && window.GolgeSehirEngine.visitedGolgeBuildings) ? window.GolgeSehirEngine.visitedGolgeBuildings.size : 0);
+    const buildingCount = (window.visitedBuildings ? window.visitedBuildings.size : 0) +
+        ((window.GolgeSehirEngine && window.GolgeSehirEngine.visitedGolgeBuildings) ? window.GolgeSehirEngine.visitedGolgeBuildings.size : 0);
     const labCount = submittedForensicCount;
 
     if (!isAutopsyTimerStarted && !isAutopsyReady) {
@@ -869,8 +869,17 @@ document.querySelectorAll('.region-town').forEach(townEl => {
             document.body.classList.add('golge-sehir-theme');
             // Gölge Şehir delil havuzunu izole et
             currentBag = currentBag.filter(c => c.id >= 1000);
-            if (window.GolgeSehirEngine) {
-                window.GolgeSehirEngine.showSuccessModalBeforeStory();
+
+            if (window.hasEnteredGolgeSehir) {
+                // Daha önce Gölge Şehir'e girilmişse direkt haritasına geç
+                if (window.GolgeSehirEngine) {
+                    window.GolgeSehirEngine.loadGolgeSehirMap();
+                }
+            } else {
+                // İlk girişte zarf ve intro akışını başlat
+                if (window.GolgeSehirEngine) {
+                    window.GolgeSehirEngine.showSuccessModalBeforeStory();
+                }
             }
         } else if (townId === 'gizemli') {
             // Gizemli Kasaba (1. Seviye) → Osman Bey Hikaye Ekranı
@@ -878,9 +887,11 @@ document.querySelectorAll('.region-town').forEach(townEl => {
             document.body.classList.remove('golge-sehir-theme');
             // Gizemli Kasaba delil havuzunu izole et
             currentBag = currentBag.filter(c => c.id < 1000);
+
             if (window.GolgeSehirEngine) {
-                window.GolgeSehirEngine.clearGolgeSehirMap();
+                window.GolgeSehirEngine.resetGolgeState();
             }
+
             const storyBadge = document.querySelector('.story-badge');
             if (storyBadge) {
                 storyBadge.innerHTML = '<i class="fa-solid fa-scroll"></i> VAKA DOSYASI #104';
@@ -1022,7 +1033,7 @@ const BUILDING_THEMES = {
     3: { name: 'Muhtarlık', video: MASTER_VIDEO_PATH, start: 2.0, end: 4.0, glow: 'glow-muhtarlik', icon: 'fa-solid fa-building-flag', color: '#ffaa33' },
     4: { name: 'Karakol', video: MASTER_VIDEO_PATH, start: 8.0, end: 10.0, glow: 'glow-karakol', icon: 'fa-solid fa-building-shield', color: '#2288ff' },
     5: { name: 'Terzi', video: MASTER_VIDEO_PATH, start: 6.0, end: 8.0, glow: 'glow-terzi', icon: 'fa-solid fa-scissors', color: '#ffcc00' },
-    
+
     // Gölge Şehir (101 - 108) - Altın/Sarı Neon Kapılar
     101: { name: 'Oduncu', video: 'images/towns/golge_sehir/Görseldeki_yazılar_da_türkçe_o.mp4', start: 5.7, end: 7.0, glow: 'glow-golge', icon: 'fa-solid fa-axe', color: '#f59e0b' },
     102: { name: 'Manav', video: 'images/towns/golge_sehir/Görseldeki_yazılar_da_türkçe_o.mp4', start: 2.8, end: 4.1, glow: 'glow-golge', icon: 'fa-solid fa-carrot', color: '#f59e0b' },
@@ -1216,7 +1227,7 @@ cancelEntryBtn?.addEventListener('click', (e) => {
 
 function openBuilding(npcId) {
     activeNpcId = npcId;
-    
+
     // Gölge Şehir Binaları
     if (npcId >= 100 && window.GolgeSehirEngine && window.GOLGE_SEHIR_CONFIG) {
         const bld = window.GOLGE_SEHIR_CONFIG.buildings.find(b => b.npcId === npcId);
@@ -1284,7 +1295,7 @@ function openBuilding(npcId) {
     // Load Hotspots (Sadece Gizemli Kasaba için hotspots-container'a yükle; Gölge Şehir'i GolgeSehirEngine yönetecek)
     const container = document.getElementById('hotspots-container');
     if (container) container.innerHTML = '';
-    
+
     if (window.currentActiveTown !== 'golge_sehir' && npcId < 100) {
         const objects = SCENE_OBJECTS[npcId] || [];
         objects.forEach(obj => {
@@ -1779,7 +1790,7 @@ document.getElementById('clue-read-btn')?.addEventListener('click', () => {
                 </div>
             `;
             break;
-        }
+    }
     overlay.classList.remove('hidden');
 });
 
@@ -1970,12 +1981,12 @@ function setupForensicTools() {
     const updateRotationImage = () => {
         if (!currentPendingObject) return;
         wrapper.style.transform = 'none';
-        
+
         const imgPath = currentPendingObject.img;
         const ext = imgPath.toLowerCase().endsWith('.jpg') ? '.jpg' : '.png';
         const baseSrc = imgPath.substring(0, imgPath.length - ext.length);
         const suffix = angles[currentRotationIndex];
-        
+
         imgEl.src = `${baseSrc}${suffix}${ext}`;
 
         syncCanvasSize();
@@ -1998,7 +2009,7 @@ function setupForensicTools() {
             const thumbImg = document.createElement('img');
             thumbImg.src = `${baseSrc}${suffix}${ext}`;
             thumbImg.className = 'clue-thumbnail';
-            
+
             if (index === currentRotationIndex) thumbImg.classList.add('active');
 
             thumbImg.addEventListener('click', () => {
@@ -2224,7 +2235,7 @@ document.getElementById('exit-cancel-btn').addEventListener('click', () => {
 
 document.getElementById('exit-confirm-btn').addEventListener('click', () => {
     exitWarningModal.classList.add('hidden');
-    
+
     // Aktif NPC ID'yi hem global değişkenlerden hem de DOM attribute'tan garantiye al
     const currentNpcId = parseInt(window.activeNpcId || activeNpcId || interiorScreen?.getAttribute('data-npc-id'), 10);
 
@@ -3023,7 +3034,7 @@ window.accuseNpc = function (accusedId) {
                     </div>`;
                     retryBtn.innerHTML = '<i class="fa-solid fa-map-location-dot"></i> Haritaya Dön';
                     retryBtn.classList.remove('hidden');
-                    
+
                     if (window.currentActiveTown === 'golge_sehir' || accusedId > 100) {
                         window.golgeSolved = true;
                     }
@@ -3037,16 +3048,31 @@ window.accuseNpc = function (accusedId) {
                             if (npcTalkModal) npcTalkModal.classList.add('hidden');
                             if (foundModal) foundModal.classList.add('hidden');
                             document.getElementById('world-map-screen')?.classList.remove('hidden');
-                            
+
                             // Kasaba durumunu temizle
+                            window.currentActiveTown = 'gizemli';
+                            document.body.classList.remove('golge-sehir-theme');
                             visitedBuildings.clear();
                             if (window.GolgeSehirEngine) {
                                 window.GolgeSehirEngine.visitedGolgeBuildings.clear();
                                 window.GolgeSehirEngine.clearGolgeSehirMap();
+                                window.GolgeSehirEngine.resetGolgeState();
                             }
                             currentBag = [];
+                            submittedBloodClueIds.clear();
+                            submittedPrintClueIds.clear();
+                            submittedForensicCount = 0;
+                            submittedForensicCountGizemli = 0;
+                            submittedForensicCountGolge = 0;
+                            isAutopsyTimerStarted = false;
+                            isAutopsyReady = false;
+                            autopsyTimeLeft = 60;
+                            if (autopsyTimer) clearInterval(autopsyTimer);
                             dialogHistory = {};
+                            npcTalkCompleted = {};
                             activeNpcId = null;
+                            updateForensicBadge();
+                            checkAutopsyConditions();
                         });
                         stopAllSounds();
 
@@ -3059,7 +3085,7 @@ window.accuseNpc = function (accusedId) {
                             }
                         }, 800);
                     };
-                    
+
                     resultModal.classList.remove('hidden');
                 } else {
                     resultIcon.className = 'result-icon fail';
@@ -3078,7 +3104,7 @@ window.accuseNpc = function (accusedId) {
                     </div>`;
                     retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Haritaya Dön ve Tekrar Dene';
                     retryBtn.classList.remove('hidden');
-                    
+
                     retryBtn.onclick = () => {
                         resultModal.classList.add('hidden');
                         triggerTransition(() => {
@@ -3089,14 +3115,29 @@ window.accuseNpc = function (accusedId) {
                             document.getElementById('world-map-screen')?.classList.remove('hidden');
 
                             // Kasaba durumunu temizle
+                            window.currentActiveTown = 'gizemli';
+                            document.body.classList.remove('golge-sehir-theme');
                             visitedBuildings.clear();
                             if (window.GolgeSehirEngine) {
                                 window.GolgeSehirEngine.visitedGolgeBuildings.clear();
                                 window.GolgeSehirEngine.clearGolgeSehirMap();
+                                window.GolgeSehirEngine.resetGolgeState();
                             }
                             currentBag = [];
+                            submittedBloodClueIds.clear();
+                            submittedPrintClueIds.clear();
+                            submittedForensicCount = 0;
+                            submittedForensicCountGizemli = 0;
+                            submittedForensicCountGolge = 0;
+                            isAutopsyTimerStarted = false;
+                            isAutopsyReady = false;
+                            autopsyTimeLeft = 60;
+                            if (autopsyTimer) clearInterval(autopsyTimer);
                             dialogHistory = {};
+                            npcTalkCompleted = {};
                             activeNpcId = null;
+                            updateForensicBadge();
+                            checkAutopsyConditions();
                         });
                         stopAllSounds();
                     };

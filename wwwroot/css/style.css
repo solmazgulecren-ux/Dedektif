@@ -808,15 +808,14 @@ canvas {
     z-index: 50;
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     object-fit: contain;
-    opacity: 0;
-    /* Delilleri tamamen görünmez yap, böylece siyah/kare görünmezler */
+    opacity: 0.85;
+    filter: drop-shadow(0 0 10px rgba(69, 243, 255, 0.5));
 }
 
 .hotspot-img:hover {
-    transform: scale(1.1) translateY(-2px);
-    filter: drop-shadow(0 0 20px rgba(69, 243, 255, 1)) brightness(1.3) contrast(1.1);
+    transform: scale(1.15) translateY(-3px);
+    filter: drop-shadow(0 0 25px rgba(69, 243, 255, 1)) brightness(1.4) contrast(1.2);
     opacity: 1;
-    /* Sadece mouse gelince görünür (parlak) yap */
 }
 
 .hotspot-label {
@@ -4841,4 +4840,48 @@ canvas {
     border-color: #38bdf8 !important;
     color: #ffffff !important;
     width: 100% !important;
+}
+
+/* Gölge Şehir Bina İçi Hotspot Stilleri */
+.golge-clue-hotspot {
+    position: absolute;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.golge-clue-hotspot img {
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.5));
+    transition: all 0.3s ease;
+    opacity: 0.85;
+}
+
+.golge-clue-hotspot:hover img {
+    transform: scale(1.15) translateY(-3px);
+    filter: drop-shadow(0 0 25px rgba(245, 158, 11, 1)) brightness(1.3);
+    opacity: 1;
+}
+
+.golge-clue-label {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fef08a;
+    font-size: 0.85rem;
+    font-family: var(--font-heading);
+    background: rgba(15, 23, 42, 0.95);
+    padding: 4px 12px;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+}
+
+.golge-clue-hotspot:hover .golge-clue-label {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-3px);
 }

@@ -11,4 +11,6 @@ public interface IForensicService
     object GetForensicState(int guiltyId);
     string GetDynamicClueDetail(int clueId, int guiltyId);
     void ClearFindings();
+    void ClearGolgeFindings();
+    void ClearGizemliFindings();
 }

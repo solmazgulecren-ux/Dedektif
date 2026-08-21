@@ -40,12 +40,19 @@ window.GolgeSehirEngine = {
         const gizemliTownBtn = document.querySelector('.region-town[data-town-id="gizemli"]');
         if (gizemliTownBtn) {
             gizemliTownBtn.addEventListener('click', () => {
-                this.currentActiveTown = 'gizemli';
-                window.currentActiveTown = 'gizemli';
-                document.body.classList.remove('golge-sehir-theme');
-                this.clearGolgeSehirMap();
+                this.resetGolgeState();
             });
         }
+    },
+
+    resetGolgeState: function () {
+        this.currentActiveTown = 'gizemli';
+        window.currentActiveTown = 'gizemli';
+        document.body.classList.remove('golge-sehir-theme');
+        this.clearGolgeSehirMap();
+        const successModal = document.getElementById('golge-success-modal');
+        if (successModal) successModal.classList.add('hidden');
+        if (window.golgeTypewriterTimer) clearTimeout(window.golgeTypewriterTimer);
     },
 
     // 1. ESKİ KARANLIK NOİR DEDEKTİF TEBRİK ZARFI & KART ANİMASYONU
@@ -164,9 +171,11 @@ window.GolgeSehirEngine = {
 
     // 2. GÖLGE ŞEHİR CİNAYET HİKAYESİ (Daktilo Efekti)
     // 2. GÖLGE ŞEHİR DAKTİLO HİKAYE EKRANI (ŞEFFAF LACİVERT & ALTIN/SARI TEMA)
+    // 2. GÖLGE ŞEHİR CİNAYET HİKAYESİ (Gizemli Kasaba ile Birebir Uyumlu Daktilo Efekti)
     showGolgeSehirStoryIntro: function () {
         window.currentActiveTown = 'golge_sehir';
         this.currentActiveTown = 'golge_sehir';
+        window.hasEnteredGolgeSehir = true;
         document.body.classList.add('golge-sehir-theme');
         this.registerGolgeSehirData();
 
@@ -183,9 +192,10 @@ window.GolgeSehirEngine = {
 
         const worldMapScreen = document.getElementById('world-map-screen');
         const storyIntroScreen = document.getElementById('story-intro-screen');
-        const storyTextEl = document.getElementById('typewriter-text') || document.getElementById('story-intro-text');
+        const storyTextEl = document.getElementById('typewriter-text');
         const storyContinueBtn = document.getElementById('story-continue-btn');
         const skipStoryBtn = document.getElementById('skip-story-btn');
+        const cursor = document.querySelector('.story-cursor');
         const storyBadge = document.querySelector('.story-badge');
 
         if (storyBadge) {
@@ -200,68 +210,48 @@ window.GolgeSehirEngine = {
         if (worldMapScreen) worldMapScreen.classList.add('hidden');
         storyIntroScreen.classList.remove('hidden');
 
-        storyTextEl.innerHTML = '';
-        const fullText = (window.GOLGE_SEHIR_CONFIG && window.GOLGE_SEHIR_CONFIG.storyIntroText) 
-            ? window.GOLGE_SEHIR_CONFIG.storyIntroText 
-            : "Sisli ve fırtınalı bir gece... Gölge Şehir'in çam ormanı girişinde bir ceset bulundu. Kurban, kasabanın en zengin ve tekinsiz tüccarı Ekrem Bey'di. Islak çam iğnelerinin üzerinde yatan cansız beden, gaz lambalarının altında solgun bir ışıkla aydınlanıyordu.\n\nOrman sınırında toplanan kasabalılar, birbirlerine derin bir şüpheyle bakıyordu. Başarılı dedektif olarak bu karmaşık davayı çözmek için Gölge Şehir'e çağrıldınız. Sekiz şüpheli, sekiz bina, sayısız karanlık sır... Gerçeği ortaya çıkarabilecek misiniz?";
-
-        let charIndex = 0;
-        if (window.golgeTypewriterTimer) clearInterval(window.golgeTypewriterTimer);
-
+        storyTextEl.textContent = '';
+        if (cursor) cursor.style.display = 'inline-block';
         if (skipStoryBtn) skipStoryBtn.classList.remove('hidden');
         if (storyContinueBtn) storyContinueBtn.classList.add('hidden');
+
+        const fullText = (window.GOLGE_SEHIR_CONFIG && window.GOLGE_SEHIR_CONFIG.storyIntroText) 
+            ? window.GOLGE_SEHIR_CONFIG.storyIntroText 
+            : "Sisli ve fırtınalı bir gece... Gölge Şehir'in çam ormanı girişinde bir ceset bulundu. Kurban, kasabanın en zengin ve tekinsiz tüccarı Ekrem Bey'di. Islak çam iğnelerinin üzerinde yatan cansız beden, gaz lambalarının altında solgun bir ışıkla aydınlanıyordu. Orman sınırında toplanan kasabalılar, birbirlerine derin bir şüpheyle bakıyordu. Deneyimli dedektif olarak bu karmaşık davayı çözmek için Gölge Şehir'e çağrıldınız. Sekiz şüpheli, sekiz bina, sayısız karanlık sır... Gerçeği ortaya çıkarabilecek misiniz?";
+
+        let charIndex = 0;
+        const speed = 35;
+        if (window.golgeTypewriterTimer) clearTimeout(window.golgeTypewriterTimer);
 
         if (typeof window.playLoopSound === 'function' && window.typewriterSound) {
             window.playLoopSound(window.typewriterSound, 0.4);
         }
 
-        window.golgeTypewriterTimer = setInterval(() => {
-            if (charIndex < fullText.length) {
-                const char = fullText.charAt(charIndex);
-                if (char === '\n') {
-                    storyTextEl.innerHTML += '<br><br>';
-                } else {
-                    storyTextEl.innerHTML += char;
-                }
-                charIndex++;
-            } else {
-                clearInterval(window.golgeTypewriterTimer);
-                if (typeof window.stopSound === 'function' && window.typewriterSound) {
-                    window.stopSound(window.typewriterSound);
-                }
-                if (skipStoryBtn) skipStoryBtn.classList.add('hidden');
-                if (storyContinueBtn) {
-                    storyContinueBtn.classList.remove('hidden');
-                    storyContinueBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> SORUŞTURMAYI BAŞLAT';
-                }
+        const finishGolgeTypewriter = () => {
+            if (window.golgeTypewriterTimer) clearTimeout(window.golgeTypewriterTimer);
+            if (typeof window.stopSound === 'function' && window.typewriterSound) {
+                window.stopSound(window.typewriterSound);
             }
-        }, 20);
+            storyTextEl.textContent = fullText;
+            if (cursor) cursor.style.display = 'none';
+            if (skipStoryBtn) skipStoryBtn.classList.add('hidden');
+            if (storyContinueBtn) {
+                storyContinueBtn.classList.remove('hidden');
+                storyContinueBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> SORUŞTURMAYI BAŞLAT';
+            }
+        };
 
-        if (skipStoryBtn) {
-            skipStoryBtn.onclick = () => {
-                if (window.golgeTypewriterTimer) clearInterval(window.golgeTypewriterTimer);
-                if (typeof window.stopSound === 'function' && window.typewriterSound) {
-                    window.stopSound(window.typewriterSound);
-                }
-                storyTextEl.innerHTML = fullText.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br><br>');
-                skipStoryBtn.classList.add('hidden');
-                if (storyContinueBtn) {
-                    storyContinueBtn.classList.remove('hidden');
-                    storyContinueBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> SORUŞTURMAYI BAŞLAT';
-                }
-            };
-        }
+        const typeChar = () => {
+            if (charIndex < fullText.length) {
+                storyTextEl.textContent += fullText.charAt(charIndex);
+                charIndex++;
+                window.golgeTypewriterTimer = setTimeout(typeChar, speed);
+            } else {
+                finishGolgeTypewriter();
+            }
+        };
 
-        if (storyContinueBtn) {
-            storyContinueBtn.onclick = () => {
-                if (window.golgeTypewriterTimer) clearInterval(window.golgeTypewriterTimer);
-                if (typeof window.stopSound === 'function' && window.typewriterSound) {
-                    window.stopSound(window.typewriterSound);
-                }
-                storyIntroScreen.classList.add('hidden');
-                this.playBekciWalkAnimation();
-            };
-        }
+        typeChar();
     },
 
     // 3. BEKÇİ RIFAT FENER YÜRÜYÜŞÜ

@@ -9,14 +9,24 @@ namespace DedektiflikRPG.Services.Forensic;
 
 public class ForensicService : IForensicService
 {
-    private readonly List<string> _submittedFindings = new();
+    // Kasabaya özel adli bulgular listeleri (izole)
+    private readonly List<string> _gizemliFindings = new();
+    private readonly List<string> _golgeFindings = new();
 
     public void ClearFindings()
     {
-        lock (_submittedFindings)
-        {
-            _submittedFindings.Clear();
-        }
+        lock (_gizemliFindings) { _gizemliFindings.Clear(); }
+        lock (_golgeFindings) { _golgeFindings.Clear(); }
+    }
+
+    public void ClearGolgeFindings()
+    {
+        lock (_golgeFindings) { _golgeFindings.Clear(); }
+    }
+
+    public void ClearGizemliFindings()
+    {
+        lock (_gizemliFindings) { _gizemliFindings.Clear(); }
     }
 
     public void SubmitFinding(int clueId, string clueName, string findingText, List<NPC> npcs, int guiltyId)
@@ -79,11 +89,13 @@ public class ForensicService : IForensicService
             entry = $"[🔬 ADLİ LAB İNCELEMESİ - {sampleCode}]: {findingText}";
         }
 
-        lock (_submittedFindings)
+        // Kasabaya göre doğru listeye ekle
+        var targetList = isGolge ? _golgeFindings : _gizemliFindings;
+        lock (targetList)
         {
-            if (!_submittedFindings.Contains(entry))
+            if (!targetList.Contains(entry))
             {
-                _submittedFindings.Add(entry);
+                targetList.Add(entry);
             }
         }
     }
@@ -217,10 +229,12 @@ public class ForensicService : IForensicService
 
         reportHtml += "</div>";
 
+        // Kasabaya göre doğru bulgu listesini kullan
+        var targetList = isGolge ? _golgeFindings : _gizemliFindings;
         List<string> currentFindings;
-        lock (_submittedFindings)
+        lock (targetList)
         {
-            currentFindings = _submittedFindings.ToList();
+            currentFindings = targetList.ToList();
         }
 
         if (currentFindings.Count > 0)
@@ -310,6 +324,48 @@ public class ForensicService : IForensicService
             13 => "İplik, Osman Bey'in ceketinin dikişleriyle aynı. Üzerindeki kan... " + (guiltyId == 5 ? "Kurbanın kanı. Yahya kurbanı öldürürken makara elindeydi." : "Terzinin dikiş yaparken kendi elini kestiği bir kaza olabilir."),
             14 => "Osman Bey'in ceketinden kopan kumaş. " + (guiltyId == 5 ? "Yahya kurbanla boğuşurken kumaş yırtıldı." : "Kumaş sadece bir terzi artığı olabilir."),
             15 => "Cepteki notta 'Osman, bugün hava kararınca gel konuşalım' yazıyor. " + (guiltyId == 5 ? "Yahya onu çağırdı ve tuzağa düşürdü." : "Yahya çağırdı ama gittiğinde onu ölü buldu."),
+            
+            // Gölge Şehir Delilleri (1011 - 1084)
+            1011 => "Ağır balta üzerinde çam reçinesi ve koyu lekeler var. " + (guiltyId == 101 ? "Baltanın sapındaki el izi ve kan, Oduncu Tahsin'in Ekrem Bey'e indirdiği ölümcül darbeyi doğruluyor." : "Baltadaki lekeler sadece reçine ve ağaç özsuyundan ibaret."),
+            1012 => "Gece kesim defterinde Ekrem Bey'in adı ve tehdit notu var. " + (guiltyId == 101 ? "Tahsin, Ekrem'in şantajını bitirmek için o gece ormanda pusu kurmuş." : "Defter sadece rutin kereste teslimatlarını gösteriyor."),
+            1013 => "Kalın deri iş eldiveni... " + (guiltyId == 101 ? "Eldivenin avuç içinde kurbanın saç telleri ve kan izi izole edildi." : "Eldiven odun kıymıklarından korunmak için kullanılmış."),
+            1014 => "Çam kütüğü üzerinde kazınmış harfler: 'E.B. 14 KASIM'. " + (guiltyId == 101 ? "Tahsin cinayeti önceden planlamış." : "Tarih sadece kereste kesim gününü işaret ediyor."),
+
+            1021 => "Meyve kasasının dibinde gizlenmiş kanlı bıçak kılıfı. " + (guiltyId == 102 ? "Manav Ayşe'nin Ekrem'in göğsüne sapladığı bıçağın kılıfı buraya saklanmış." : "Sıradan bir meyve kasası."),
+            1022 => "Tezgâhtaki elma üzerinde siyah kumaş lifleri var. " + (guiltyId == 102 ? "Ayşe cinayet gecesi giydiği siyah pelerini aceleyle çıkarırken lifler buraya dökülmüş." : "Meyve tezgâhında olağan dışı bir iz yok."),
+            1023 => "Yırtık siyah pelerin kumaşı... " + (guiltyId == 102 ? "Ekrem can verirken Ayşe'nin pelerininden bu parçayı koparmış." : "Kumaş sıradan bir çuval bezi artığı."),
+            1024 => "Buruşturulmuş kâğıt parçasında ipotek senedi ve Ayşe'nin el yazısı notu var: " + (guiltyId == 102 ? "'Ekrem'in burayı almasına asla izin vermeyeceğim!'" : "Sadece eski bir hesap notu."),
+
+            1031 => "Ağır demirci çekici ve demir çubuk. " + (guiltyId == 103 ? "Kurbanın şakağındaki kırıkla çekicin köşesi tam olarak örtüşüyor." : "Çekiç sadece demir dövmek için kullanılmış."),
+            1032 => "Özel yapım çelik asma kilit... " + (guiltyId == 103 ? "Kazım, Ekrem'in evraklarını sakladığı kasanın kilidini zorla açmaya çalışmış." : "Dükkânın standart kapı kilidi."),
+            1033 => "Körük tozu ve kükürt numunesi. " + (guiltyId == 103 ? "Olay yerinde ve Ekrem'in ceketinde bulunan inorganik kükürt tozu ile %100 eşleşti." : "Atölyede olağan demir tozu kalıntısı."),
+            1034 => "Deri iş önlüğü üzerinde kan sıçrama lekesi. " + (guiltyId == 103 ? "Kazım cinayet anında bu önlüğü giyiyordu." : "Önlük üzerindeki lekeler pas ve yanık izi."),
+
+            1041 => "Veresiye defterinde Ekrem Bey'in 35.000 Liralık borcu kırmızıyla çizilmiş. " + (guiltyId == 104 ? "Naciye'nin 'Hak ettiğini bulacak' notu açık bir cinayet itirafı." : "Sıradan bir alacak-verecek kaydı."),
+            1042 => "Boş cam şişede zehir tortusu saptandı. " + (guiltyId == 104 ? "Naciye fare zehrini bu şişeden Ekrem'in tütününe aktarmış." : "Şişe eski sirke şişesi."),
+            1043 => "İşlemeli tütün kesesi... " + (guiltyId == 104 ? "İçindeki tütün yapraklarında ölümcül dozda inorganik arsenik toksini izole edildi." : "Sıradan kurutulmuş tütün yaprakları."),
+            1044 => "Küçük pirinç anahtar... " + (guiltyId == 104 ? "Naciye zehri sakladığı ecza dolabının anahtarını cebinde unutmuş." : "Bakkal kasanın yedek anahtarı."),
+
+            1051 => "Koyu renkli cam şişede banotu kökü özü var. " + (guiltyId == 105 ? "Hekim Sevgi, Ekrem'in mide ilacına bu ölümcül iksiri karıştırmış." : "Tıbbi amaçla saklanan bitkisel tentür."),
+            1052 => "Yırtık reçete sayfasında silinmiş yazı: 'Banotu Kökü Özü (3cc Lethal Doz)'. " + (guiltyId == 105 ? "Sevgi ölümcül dozu bizzat reçete etmiş ve sayfayı yırtarak delili karartmak istemiş." : "Eski bir tedavi notu."),
+            1053 => "Kurutulmuş banotu bitkisi... " + (guiltyId == 105 ? "Maktulün tırnaklarındaki mor lekelerle bitkinin alkaloid yapısı birebir uyumlu." : "Zararsız şifalı ot demeti."),
+            1054 => "Pirinç saplı tıbbi kesici alet (neşter)... " + (guiltyId == 105 ? "Üzerindeki kan DNA'sı Ekrem Bey'in savunma yarasıyla eşleşiyor." : "Standart muayenehane aleti."),
+
+            1061 => "Resmi mühürlü tehdit mektubu: " + (guiltyId == 106 ? "Muhtar Cevdet 'Aksi takdirde sonuçlarına katlanırsınız' diyerek kurbana açıkça gözdağı vermiş." : "Resmi bir köy işleri yazışması."),
+            1062 => "Sahte tapu devir senedi... " + (guiltyId == 106 ? "Ekrem bu sahtekârlığı ihbar etmek istediği için Cevdet tarafından öldürüldü." : "Eski bir arazi anlaşmazlığı evrakı."),
+            1063 => "Uzun çelik kasa anahtarı... " + (guiltyId == 106 ? "Muhtar cinayetten sonra Ekrem'in kasasından tapuları çalmak için bu anahtarı kullanmış." : "Muhtarlık arşiv dolabının anahtarı."),
+            1064 => "Sol camı çatlamış altın çerçeveli gözlük! " + (guiltyId == 106 ? "Olay yerindeki arbedede Cevdet'in gözlüğü düşmüş, kırık cam parçası halıda kalmış." : "Eski bir okuma gözlüğü."),
+
+            1071 => "Zincirli altın cep saati... " + (guiltyId == 107 ? "Tam saat 02:14'te durmuş. Fehmi Bey cinayet anında kurbanın cebinden babasının saatini geri almış." : "Antika bir köstekli saat."),
+            1072 => "Tehdit içerikli not: 'O saati bir daha asla göremeyeceksin.' " + (guiltyId == 107 ? "Ekrem'in bu alaycı notu Fehmi Bey'in öfke krizine girip kurbanı şömineye itmesine yol açmış." : "Eski bir husumet mektubu."),
+            1073 => "Gaz feneri üzerinde parmak izleri ve is lekesi. " + (guiltyId == 107 ? "Fehmi Bey gece saat 02:00'de Ekrem'in evine giderken bu feneri kullandı." : "Ev aydınlatmasında kullanılan sıradan fener."),
+            1074 => "Kalın ciltli romanda altı çizili satır ve el yazısı not: " + (guiltyId == 107 ? "'O gece saat 02:14'te sesler duydum...' Fehmi Bey kendi suçunu örtbas etmek için sahte tanıklık kurgulamış." : "Edebi bir roman sayfası."),
+
+            1081 => "42 numara çamurlu kışlık deri çizme... " + (guiltyId == 108 ? "Olay yerindeki göl kenarı çamur izleriyle çizmenin taban deseni %100 örtüşüyor." : "Kunduracının kendi atölye çizmesi."),
+            1082 => "Mumlu dayanıklı ayakkabı ipi yumağı... " + (guiltyId == 108 ? "Ekrem Bey'in boynundaki 0.4mm strangülasyon izi bu mumlu iple birebir eşleşiyor." : "Deri dikiminde kullanılan standart mumlu ip."),
+            1083 => "Eğri deri kesme bıçağı... " + (guiltyId == 108 ? "Bıçağın kabzasındaki parmak izi Rasim'in cinayet gecesi olay yerinde olduğunu kanıtlıyor." : "Deri traşlamada kullanılan usta aleti."),
+            1084 => "Ahşap ayakkabı kalıbı... " + (guiltyId == 108 ? "Kalıbın taban numarası ile kurbanın göğsündeki darbe izi eşleşti." : "Ayakkabı şekillendirme kalıbı."),
+
             _ => "Bu nesne karanlık sırlar barındırıyor..."
         };
     }

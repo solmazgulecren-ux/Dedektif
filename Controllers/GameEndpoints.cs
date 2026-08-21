@@ -262,9 +262,13 @@ public static class GameEndpoints
         {
             try
             {
-                var npcs = (await repo.GetAllNPCsAsync()).ToList();
+                bool isGolge = clueId >= 1000;
+                var npcs = isGolge
+                    ? (await repo.GetGolgeSehirNPCsAsync()).ToList()
+                    : (await repo.GetAllNPCsAsync()).ToList();
+
                 var guiltyNpc = npcs.FirstOrDefault(n => n.IsGuilty);
-                int guiltyId = guiltyNpc?.NPCId ?? 1;
+                int guiltyId = guiltyNpc?.NPCId ?? (isGolge ? 101 : 1);
 
                 string detail = forensicService.GetDynamicClueDetail(clueId, guiltyId);
                 return Results.Ok(new { success = true, text = detail });
@@ -280,7 +284,7 @@ public static class GameEndpoints
         {
             try
             {
-                forensicService.ClearFindings();
+                forensicService.ClearGizemliFindings();
                 var random = new Random();
                 int guiltyId = random.Next(1, 6);
 
@@ -616,13 +620,14 @@ public static class GameEndpoints
         });
 
         // 6. Gölge Şehir Sıfırla (Rastgele 101-108 Katil Belirle)
-        app.MapPost("/api/golge-sehir/reset", async (IGameRepository repo) =>
+        app.MapPost("/api/golge-sehir/reset", async (IGameRepository repo, IForensicService forensicService) =>
         {
             try
             {
                 var rnd = new Random();
                 int guiltyId = rnd.Next(101, 109);
                 await repo.ResetGolgeSehirSessionAsync(guiltyId);
+                forensicService.ClearGolgeFindings();
                 return Results.Ok(new { success = true, message = "Gölge Şehir sıfırlandı ve yeni suçlu belirlendi.", guiltyNpcId = guiltyId });
             }
             catch (Exception ex)
